@@ -1,4 +1,4 @@
-# application-kiso
+# application-kiso（変更予定）
 
 アプリ開発 基礎編
 
