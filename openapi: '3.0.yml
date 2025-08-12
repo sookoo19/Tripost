@@ -10,9 +10,19 @@ servers:
     description: Development server
 
 paths:
+  /sanctum/csrf-cookie:
+    get:
+      summary: Get CSRF cookie
+      tags:
+        - Authentication
+      description: Initialize CSRF protection for SPA
+      responses:
+        '204':
+          description: CSRF cookie set successfully
+
   /auth/register:
     post:
-      summary: User registration
+      summary: Register a new user
       tags:
         - Authentication
       requestBody:
@@ -22,31 +32,42 @@ paths:
             schema:
               type: object
               required:
-                - username
+                - name
                 - email
                 - password
+                - password_confirmation
               properties:
-                username:
+                name:
                   type: string
+                  maxLength: 255
                 email:
                   type: string
                   format: email
                 password:
                   type: string
                   minLength: 8
+                password_confirmation:
+                  type: string
       responses:
         '201':
           description: User registered successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-        '400':
-          description: Invalid input
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /auth/login:
     post:
-      summary: User login
+      summary: Login user
       tags:
         - Authentication
       requestBody:
@@ -72,12 +93,54 @@ paths:
               schema:
                 type: object
                 properties:
-                  token:
-                    type: string
                   user:
                     $ref: '#/components/schemas/User'
         '401':
           description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/logout:
+    post:
+      summary: Logout user
+      tags:
+        - Authentication
+      security:
+        - cookieAuth: []
+        - csrfToken: []
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /auth/user:
+    get:
+      summary: Get authenticated user
+      tags:
+        - Authentication
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Authenticated user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /users:
     get:
@@ -126,7 +189,8 @@ paths:
       tags:
         - Users
       security:
-        - bearerAuth: []
+        - cookieAuth: []
+        - csrfToken: []
       parameters:
         - name: userId
           in: path
@@ -151,7 +215,8 @@ paths:
       tags:
         - Users
       security:
-        - bearerAuth: []
+        - cookieAuth: []
+        - csrfToken: []
       parameters:
         - name: userId
           in: path
@@ -169,7 +234,8 @@ paths:
       tags:
         - Users
       security:
-        - bearerAuth: []
+        - cookieAuth: []
+        - csrfToken: []
       parameters:
         - name: userId
           in: path
@@ -234,7 +300,8 @@ paths:
       tags:
         - Posts
       security:
-        - bearerAuth: []
+        - cookieAuth: []
+        - csrfToken: []
       requestBody:
         required: true
         content:
@@ -275,7 +342,8 @@ paths:
       tags:
         - Posts
       security:
-        - bearerAuth: []
+        - cookieAuth: []
+        - csrfToken: []
       parameters:
         - name: postId
           in: path
@@ -299,7 +367,8 @@ paths:
       tags:
         - Posts
       security:
-        - bearerAuth: []
+        - cookieAuth: []
+        - csrfToken: []
       parameters:
         - name: postId
           in: path
@@ -318,7 +387,8 @@ paths:
       tags:
         - Posts
       security:
-        - bearerAuth: []
+        - cookieAuth: []
+        - csrfToken: []
       parameters:
         - name: postId
           in: path
@@ -336,7 +406,8 @@ paths:
       tags:
         - Posts
       security:
-        - bearerAuth: []
+        - cookieAuth: []
+        - csrfToken: []
       parameters:
         - name: postId
           in: path
@@ -353,7 +424,8 @@ paths:
       tags:
         - Posts
       security:
-        - bearerAuth: []
+        - cookieAuth: []
+        - csrfToken: []
       parameters:
         - name: postId
           in: path
@@ -371,7 +443,8 @@ paths:
       tags:
         - Posts
       security:
-        - bearerAuth: []
+        - cookieAuth: []
+        - csrfToken: []
       parameters:
         - name: postId
           in: path
@@ -408,7 +481,8 @@ paths:
       tags:
         - Comments
       security:
-        - bearerAuth: []
+        - cookieAuth: []
+        - csrfToken: []
       parameters:
         - name: postId
           in: path
@@ -437,10 +511,17 @@ paths:
 
 components:
   securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: "laravel_session"
+      description: "Laravel Sanctum session-based authentication for SPA"
+    
+    csrfToken:
+      type: apiKey
+      in: header
+      name: "X-CSRF-TOKEN"
+      description: "CSRF token for session-based authentication"
 
   schemas:
     User:
