@@ -35,7 +35,7 @@ React Context + useReducer
 Vercel(フロント)
 Railway(バック、データベース)
 無料
-
+(Googleでもデプロイできるか試してみる)
 
 ## 画面設計図
 https://www.figma.com/design/JkcWsCKqWOFi29hsUtHpKd/%E5%80%8B%E4%BA%BA%E9%96%8B%E7%99%BA%E3%80%8ETripost%E3%80%8F?node-id=0-1&t=rquA2HitHrGef66S-1
