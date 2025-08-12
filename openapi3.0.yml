@@ -33,6 +33,7 @@ paths:
               type: object
               required:
                 - name
+                - displayid
                 - email
                 - password
                 - password_confirmation
@@ -40,6 +41,10 @@ paths:
                 name:
                   type: string
                   maxLength: 255
+                displayid:
+                  type: string
+                  maxLength: 50
+                  minLength: 8
                 email:
                   type: string
                   format: email
@@ -529,6 +534,8 @@ components:
       properties:
         id:
           type: integer
+        displayid:
+          type: string
         username:
           type: string
         email:
@@ -558,6 +565,8 @@ components:
     UserUpdate:
       type: object
       properties:
+        displayid:
+          type: string
         username:
           type: string
         bio:
