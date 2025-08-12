@@ -15,12 +15,11 @@ Google Maps JavaScript APIとの統合が豊富
 ・Laravel
 
 3. データベース
-・MySQL 
+・MySQL
 SNSアプリの複雑なリレーション対応
 
 4. 認証
-・JWT（JSON Web Token）
-REST APIとSPAの親和性が高い
+Laravel Breeze
 
 5. 外部API
 ・Google Maps Platform
@@ -28,10 +27,17 @@ Maps JavaScript API: 地図表示・マーカー配置
 Places API: 場所検索・googleマップとの紐付け
 Directions API: ルート表示機能
 
+
 6. 状態管理
 React Context + useReducer
 
-##　画面設計図
+7.ホスティング
+Vercel(フロント)
+Railway(バック、データベース)
+無料
+
+
+## 画面設計図
 https://www.figma.com/design/JkcWsCKqWOFi29hsUtHpKd/%E5%80%8B%E4%BA%BA%E9%96%8B%E7%99%BA%E3%80%8ETripost%E3%80%8F?node-id=0-1&t=rquA2HitHrGef66S-1
 
 ## 画面遷移図
