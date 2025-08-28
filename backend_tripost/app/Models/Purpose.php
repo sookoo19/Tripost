@@ -10,15 +10,8 @@ class Country extends Model
     use HasFactory;
 
     protected $fillable = [
-        'code',
         'name',
-        'image',
     ];
-
-    public function users()
-    {
-        return $this->belongsToMany(User::class);
-    }
 
     public function posts()
     {

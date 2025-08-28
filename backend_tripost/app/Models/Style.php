@@ -5,20 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Country extends Model
+class Style extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'code',
         'name',
-        'image',
     ];
-
-    public function users()
-    {
-        return $this->belongsToMany(User::class);
-    }
 
     public function posts()
     {

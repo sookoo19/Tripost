@@ -69,12 +69,7 @@ export default function Show({ user, countries }) {
               {showModal && (
                 <div className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40'>
                   <div className='bg-white rounded-lg p-6 shadow-lg min-w-[250px]'>
-                    <div className='mb-4 text-lg font-bold'>設定メニュー</div>
-                    <Link href='auth/confirm-password'>
-                      <div className='mb-2 text-lg font-normal'>
-                        パスワード設定
-                      </div>
-                    </Link>
+                    <div className='mb-4 text-lg font-bold'>メニュー</div>
                     <div className='mb-4 text-lg font-normal'>
                       このアプリについて
                     </div>
