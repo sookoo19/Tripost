@@ -53,6 +53,7 @@ Route::middleware('auth')->group(function () {
         ->name('password.confirm');
 
     Route::post('auth/confirm-password', [ConfirmablePasswordController::class, 'store']);
+    
 
     Route::put('password', [PasswordController::class, 'update'])->name('password.update');
     

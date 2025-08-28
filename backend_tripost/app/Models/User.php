@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+// - use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Notifications\CustomVerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
 use Illuminate\Auth\MustVerifyEmail;
@@ -57,6 +57,11 @@ class User extends Authenticatable implements MustVerifyEmailContract
     public function visitedCountries()
     {
         return $this->belongsToMany(Country::class);
+    }
+
+    public function posts()
+    {
+        return $this->hasMany(Post::class);
     }
 
      public function sendEmailVerificationNotification()
