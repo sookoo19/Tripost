@@ -4,7 +4,7 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link } from '@inertiajs/react';
-import { useForm } from '@inertiajs/react'; // 標準のInertia.jsのuseFormに変更
+import { useForm } from '@inertiajs/react';
 
 export default function Register() {
   const { data, setData, post, processing, errors, reset } = useForm({

@@ -9,6 +9,9 @@ use Inertia\Response;
 use Illuminate\Http\Request;
 use App\Models\Country;
 use App\Models\Post;
+use App\Models\Style;
+use App\Models\Purpose;
+use App\Models\Budget;
 
 class PostController extends Controller
 {
@@ -18,7 +21,12 @@ class PostController extends Controller
      public function create(): Response
     {
         $user = auth()->id();
-        return Inertia::render('Posts/Create');
+        return Inertia::render('Posts/Create', [
+            'countries' => Country::all(['id', 'code', 'name']),
+            'styles' => Style::all(['id', 'name']),
+            'purposes' => Purpose::all(['id', 'name']),
+            'budgets' => Budget::all(['id', 'min','max','label']),
+        ]);
     }
 
      /**

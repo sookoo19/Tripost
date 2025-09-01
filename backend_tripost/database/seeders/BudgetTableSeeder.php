@@ -13,6 +13,10 @@ class BudgetTableSeeder extends Seeder
      */
     public function run(): void
     {
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        DB::table('budgets')->truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
         DB::table('budgets')->insert([
             ['min' => 0,       'max' => 50000,    'label' => '〜5万円'],        // 東南アジアの短期旅・LCC利用など
             ['min' => 50000,   'max' => 100000,   'label' => '5〜10万円'],     // アジア主要都市・安めの欧州
