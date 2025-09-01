@@ -44,8 +44,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
 });
 
-// API routes for Places (temporary fix)
-Route::get('/api/places/autocomplete', [PlaceController::class, 'autocomplete']);
-Route::get('/api/places/details', [PlaceController::class, 'details']);
 
 require __DIR__.'/auth.php';
