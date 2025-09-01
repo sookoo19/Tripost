@@ -38,9 +38,12 @@
         "vite": "^7.0.4"
     },
     "dependencies": {
+        "@react-google-maps/api": "^2.20.7",
         "cropperjs": "^1.5.13",
+        "dayjs": "^1.11.15",
         "laravel-precognition-react": "^0.7.2",
         "laravel-precognition-react-inertia": "^0.7.2",
-        "react-cropper": "^2.3.3"
+        "react-cropper": "^2.3.3",
+        "react-select": "^5.10.2"
     }
 }

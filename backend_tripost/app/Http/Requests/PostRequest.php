@@ -22,7 +22,7 @@ class PostRequest extends FormRequest
     public function rules(): array
     {
         return [
-             'title' => ['required', 'string', 'max:50'],
+            'title' => ['required', 'string', 'max:50'],
             'subtitle' => ['nullable', 'string', 'max:50'],
             'description'=> ['nullable', 'string', 'max:2000'],
             'region' => ['nullable', 'string', 'max:50'],
@@ -33,7 +33,7 @@ class PostRequest extends FormRequest
             'country_id' => ['required', 'exists:countries,id'],
             'style_id' => ['required', 'exists:styles,id'],
             'purpose_id' => ['required', 'exists:purposes,id'],
-            'budget_id' => ['required', 'exists:budgets,id'],
+            'budget_id' => ['nullable', 'exists:budgets,id'],
         ];
     }
 }

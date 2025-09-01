@@ -15,7 +15,7 @@ export default function AuthenticatedLayout({ header, children }) {
       <div>
         <div className='w-full'>{header}</div>
       </div>
-      <div className='mt-6 w-full overflow-hidden bg-white px-6 py-4 border-t border-gray-200'>
+      <div className='mt-3 w-full overflow-hidden bg-white px-6 py-4 border-t border-gray-200'>
         {children}
       </div>
     </div>

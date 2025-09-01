@@ -13,6 +13,10 @@ class PurposesTableSeeder extends Seeder
      */
     public function run(): void
     {
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        DB::table('purposes')->truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        
         DB::table('purposes')->insert([
             ['name' => '自然'],
             ['name' => '文化・歴史'],
