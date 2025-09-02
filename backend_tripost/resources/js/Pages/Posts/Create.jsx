@@ -11,8 +11,9 @@ import GoogleMapComponent from '@/Components/GoogleMap';
 
 export default function PostCreate({ countries, styles, purposes, budgets }) {
   const [placeTrigger, setPlaceTrigger] = useState(0);
+  const [markerPosition, setMarkerPosition] = useState(null); // 新しいstate
   const tripPlaceRef = useRef(null);
-  const [predictions, setPredictions] = useState([]); // 予測候補
+  const [predictions, setPredictions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const fetchTimerRef = useRef(null);
   const wrapperRef = useRef(null);
@@ -283,9 +284,10 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
   };
 
   const handleSelectPrediction = async prediction => {
-    // 新しいPlaces APIを使用して詳細を取得
+    console.log('handleSelectPrediction called with:', prediction);
+
     if (!window.google?.maps?.places?.Place) {
-      // フォールバック：予測の description を使う
+      console.log('Place API not available, using fallback');
       setFirstPlace(prediction.description || '');
       setPlaceTrigger(Date.now());
       setPredictions([]);
@@ -294,27 +296,46 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
     }
 
     try {
-      // 新しいPlace APIを使用
+      console.log('Creating Place with ID:', prediction.place_id);
       const place = new window.google.maps.places.Place({
         id: prediction.place_id,
       });
 
-      // fetchFields を使用して詳細情報を取得
       await place.fetchFields({
         fields: ['displayName', 'formattedAddress', 'location'],
       });
 
-      // 取得した情報を使用
-      const address =
-        place.formattedAddress || place.displayName || prediction.description;
-      setFirstPlace(address);
+      console.log('Place details fetched:', place);
+
+      // 施設名（お店の名前）のみを取得
+      const placeName =
+        place.displayName ||
+        prediction.structured_formatting?.main_text ||
+        prediction.description;
+      console.log('Place name:', placeName);
+
+      // 位置情報を取得してマーカー用に保存
+      if (place.location) {
+        const position = {
+          lat: place.location.lat(),
+          lng: place.location.lng(),
+        };
+        console.log('Setting marker position:', position);
+        setMarkerPosition(position);
+      } else {
+        console.log('No location found in place details');
+      }
+
+      setFirstPlace(placeName);
       setPlaceTrigger(Date.now());
       setPredictions([]);
       setShowSuggestions(false);
     } catch (error) {
       console.error('Place details fetch error:', error);
       // エラー時のフォールバック
-      setFirstPlace(prediction.description || '');
+      const fallbackName =
+        prediction.structured_formatting?.main_text || prediction.description;
+      setFirstPlace(fallbackName);
       setPlaceTrigger(Date.now());
       setPredictions([]);
       setShowSuggestions(false);
@@ -636,6 +657,7 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
         <GoogleMapComponent
           searchPlace={getFirstPlace(data.trip_plan)}
           searchTrigger={placeTrigger}
+          markerPosition={markerPosition}
         />
       </form>
     </AuthenticatedLayout>
