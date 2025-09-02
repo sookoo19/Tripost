@@ -281,12 +281,13 @@ export default function TripPlanSection({
       updatedPlans[updatedPlans.length - 1][2] = position?.lat; // latを更新
       updatedPlans[updatedPlans.length - 1][3] = position?.lng; // lngを更新
 
-      setTripPlanForDay(day, updatedPlans); // 配列として設定
-
-      // 選択された場所の位置をselectedPositionに設定（地図移動用）
+      // 先に地図移動用の selectedPosition を渡す（優先）
       if (position) {
+        console.log('select prediction -> set selectedPosition:', position, 'day:', day);
         onSelectedPositionChange(position);
       }
+      // その後に trip_plan を更新
+      setTripPlanForDay(day, updatedPlans); // 配列として設定
 
       setPredictions(prev => ({ ...prev, [day]: [] }));
       setShowSuggestions(prev => ({ ...prev, [day]: false }));

@@ -63,7 +63,8 @@ export default function GoogleMapComponent({
 
   // markerPositionsが変更されたときに地図を更新
   useEffect(() => {
-    if (!markerPositions.length || !isLoaded) {
+    // selectedPosition がセットされている間は markerPositions 側で地図を移動しない
+    if (selectedPosition || !markerPositions.length || !isLoaded) {
       return;
     }
 
@@ -82,7 +83,7 @@ export default function GoogleMapComponent({
         }, 100);
       }
     }
-  }, [markerPositions, isLoaded]);
+  }, [markerPositions, isLoaded, selectedPosition]);
 
   // selectedPositionが変更されたときに地図を移動
   useEffect(() => {
