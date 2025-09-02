@@ -10,7 +10,6 @@ import { useMemo, useState, useEffect, useRef } from 'react';
 import GoogleMapComponent from '@/Components/GoogleMap';
 
 export default function PostCreate({ countries, styles, purposes, budgets }) {
-  const [clearMarkerTrigger, setClearMarkerTrigger] = useState(0);
   const [placeTrigger, setPlaceTrigger] = useState(0);
   const tripPlaceRef = useRef(null);
   const [predictions, setPredictions] = useState([]); // 予測候補
@@ -133,33 +132,17 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
     return Array.isArray(first) ? (first[1] ?? '') : '';
   };
 
-  const getFirstLocation = tp => {
-    if (!Array.isArray(tp) || tp.length === 0) return null;
-    const first = tp[0];
-    if (Array.isArray(first) && first.length >= 4) {
-      return { lat: first[2], lng: first[3] };
-    }
-    return null;
-  };
-
   const setFirstTime = val => {
     const rest = Array.isArray(data.trip_plan) ? data.trip_plan.slice(1) : [];
     const first = Array.isArray(data.trip_plan) ? data.trip_plan[0] : undefined;
     const newFirst = Array.isArray(first) ? [val, first[1] ?? ''] : [val, ''];
     setData('trip_plan', [newFirst, ...rest]);
   };
-  const setFirstPlace = (placeName, location = null) => {
+  const setFirstPlace = val => {
     const rest = Array.isArray(data.trip_plan) ? data.trip_plan.slice(1) : [];
     const first = Array.isArray(data.trip_plan) ? data.trip_plan[0] : undefined;
-    const currentTime = Array.isArray(first) ? (first[0] ?? '') : '';
-
-    if (location) {
-      const newFirst = [currentTime, placeName, location.lat, location.lng];
-      setData('trip_plan', [newFirst, ...rest]);
-    } else {
-      const newFirst = [currentTime, placeName];
-      setData('trip_plan', [newFirst, ...rest]);
-    }
+    const newFirst = Array.isArray(first) ? [first[0] ?? '', val] : ['', val];
+    setData('trip_plan', [newFirst, ...rest]);
   };
 
   const handleSubmit = e => {
@@ -191,7 +174,7 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
     (async () => {
       const ok = await waitForGoogle();
       if (!ok) {
-        // Google Maps Places が利用できません（タイムアウト）
+        console.error('Google Maps Places が利用できません（タイムアウト）');
         return;
       }
       if (!mounted) return;
@@ -206,7 +189,7 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
     };
   }, []);
 
-  // 予測取得（デバウンス） — 新しいAutocompleteSuggestion APIのみを使用
+  // 予測取得（デバウンス） — 新しいAutocompleteSuggestion APIを使用
   const fetchPredictions = input => {
     if (fetchTimerRef.current) clearTimeout(fetchTimerRef.current);
     if (!input) {
@@ -216,61 +199,93 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
     }
 
     fetchTimerRef.current = setTimeout(async () => {
-      // 新しいAutocompleteSuggestion APIのみを使用（旧APIのフォールバックはしない）
-      if (!window.google?.maps?.places?.AutocompleteSuggestion) {
-        setPredictions([]);
-        setShowSuggestions(false);
-        return;
-      }
+      // 新しいAutocompleteSuggestion APIを使用
+      if (window.google?.maps?.places?.AutocompleteSuggestion) {
+        try {
+          const request = {
+            input: input,
+            language: 'ja',
+            region: 'jp',
+            includedPrimaryTypes: ['establishment', 'locality', 'sublocality'], // 施設と地名
+          };
 
-      try {
-        const request = {
-          input: input,
-          language: 'ja',
-          region: 'jp',
-          includedPrimaryTypes: ['establishment', 'locality', 'sublocality'],
-        };
+          const { suggestions } =
+            await window.google.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions(
+              request
+            );
 
-        const { suggestions } =
-          await window.google.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions(
-            request
-          );
-
-        if (suggestions && suggestions.length > 0) {
-          const convertedPredictions = suggestions.map(suggestion => ({
-            place_id:
-              suggestion.placePrediction?.placeId ||
-              suggestion.queryPrediction?.text,
-            description:
-              suggestion.placePrediction?.text?.text ||
-              suggestion.queryPrediction?.text,
-            structured_formatting: {
-              main_text:
-                suggestion.placePrediction?.structuredFormat?.mainText?.text ||
+          if (suggestions && suggestions.length > 0) {
+            // 新しいAPIのレスポンス形式に合わせて変換
+            const convertedPredictions = suggestions.map(suggestion => ({
+              place_id:
+                suggestion.placePrediction?.placeId ||
                 suggestion.queryPrediction?.text,
-              secondary_text:
-                suggestion.placePrediction?.structuredFormat?.secondaryText
-                  ?.text,
-            },
-          }));
+              description:
+                suggestion.placePrediction?.text?.text ||
+                suggestion.queryPrediction?.text,
+              structured_formatting: {
+                main_text:
+                  suggestion.placePrediction?.structuredFormat?.mainText
+                    ?.text || suggestion.queryPrediction?.text,
+                secondary_text:
+                  suggestion.placePrediction?.structuredFormat?.secondaryText
+                    ?.text,
+              },
+            }));
 
-          setPredictions(convertedPredictions);
-          setShowSuggestions(true);
-        } else {
-          setPredictions([]);
-          setShowSuggestions(false);
+            setPredictions(convertedPredictions);
+            setShowSuggestions(true);
+          } else {
+            setPredictions([]);
+            setShowSuggestions(false);
+          }
+        } catch (error) {
+          console.error('AutocompleteSuggestion error:', error);
+          // フォールバック：旧APIを試す
+          fallbackToOldAPI(input);
         }
-      } catch {
-        // エラー時は静かに候補を消す（フォールバックは行わない）
-        setPredictions([]);
-        setShowSuggestions(false);
+      } else {
+        // 新しいAPIが利用できない場合は旧APIを使用
+        fallbackToOldAPI(input);
       }
     }, 250);
   };
 
-  // Autocomplete の選択時に呼ばれる
+  // フォールバック用の旧API関数
+  const fallbackToOldAPI = input => {
+    if (!window.google?.maps?.places?.AutocompleteService) {
+      console.error('Google Places API not available');
+      return;
+    }
+
+    const service = new window.google.maps.places.AutocompleteService();
+    service.getPlacePredictions(
+      {
+        input: input,
+        language: 'ja',
+        region: 'jp',
+        types: ['establishment', 'geocode'],
+      },
+      (predictions, status) => {
+        if (
+          status === window.google.maps.places.PlacesServiceStatus.OK &&
+          predictions
+        ) {
+          setPredictions(predictions);
+          setShowSuggestions(true);
+        } else {
+          console.error('Places service error:', status);
+          setPredictions([]);
+          setShowSuggestions(false);
+        }
+      }
+    );
+  };
+
   const handleSelectPrediction = async prediction => {
+    // 新しいPlaces APIを使用して詳細を取得
     if (!window.google?.maps?.places?.Place) {
+      // フォールバック：予測の description を使う
       setFirstPlace(prediction.description || '');
       setPlaceTrigger(Date.now());
       setPredictions([]);
@@ -279,29 +294,26 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
     }
 
     try {
+      // 新しいPlace APIを使用
       const place = new window.google.maps.places.Place({
         id: prediction.place_id,
       });
 
+      // fetchFields を使用して詳細情報を取得
       await place.fetchFields({
-        fields: ['name', 'formattedAddress', 'location'],
+        fields: ['displayName', 'formattedAddress', 'location'],
       });
 
-      const placeName = place.name || prediction.description || '';
-      const location = place.location
-        ? {
-            lat: place.location.lat(),
-            lng: place.location.lng(),
-          }
-        : null;
-
-      // 場所名と緯度経度を両方保存
-      setFirstPlace(placeName, location);
-
+      // 取得した情報を使用
+      const address =
+        place.formattedAddress || place.displayName || prediction.description;
+      setFirstPlace(address);
       setPlaceTrigger(Date.now());
       setPredictions([]);
       setShowSuggestions(false);
-    } catch {
+    } catch (error) {
+      console.error('Place details fetch error:', error);
+      // エラー時のフォールバック
       setFirstPlace(prediction.description || '');
       setPlaceTrigger(Date.now());
       setPredictions([]);
@@ -314,28 +326,6 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
     setTimeout(() => {
       setShowSuggestions(false);
     }, 150);
-  };
-
-  // クリアボタン（×）押下で入力をリセット
-  const handleClearPlace = e => {
-    e?.preventDefault();
-    setFirstPlace('');
-    setPredictions([]);
-    setShowSuggestions(false);
-    tripPlaceRef.current?.focus();
-    // マーカー削除の合図を出す
-    setClearMarkerTrigger(Date.now());
-  };
-
-  // マップで場所が選択されたときに呼ばれる（GoogleMapComponent から呼び出される想定）
-  const handleMapPlaceSelect = (placeName, location = null) => {
-    // 入力欄と trip_plan に反映
-    setFirstPlace(placeName || '', location);
-    // place によるトリガー（Map -> input の更新を通知するために既存のロジックと合わせる）
-    setPlaceTrigger(Date.now());
-    // 候補は不要なので閉じる
-    setPredictions([]);
-    setShowSuggestions(false);
   };
 
   return (
@@ -602,7 +592,7 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
                 name='trip_place'
                 ref={tripPlaceRef}
                 value={getFirstPlace(data.trip_plan)}
-                className='mt-1 block w-full bg-gray-50 rounded border border-gray-300 pr-8'
+                className='mt-1 block w-full bg-gray-50 rounded border border-gray-300'
                 onChange={e => {
                   setFirstPlace(e.target.value);
                   fetchPredictions(e.target.value);
@@ -613,16 +603,6 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
                   if (predictions.length) setShowSuggestions(true);
                 }}
               />
-              {getFirstPlace(data.trip_plan) && (
-                <button
-                  type='button'
-                  aria-label='入力をクリア'
-                  onClick={handleClearPlace}
-                  className='absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700'
-                >
-                  ×
-                </button>
-              )}
               {showSuggestions && predictions.length > 0 && (
                 <div
                   className='absolute left-0 right-0 bg-white border border-gray-300 mt-1 rounded shadow z-50 max-h-60 overflow-auto'
@@ -656,8 +636,6 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
         <GoogleMapComponent
           searchPlace={getFirstPlace(data.trip_plan)}
           searchTrigger={placeTrigger}
-          clearMarkerTrigger={clearMarkerTrigger}
-          onPlaceSelect={handleMapPlaceSelect}
         />
       </form>
     </AuthenticatedLayout>
