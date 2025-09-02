@@ -1,35 +1,37 @@
-import { useCallback, useRef, useEffect } from 'react';
-import { GoogleMap, useLoadScript } from '@react-google-maps/api';
+import { useCallback, useRef, useEffect, useState } from 'react';
+import { GoogleMap, useLoadScript, Marker } from '@react-google-maps/api';
 
 import mapStyles from './mapStyles';
-// 地図のデザインを指定することができます。
-// デザインは https://snazzymaps.com からインポートすることができます。
 
 const libraries = ['places'];
 const mapContainerStyle = {
   height: '60vh',
   width: '100%',
 };
-// 地図の大きさを指定します。
 
 const options = {
   styles: mapStyles,
   disableDefaultUI: true,
-  // デフォルトUI（衛星写真オプションなど）をキャンセルします。
   zoomControl: true,
 };
 
 export default function GoogleMapComponent({
   searchPlace = '',
   searchTrigger = 0,
+  markerPosition = null,
 }) {
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_KEY,
-    // ここにAPIキーを入力します。今回は.envに保存しています。
     libraries,
   });
 
-  // useLoadScript による読み込み完了を他コンポーネントが検知できるようグローバルフラグを立てる
+  const [marker, setMarker] = useState(null);
+  const [center, setCenter] = useState({
+    lat: 35.6895,
+    lng: 139.6917,
+  });
+  const [zoom, setZoom] = useState(4);
+
   useEffect(() => {
     if (isLoaded) {
       window.__GOOGLE_MAPS_LOADED__ = true;
@@ -45,41 +47,55 @@ export default function GoogleMapComponent({
   const onMapLoad = useCallback(map => {
     mapRef.current = map;
   }, []);
-  //API読み込み後に再レンダーを引き起こさないため、useStateを使わず、useRefとuseCallbackを使っています。
 
-  // onBlur（searchTrigger の変化）でのみジオコーディング実行
-
+  // markerPositionが実際に変更されたときのみ実行
   useEffect(() => {
-    if (!isLoaded || !searchPlace || !mapRef.current || !window.google) return;
-    let cancelled = false;
-    const geocoder = new window.google.maps.Geocoder();
-    geocoder.geocode({ address: searchPlace }, (results, status) => {
-      if (cancelled) return;
-      if (status === 'OK' && results[0]) {
-        const loc = results[0].geometry.location;
-        mapRef.current.panTo({ lat: loc.lat(), lng: loc.lng() });
-        mapRef.current.setZoom(14);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [isLoaded, searchTrigger]);
+    // markerPositionがnullまたは未定義の場合は何もしない
+    if (!markerPosition || !isLoaded) {
+      return;
+    }
 
-  if (loadError) return 'Error';
-  if (!isLoaded) return 'Loading...';
+    // 現在のマーカー位置と新しい位置が同じ場合は何もしない
+    if (
+      marker &&
+      marker.lat === markerPosition.lat &&
+      marker.lng === markerPosition.lng
+    ) {
+      return;
+    }
+
+    console.log('Updating marker position to:', markerPosition);
+
+    setMarker(markerPosition);
+    setCenter(markerPosition);
+    setZoom(15);
+
+    if (mapRef.current) {
+      setTimeout(() => {
+        mapRef.current.panTo(markerPosition);
+        mapRef.current.setZoom(15);
+      }, 100);
+    }
+  }, [markerPosition, isLoaded, marker]);
+
+  if (loadError) {
+    console.error('Map load error:', loadError);
+    return 'Error loading map';
+  }
+  if (!isLoaded) return 'Loading map...';
 
   return (
     <GoogleMap
       id='map'
       mapContainerStyle={mapContainerStyle}
-      zoom={4} // デフォルトズーム倍率を指定します。
-      center={{
-        lat: 35.6895,
-        lng: 139.6917,
-      }} // 札幌周辺にデフォルトのセンターを指定しました。
+      zoom={zoom}
+      center={center}
       options={options}
       onLoad={onMapLoad}
-    ></GoogleMap>
+    >
+      {marker && (
+        <Marker position={marker} key={`${marker.lat}-${marker.lng}`} />
+      )}
+    </GoogleMap>
   );
 }
