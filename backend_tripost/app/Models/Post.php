@@ -18,7 +18,17 @@ class Post extends Model
         'days',
         'post_status',
         'share_scope',
-        // 必要に応じて他のカラムも追加
+        'country_id',
+        'style_id',
+        'purpose_id',
+        'budget_id',
+        'trip_plan', // JSON保存するなら追加
+        // 必要に応じて 'user_id' を追加（フォームから渡す場合のみ）
+    ];
+
+    // trip_plan を自動で配列にする（DBは JSON / TEXT ）
+    protected $casts = [
+        'trip_plan' => 'array',
     ];
 
     public function user()
