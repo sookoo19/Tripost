@@ -15,17 +15,30 @@ const options = {
   zoomControl: true,
 };
 
+const colors = [
+  'red',
+  'blue',
+  'green',
+  'yellow',
+  'purple',
+  'orange',
+  'pink',
+  'brown',
+  'gray',
+  'black',
+]; // 10色リスト
+
 export default function GoogleMapComponent({
   searchPlace = '',
   searchTrigger = 0,
-  markerPosition = null,
+  markerPositions = [], // 配列: [{lat, lng, day}, ...] または null
+  selectedPosition = null, // 選択された場所の位置
 }) {
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_KEY,
     libraries,
   });
 
-  const [marker, setMarker] = useState(null);
   const [center, setCenter] = useState({
     lat: 35.6895,
     lng: 139.6917,
@@ -48,35 +61,38 @@ export default function GoogleMapComponent({
     mapRef.current = map;
   }, []);
 
-  // markerPositionが実際に変更されたときのみ実行
+  // markerPositionsが変更されたときに地図を更新
   useEffect(() => {
-    // markerPositionがnullまたは未定義の場合は何もしない
-    if (!markerPosition || !isLoaded) {
+    if (!markerPositions.length || !isLoaded) {
       return;
     }
 
-    // 現在のマーカー位置と新しい位置が同じ場合は何もしない
-    if (
-      marker &&
-      marker.lat === markerPosition.lat &&
-      marker.lng === markerPosition.lng
-    ) {
-      return;
+    // 最初の有効な位置を中心に設定
+    const firstPosition = markerPositions.find(
+      pos => pos && pos.lat && pos.lng
+    );
+    if (firstPosition) {
+      setCenter(firstPosition);
+      setZoom(15);
+
+      if (mapRef.current) {
+        setTimeout(() => {
+          mapRef.current.panTo(firstPosition);
+          mapRef.current.setZoom(15);
+        }, 100);
+      }
     }
+  }, [markerPositions, isLoaded]);
 
-    console.log('Updating marker position to:', markerPosition);
-
-    setMarker(markerPosition);
-    setCenter(markerPosition);
-    setZoom(15);
-
-    if (mapRef.current) {
+  // selectedPositionが変更されたときに地図を移動
+  useEffect(() => {
+    if (selectedPosition && isLoaded && mapRef.current) {
       setTimeout(() => {
-        mapRef.current.panTo(markerPosition);
+        mapRef.current.panTo(selectedPosition);
         mapRef.current.setZoom(15);
       }, 100);
     }
-  }, [markerPosition, isLoaded, marker]);
+  }, [selectedPosition, isLoaded]);
 
   if (loadError) {
     console.error('Map load error:', loadError);
@@ -93,8 +109,17 @@ export default function GoogleMapComponent({
       options={options}
       onLoad={onMapLoad}
     >
-      {marker && (
-        <Marker position={marker} key={`${marker.lat}-${marker.lng}`} />
+      {markerPositions.map((position, index) =>
+        position && position.lat && position.lng ? (
+          <Marker
+            key={`${position.lat}-${position.lng}-${index}`} // 位置とインデックスでユニーク
+            position={position}
+            icon={{
+              url: `https://maps.google.com/mapfiles/ms/icons/${colors[(position.day - 1) % colors.length]}-dot.png`,
+              scaledSize: new window.google.maps.Size(32, 32), // アイコンサイズ調整
+            }}
+          />
+        ) : null
       )}
     </GoogleMap>
   );
