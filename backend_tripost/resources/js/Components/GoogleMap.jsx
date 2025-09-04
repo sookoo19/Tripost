@@ -1,5 +1,10 @@
 import { useCallback, useRef, useEffect, useState } from 'react';
-import { GoogleMap, useLoadScript, Marker } from '@react-google-maps/api';
+import {
+  GoogleMap,
+  useLoadScript,
+  Marker,
+  InfoWindow,
+} from '@react-google-maps/api';
 
 import mapStyles from './mapStyles';
 
@@ -44,6 +49,7 @@ export default function GoogleMapComponent({
     lng: 139.6917,
   });
   const [zoom, setZoom] = useState(4);
+  const [hoveredMarker, setHoveredMarker] = useState(null); // index of hovered marker
 
   useEffect(() => {
     if (isLoaded) {
@@ -102,26 +108,65 @@ export default function GoogleMapComponent({
   if (!isLoaded) return 'Loading map...';
 
   return (
-    <GoogleMap
-      id='map'
-      mapContainerStyle={mapContainerStyle}
-      zoom={zoom}
-      center={center}
-      options={options}
-      onLoad={onMapLoad}
-    >
-      {markerPositions.map((position, index) =>
-        position && position.lat && position.lng ? (
-          <Marker
-            key={`${position.lat}-${position.lng}-${index}`} // 位置とインデックスでユニーク
-            position={position}
-            icon={{
-              url: `https://maps.google.com/mapfiles/ms/icons/${colors[(position.day - 1) % colors.length]}-dot.png`,
-              scaledSize: new window.google.maps.Size(32, 32), // アイコンサイズ調整
+    <>
+      {/* InfoWindow の閉じるボタンを非表示にする（必要ならグローバルCSSへ移動してください） */}
+      <style>{`
+        /* InfoWindow の閉じボタンを隠す */
+        .gm-style .gm-ui-hover-effect,
+        .gm-style .gm-style-iw button {
+          display: none !important;
+        }
+      `}</style>
+      <GoogleMap
+        id='map'
+        mapContainerStyle={mapContainerStyle}
+        zoom={zoom}
+        center={center}
+        options={options}
+        onLoad={onMapLoad}
+      >
+        {markerPositions.map((position, index) =>
+          position && position.lat && position.lng ? (
+            <Marker
+              key={`${position.lat}-${position.lng}-${index}`}
+              position={position}
+              onMouseOver={() => setHoveredMarker(index)}
+              onMouseOut={() =>
+                setHoveredMarker(prev => (prev === index ? null : prev))
+              }
+              icon={{
+                url: `https://maps.google.com/mapfiles/ms/icons/${colors[(position.day - 1) % colors.length]}-dot.png`,
+                scaledSize: new window.google.maps.Size(32, 32),
+              }}
+            />
+          ) : null
+        )}
+
+        {/* hoveredMarker がセットされていれば InfoWindow を表示 */}
+        {hoveredMarker !== null && markerPositions[hoveredMarker] && (
+          <InfoWindow
+            position={{
+              lat: Number(markerPositions[hoveredMarker].lat),
+              lng: Number(markerPositions[hoveredMarker].lng),
             }}
-          />
-        ) : null
-      )}
-    </GoogleMap>
+            options={{
+              pixelOffset: new window.google.maps.Size(0, -30),
+              closeBoxURL: '',
+            }}
+          >
+            <div className='text-sm'>
+              <div className='font-semibold'>
+                {markerPositions[hoveredMarker].label || ''}
+              </div>
+              <div className='text-xs text-black'>
+                {markerPositions[hoveredMarker].day
+                  ? `Day ${markerPositions[hoveredMarker].day}`
+                  : ''}
+              </div>
+            </div>
+          </InfoWindow>
+        )}
+      </GoogleMap>
+    </>
   );
 }

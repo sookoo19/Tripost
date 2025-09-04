@@ -133,7 +133,10 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
     console.groupCollapsed('POST /posts payload');
     console.log('data (shallow):', data);
     try {
-      console.log('trip_plan (pretty):', JSON.stringify(payload.trip_plan, null, 2));
+      console.log(
+        'trip_plan (pretty):',
+        JSON.stringify(payload.trip_plan, null, 2)
+      );
     } catch (err) {
       console.warn('trip_plan stringify failed:', err);
     }
