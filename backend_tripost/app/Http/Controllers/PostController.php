@@ -12,6 +12,7 @@ use App\Models\Post;
 use App\Models\Style;
 use App\Models\Purpose;
 use App\Models\Budget;
+use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
@@ -37,19 +38,22 @@ class PostController extends Controller
     public function store(PostRequest $request): RedirectResponse
     {
         // バリデーション結果を$validatedに代入
-        $validated = $request->validated();
+        $data = $request->validated();
+        $post = auth()->user()->posts()->create($data);
 
-        // 投稿保存処理（user_idはログインユーザーから取得）
-        $request->user()->posts()->create($validated);
 
-        return redirect()->route('profile.show')->with('success', '投稿を作成しました');
+        return redirect()->route('posts.show', $post);   
     }
 
     /**
      * Display the post detail.
      */
     public function show(Post $post): Response
-    {   //render(resources/js/Pages/Posts/Show.jsx)
+    {
+        $post->user->profile_image_url = $post->user->profile_image
+            ? Storage::url($post->user->profile_image)
+            : null;
+        //render(resources/js/Pages/Posts/Show.jsx)
         return Inertia::render('Posts/Show', [
             'post' => $post->load(['user', 'country', 'style', 'purpose', 'budget']),
         ]);

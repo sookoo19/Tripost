@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Models\User;
 
 class ProfileController extends Controller
 {
@@ -97,5 +98,14 @@ class ProfileController extends Controller
         $request->session()->regenerateToken();
 
         return Redirect::to('/');
+    }
+
+    public function showPublic(User $user)
+    {
+        // 必要なリレーションをロードして渡す（必要に応じて調整）
+        $user->load(['posts']);
+        return Inertia::render('Profile/ShowPublic', [
+            'user' => $user,
+        ]);
     }
 }

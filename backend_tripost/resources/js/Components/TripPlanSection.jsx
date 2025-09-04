@@ -283,7 +283,12 @@ export default function TripPlanSection({
 
       // 先に地図移動用の selectedPosition を渡す（優先）
       if (position) {
-        console.log('select prediction -> set selectedPosition:', position, 'day:', day);
+        console.log(
+          'select prediction -> set selectedPosition:',
+          position,
+          'day:',
+          day
+        );
         onSelectedPositionChange(position);
       }
       // その後に trip_plan を更新
