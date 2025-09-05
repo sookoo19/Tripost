@@ -4,12 +4,14 @@
 最速でのリリースを求めるために、学習した技術をメインで使用。リリース後モバイルアプリ展開に適した言語を選定。
 
 1. フロントエンド
+node.js 22.16.0
 ・React.js
 Google Maps JavaScript APIとの統合が豊富
 ・SPA（Single Page Application）
 ページ遷移なしでの地図とコンテンツ表示切り替え
 
 2. バックエンド
+PHP 8.3.22
 ・Laravel
 
 3. データベース

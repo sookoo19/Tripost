@@ -147,30 +147,62 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /users:
+  /profile:
     get:
-      summary: Get list of users
+      summary: Get own profile for editing
       tags:
-        - Users
-      parameters:
-        - name: search
-          in: query
-          schema:
-            type: string
-          description: Search by username
+        - Profile
+      security:
+        - cookieAuth: []
       responses:
         '200':
-          description: List of users
+          description: Own profile data for editing
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthenticated
+
+    patch:
+      summary: Update own profile
+      tags:
+        - Profile
+      security:
+        - cookieAuth: []
+        - csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                displayid:
+                  type: string
+                  maxLength: 50
+                  minLength: 5
+                username:
+                  type: string
+                  maxLength: 255
+                email:
+                  type: string
+                  format: email
+                bio:
+                  type: string
+                  maxLength: 500
+                avatar:
+                  type: string
+                  format: uri
+      responses:
+        '200':
+          description: Profile updated successfully
+        '422':
+          description: Validation error
 
   /users/{userId}:
     get:
-      summary: Get user by ID
+      summary: Get user profile (public view)
       tags:
         - Users
       parameters:
@@ -181,38 +213,13 @@ paths:
             type: integer
       responses:
         '200':
-          description: User detail
+          description: User profile
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
         '404':
           description: User not found
-
-    put:
-      summary: Update user profile
-      tags:
-        - Users
-      security:
-        - cookieAuth: []
-        - csrfToken: []
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserUpdate'
-      responses:
-        '200':
-          description: User updated
-        '403':
-          description: Permission denied
 
   /users/{userId}/follow:
     post:
