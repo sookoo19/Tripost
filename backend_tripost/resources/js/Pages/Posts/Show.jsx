@@ -4,6 +4,25 @@ import { useMemo, useState } from 'react';
 
 export default function Show({ post }) {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  // yyyy-mm -> yyyy年mm月 に整形
+  const formatPeriod = period => {
+    if (!period) return '';
+    const m = String(period).match(/^(\d{4})-(\d{2})$/);
+    return m ? `${m[1]}年${m[2]}月` : period;
+  };
+  // メタ情報を存在する要素だけ繋いで表示（スラッシュは自動で入る）
+  const metaParts = useMemo(() => {
+    const parts = [];
+    if (post?.country?.name) parts.push(post.country.name);
+    if (post?.region) parts.push(post.region);
+    const periodText = formatPeriod(post?.period);
+    if (periodText) parts.push(periodText);
+    if (post?.days) parts.push(`${post.days}日間`);
+    if (post?.style?.name) parts.push(post.style.name);
+    if (post?.purpose?.name) parts.push(post.purpose.name);
+    if (post?.budget?.label) parts.push(post.budget.label);
+    return parts.join(' / ');
+  }, [post]);
 
   // trip_plan がオブジェクト（{1: [...], 2: [...]}) か配列かを吸収して扱う
   const tripPlanObject = useMemo(() => {
@@ -36,13 +55,6 @@ export default function Show({ post }) {
     }
     return out;
   }, [tripPlanObject]);
-
-  // yyyy-mm -> yyyy年mm月 に整形
-  const formatPeriod = period => {
-    if (!period) return '';
-    const m = String(period).match(/^(\d{4})-(\d{2})$/);
-    return m ? `${m[1]}年${m[2]}月` : period;
-  };
 
   // 写真配列を取得
   const photos = post?.photos || [];
@@ -100,7 +112,7 @@ export default function Show({ post }) {
         <div>
           {/* 写真カルーセル */}
           {hasPhotos && (
-            <div className='relative w-full h-80 bg-gray-100 overflow-hidden group'>
+            <div className='relative w-full aspect-square bg-gray-100 overflow-hidden group'>
               {/* 写真表示 */}
               <div
                 className='flex transition-transform duration-500 ease-in-out h-full'
@@ -193,12 +205,7 @@ export default function Show({ post }) {
         {/* タイトル・メタ */}
         <h1 className='text-2xl font-bold mt-2'>{post.title}</h1>
         <h2 className='text-normal font-bold mt-1'>{post?.subtitle || ''}</h2>
-        <div className='text-sm text-gray-500 mt-1'>
-          {post?.country?.name} / {post?.region || ''} /{' '}
-          {formatPeriod(post?.period)} / {post.days}日間 /{' '}
-          {post?.style?.name || ''} / {post?.purpose?.name || ''} /{' '}
-          {post?.budget?.label || ''}
-        </div>
+        <div className='text-sm text-gray-500 mt-1'>{metaParts}</div>
 
         {/* 本文（長文） */}
         {post?.description && (
