@@ -7,15 +7,44 @@ use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\Request;
-use App\Models\Country;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Post;
+use App\Models\Country;
+use App\Models\User;
 use App\Models\Style;
 use App\Models\Purpose;
 use App\Models\Budget;
-use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
+
+    public function index(Request $request)
+    {
+        // 基本のクエリ：最新順、ユーザーを事前ロード
+        $query = Post::with('user')->latest();
+
+        // ページネーション（例：8件／ページ）
+        $posts = $query->paginate(8)->through(function (Post $post) {
+            $user = $post->user;
+            return [
+                'id' => $post->id,
+                'title' => $post->title,
+                'subtitle' => $post->subtitle,
+                'created_at' => $post->created_at->toDateTimeString(),
+                'user' => [
+                    'id' => $user->id,
+                    'displayid' => $user->displayid,
+                    'profile_image_url' => $user->profile_image ? Storage::url($user->profile_image) : null,
+                ],
+                'photos' => $post->photos ?? [],
+                'photos_urls' => collect($post->photos ?? [])->map(fn($p) => Storage::url($p))->all(),
+            ];
+        });
+
+        return Inertia::render('Posts/Index', [
+            'posts' => $posts,
+        ]);
+    }
     /**
      * Display the post_creation view.
      */
@@ -29,6 +58,8 @@ class PostController extends Controller
             'budgets' => Budget::all(['id', 'min','max','label']),
         ]);
     }
+
+    
 
      /**
      * Handle an incoming post_creation request.
