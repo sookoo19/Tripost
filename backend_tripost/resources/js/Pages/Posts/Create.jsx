@@ -124,17 +124,98 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
     }
   }, [data.days]);
 
+  // ファイル圧縮関数（2MB以下にリサイズ・圧縮）
+  const compressFile = file => {
+    return new Promise(resolve => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+
+      img.onload = () => {
+        // 元画像のサイズを取得
+        const originalWidth = img.width;
+        const originalHeight = img.height;
+
+        // 最大800pxにリサイズ（縦横比維持）
+        let targetWidth = originalWidth;
+        let targetHeight = originalHeight;
+        const maxSize = 800;
+
+        if (originalWidth > originalHeight && originalWidth > maxSize) {
+          targetWidth = maxSize;
+          targetHeight = Math.round((originalHeight / originalWidth) * maxSize);
+        } else if (
+          originalHeight >= originalWidth &&
+          originalHeight > maxSize
+        ) {
+          targetHeight = maxSize;
+          targetWidth = Math.round((originalWidth / originalHeight) * maxSize);
+        }
+
+        // canvasのサイズを設定
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+
+        // 高品質で描画
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+        // JPEG形式で圧縮（品質0.8 = 80%）
+        canvas.toBlob(
+          blob => {
+            if (blob) {
+              const compressedFile = new File(
+                [blob],
+                file.name.replace(/\.[^/.]+$/, '.jpg'),
+                {
+                  type: 'image/jpeg',
+                  lastModified: Date.now(),
+                }
+              );
+              resolve(compressedFile);
+            } else {
+              resolve(file); // 圧縮失敗時は元ファイルを返す
+            }
+          },
+          'image/jpeg',
+          0.8 // 圧縮率（0.8 = 80%品質）
+        );
+      };
+
+      img.onerror = () => resolve(file); // エラー時は元ファイルを返す
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
   // ファイル選択／追加（既存ファイルと結合して最大8枚まで）
-  const onPhotosChange = e => {
+  const onPhotosChange = async e => {
     const files = Array.from(e.target.files || []);
     const existing = Array.isArray(data.photos) ? data.photos : [];
-    const combined = existing.concat(files).slice(0, 8);
-    if (combined.length > 8 || files.length === 0) {
+
+    if (existing.length + files.length > 8) {
       alert('写真は最大8枚までです');
       if (fileInputRef.current) fileInputRef.current.value = null;
+      return;
     }
-    setData('photos', combined);
-    if (fileInputRef.current) fileInputRef.current.value = null; // 同じファイル選択を許すためクリア
+
+    if (files.length === 0) return;
+
+    try {
+      // 各ファイルを圧縮（並列処理）
+      const compressedFiles = await Promise.all(
+        files.map(file => compressFile(file))
+      );
+
+      const combined = existing.concat(compressedFiles).slice(0, 8);
+      setData('photos', combined);
+
+      if (fileInputRef.current) fileInputRef.current.value = null;
+    } catch (error) {
+      console.error('画像圧縮エラー:', error);
+      alert('画像の圧縮中にエラーが発生しました');
+      if (fileInputRef.current) fileInputRef.current.value = null;
+    }
   };
 
   // ファイルプレビュー URL を管理（メモリリーク防止のため解放）
@@ -154,45 +235,52 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
     setData('photos', list);
   };
 
+  // trip_plan の空エントリを除外するユーティリティ
+  const cleanTripPlan = tp => {
+    if (!tp || typeof tp !== 'object') return {};
+    const out = {};
+    Object.keys(tp).forEach(dayKey => {
+      const entries = Array.isArray(tp[dayKey]) ? tp[dayKey] : [];
+      const filtered = entries.filter(entry => {
+        if (!Array.isArray(entry)) return false;
+        const [time, place, lat, lng] = entry;
+        const isEmptyTime = time === null || String(time).trim() === '';
+        const isEmptyPlace = place === null || String(place).trim() === '';
+        const isEmptyLat =
+          lat === null || lat === undefined || String(lat).trim() === '';
+        const isEmptyLng =
+          lng === null || lng === undefined || String(lng).trim() === '';
+        // 全て空なら除外、いずれか1つでも値があれば残す
+        return !(isEmptyTime && isEmptyPlace && isEmptyLat && isEmptyLng);
+      });
+      if (filtered.length > 0) out[dayKey] = filtered;
+    });
+    return out;
+  };
+
   const handleSubmit = e => {
     e.preventDefault();
 
-    // ログ出力（安全のためディープコピーしてから）
-    const payload = {
-      ...data,
-      trip_plan: data.trip_plan, // そのままでも OK
-    };
+    // trip_plan をクリーンにしてそのまま送信（送信後は復元しない）
+    const cleanedTripPlan = cleanTripPlan(data.trip_plan);
+    setData('trip_plan', cleanedTripPlan);
 
+    // ログ（任意）
     console.groupCollapsed('POST /posts payload');
-    console.log('data (shallow):', data);
     try {
       console.log(
-        'trip_plan (pretty):',
-        JSON.stringify(payload.trip_plan, null, 2)
+        'trip_plan (cleaned):',
+        JSON.stringify(cleanedTripPlan, null, 2)
       );
     } catch (err) {
       console.warn('trip_plan stringify failed:', err);
     }
-    console.log('markerPositions:', markerPositions);
-    console.log('selectedPosition:', selectedPosition);
     console.groupEnd();
 
     post(route('posts.store'), {
       forceFormData: true,
-      onBefore: visit => {
-        console.log('Inertia onBefore visit:', visit);
-      },
-      onStart: () => {
-        console.log('Inertia onStart');
-      },
-      onSuccess: page => {
-        console.log('Inertia onSuccess, page:', page);
-      },
       onError: errors => {
         console.error('Inertia onError (validation):', errors);
-      },
-      onFinish: () => {
-        console.log('Inertia onFinish');
       },
     });
   };

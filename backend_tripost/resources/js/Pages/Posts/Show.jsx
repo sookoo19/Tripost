@@ -1,8 +1,10 @@
 import { Head, Link } from '@inertiajs/react';
 import GoogleMapComponent from '@/Components/GoogleMap';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 export default function Show({ post }) {
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+
   // trip_plan がオブジェクト（{1: [...], 2: [...]}) か配列かを吸収して扱う
   const tripPlanObject = useMemo(() => {
     return post?.trip_plan && typeof post.trip_plan === 'object'
@@ -42,6 +44,19 @@ export default function Show({ post }) {
     return m ? `${m[1]}年${m[2]}月` : period;
   };
 
+  // 写真配列を取得
+  const photos = post?.photos || [];
+  const hasPhotos = photos.length > 0;
+
+  // 写真切り替え
+  const nextPhoto = () => {
+    setCurrentPhotoIndex(prev => (prev + 1) % photos.length);
+  };
+
+  const prevPhoto = () => {
+    setCurrentPhotoIndex(prev => (prev - 1 + photos.length) % photos.length);
+  };
+
   return (
     <div className='flex min-h-screen flex-col items-center bg-whit'>
       <Head title={post.title} />
@@ -59,12 +74,12 @@ export default function Show({ post }) {
       <div className='w-full overflow-hidden bg-white px-6 pb-4'>
         <div className='mt-4 flex items-center'>
           <div className='flex items-center'>
-            <Link href={route('users.profile', post.user.id)}>
+            <Link href={route('users.profile', post?.user?.id)}>
               <img
                 src={
                   post?.user?.profile_image_url ||
                   (post?.user?.profile_image
-                    ? `/storage/${post.user.profile_image}`
+                    ? `/storage/${post?.user?.profile_image}`
                     : '/images/default-avatar.png')
                 }
                 alt='avatar'
@@ -72,9 +87,9 @@ export default function Show({ post }) {
               />
             </Link>
             <div className='flex flex-row'>
-              <Link href={route('users.profile', post.user.id)}>
+              <Link href={route('users.profile', post?.user?.id)}>
                 <div className='ml-1 font-semibold text-sm'>
-                  @{post.user.displayid}
+                  @{post?.user?.displayid}
                 </div>
               </Link>
               <div className='ml-1 mt-1 text-xs text-gray-500'>フォロー中</div>
@@ -82,14 +97,107 @@ export default function Show({ post }) {
           </div>
         </div>
 
+        <div>
+          {/* 写真カルーセル */}
+          {hasPhotos && (
+            <div className='relative w-full h-80 bg-gray-100 overflow-hidden group'>
+              {/* 写真表示 */}
+              <div
+                className='flex transition-transform duration-500 ease-in-out h-full'
+                style={{
+                  transform: `translateX(-${currentPhotoIndex * 100}%)`,
+                }}
+              >
+                {photos.map((photo, index) => (
+                  <div key={index} className='flex-shrink-0 w-full h-full'>
+                    <img
+                      src={
+                        post.photos_urls && post.photos_urls[index]
+                          ? post.photos_urls[index]
+                          : `/storage/${photo}`
+                      }
+                      alt={`photo-${index}`}
+                      className='w-full h-full object-cover'
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {/* 左矢印（ホバー時のみ表示） */}
+              {photos.length > 1 && (
+                <>
+                  <button
+                    onClick={prevPhoto}
+                    className='absolute left-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white rounded-full w-10 h-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-opacity-70'
+                    aria-label='前の写真'
+                  >
+                    <svg
+                      className='w-5 h-5'
+                      fill='none'
+                      stroke='currentColor'
+                      viewBox='0 0 24 24'
+                    >
+                      <path
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth={2}
+                        d='M15 19l-7-7 7-7'
+                      />
+                    </svg>
+                  </button>
+
+                  {/* 右矢印（ホバー時のみ表示） */}
+                  <button
+                    onClick={nextPhoto}
+                    className='absolute right-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white rounded-full w-10 h-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-opacity-70'
+                    aria-label='次の写真'
+                  >
+                    <svg
+                      className='w-5 h-5'
+                      fill='none'
+                      stroke='currentColor'
+                      viewBox='0 0 24 24'
+                    >
+                      <path
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth={2}
+                        d='M9 5l7 7-7 7'
+                      />
+                    </svg>
+                  </button>
+                </>
+              )}
+
+              {/* インジケーター（ドット表示） */}
+              {photos.length > 1 && (
+                <div className='absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2'>
+                  {photos.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentPhotoIndex(index)}
+                      className={`w-2 h-2 rounded-full transition-colors duration-300 ${
+                        index === currentPhotoIndex
+                          ? 'bg-white'
+                          : 'bg-white bg-opacity-50'
+                      }`}
+                      aria-label={`写真 ${index + 1}`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
         {/* タイトル・メタ */}
         <h1 className='text-2xl font-bold mt-2'>{post.title}</h1>
         <h2 className='text-normal font-bold mt-1'>{post?.subtitle || ''}</h2>
         <div className='text-sm text-gray-500 mt-1'>
-          {post?.country.name} / {post?.region || ''} /{' '}
+          {post?.country?.name} / {post?.region || ''} /{' '}
           {formatPeriod(post?.period)} / {post.days}日間 /{' '}
           {post?.style?.name || ''} / {post?.purpose?.name || ''} /{' '}
-          {post?.budget.label || ''}
+          {post?.budget?.label || ''}
         </div>
 
         {/* 本文（長文） */}
