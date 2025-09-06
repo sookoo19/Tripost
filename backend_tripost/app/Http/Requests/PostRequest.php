@@ -43,6 +43,9 @@ class PostRequest extends FormRequest
             'trip_plan.*.*.1' => 'nullable|string|max:255',  // place
             'trip_plan.*.*.2' => 'nullable|numeric',         // lat
             'trip_plan.*.*.3' => 'nullable|numeric',         // lng
+
+            'photos' => 'nullable|array|max:8',
++           'photos.*' => 'file|image|max:2048', // 2MB 上限に例
         ];
     }
 }

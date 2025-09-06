@@ -41,6 +41,19 @@ class PostController extends Controller
         $data = $request->validated();
         $post = auth()->user()->posts()->create($data);
 
+         if ($request->hasFile('photos')) {
+        $paths = [];
+        foreach ($request->file('photos') as $file) {
+            if (!$file) continue;
+            $paths[] = $file->store('posts_photos', 'public');
+            if (count($paths) >= 8) break;
+        }
+        if (!empty($paths)) {
+            $post->photos = $paths;
+            $post->save();
+        }
+    }
+
 
         return redirect()->route('posts.show', $post);   
     }
@@ -70,6 +83,18 @@ class PostController extends Controller
     {
         $validated = $request->validated();
         $post->update($validated);
+
+        $existing = is_array($post->photos) ? $post->photos : [];
+
+        if ($request->hasFile('photos')) {
+            foreach ($request->file('photos') as $file) {
+                if (!$file) continue;
+                $existing[] = $file->store('posts_photos', 'public');
+                if (count($existing) >= 8) break;
+            }
+            $post->photos = array_slice($existing, 0, 8);
+            $post->save();
+        }
         return redirect()->route('posts.show', $post)->with('success', '投稿を更新しました');
 
     }

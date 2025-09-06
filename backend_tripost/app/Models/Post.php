@@ -23,12 +23,13 @@ class Post extends Model
         'purpose_id',
         'budget_id',
         'trip_plan', // JSON保存するなら追加
-        // 必要に応じて 'user_id' を追加（フォームから渡す場合のみ）
+        'photos',
     ];
 
-    // trip_plan を自動で配列にする（DBは JSON / TEXT ）
+    // 自動で配列にする（DBは JSON / TEXT ）
     protected $casts = [
         'trip_plan' => 'array',
+        'photos' => 'array',
     ];
 
     public function user()

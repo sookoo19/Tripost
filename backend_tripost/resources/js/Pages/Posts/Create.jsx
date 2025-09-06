@@ -6,11 +6,13 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/react';
 import { useForm } from '@inertiajs/react';
 import Select from 'react-select';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import GoogleMapComponent from '@/Components/GoogleMap';
 import TripPlanSection from '@/Components/TripPlanSection';
 
 export default function PostCreate({ countries, styles, purposes, budgets }) {
+  const fileInputRef = useRef(null);
+  const [previewUrls, setPreviewUrls] = useState([]);
   const [placeTrigger, setPlaceTrigger] = useState(0);
   const [markerPositions, setMarkerPositions] = useState([]); // 各日の位置を配列で管理
   const [selectedPosition, setSelectedPosition] = useState(null); // 選択された場所の位置を管理
@@ -29,6 +31,7 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
     purpose_id: '',
     budget_id: '',
     trip_plan: {}, // オブジェクト形式に変更: {day: [[time, place, lat, lng], ...], ...}
+    photos: [], //画像パスの配列
   });
 
   // React Select用のstyleデータ整形（useMemoでメモ化）
@@ -121,6 +124,36 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
     }
   }, [data.days]);
 
+  // ファイル選択／追加（既存ファイルと結合して最大8枚まで）
+  const onPhotosChange = e => {
+    const files = Array.from(e.target.files || []);
+    const existing = Array.isArray(data.photos) ? data.photos : [];
+    const combined = existing.concat(files).slice(0, 8);
+    if (combined.length > 8 || files.length === 0) {
+      alert('写真は最大8枚までです');
+      if (fileInputRef.current) fileInputRef.current.value = null;
+    }
+    setData('photos', combined);
+    if (fileInputRef.current) fileInputRef.current.value = null; // 同じファイル選択を許すためクリア
+  };
+
+  // ファイルプレビュー URL を管理（メモリリーク防止のため解放）
+  useEffect(() => {
+    const urls = (data.photos || []).map(f =>
+      f instanceof File ? URL.createObjectURL(f) : null
+    );
+    setPreviewUrls(urls);
+    return () => urls.forEach(u => u && URL.revokeObjectURL(u));
+  }, [data.photos]);
+
+  const openFileDialog = () =>
+    fileInputRef.current && fileInputRef.current.click();
+  const removePhoto = index => {
+    const list = Array.isArray(data.photos) ? data.photos.slice() : [];
+    list.splice(index, 1);
+    setData('photos', list);
+  };
+
   const handleSubmit = e => {
     e.preventDefault();
 
@@ -145,6 +178,7 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
     console.groupEnd();
 
     post(route('posts.store'), {
+      forceFormData: true,
       onBefore: visit => {
         console.log('Inertia onBefore visit:', visit);
       },
@@ -357,12 +391,85 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
           </div>
         </div>
         <div className='mt-12'>
-          <InputLabel
-            className='font-bold text-base'
-            htmlFor='title'
-            value='タイトル'
-          />
+          <div className='flex flex-row'>
+            <InputLabel
+              className='font-bold'
+              htmlFor='photos'
+              value='タビ写真'
+            />
 
+            {/* 非表示の file input */}
+            <input
+              ref={fileInputRef}
+              id='photos'
+              type='file'
+              name='photos[]'
+              accept='image/*'
+              multiple
+              className='hidden'
+              onChange={onPhotosChange}
+            />
+
+            {/* カウンタ */}
+            <div className='text-sm text-gray-500 mb-2 ml-auto'>
+              {(data.photos || []).length}/8枚
+            </div>
+          </div>
+
+          {/* グリッド（8スロット） */}
+          <div className='grid grid-cols-4 gap-3'>
+            {Array.from({ length: 8 }).map((_, i) => {
+              const file = (data.photos || [])[i];
+              const url = previewUrls[i];
+              return (
+                <div
+                  key={i}
+                  className='w-16 h-16 xs:w-20 xs:h-20 rounded bg-gray-100 flex items-center justify-center relative'
+                >
+                  {file ? (
+                    <>
+                      <img
+                        src={url}
+                        alt={`preview-${i}`}
+                        className='w-full h-full object-cover rounded'
+                      />
+                      <button
+                        type='button'
+                        onClick={() => removePhoto(i)}
+                        className='absolute top-0 right-0 m-1 bg-black bg-opacity-50 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center'
+                        aria-label='削除'
+                      >
+                        ×
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      type='button'
+                      onClick={openFileDialog}
+                      className='w-full h-full flex items-center justify-center text-gray-400'
+                    >
+                      <span className='text-2xl'>＋</span>
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* 追加ボタン */}
+          <div className='mt-3'>
+            <button
+              type='button'
+              onClick={openFileDialog}
+              className='inline-flex items-center px-2 py-2 bg-indigo-500 text-sm text-white rounded-md'
+            >
+              まとめて追加
+            </button>
+          </div>
+        </div>
+
+        <div className='mt-12'>
+          <InputLabel className='font-bold' htmlFor='title' value='タイトル' />
           <TextInput
             id='title'
             name='title'
@@ -380,7 +487,7 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
         </div>
         <div className='mt-8'>
           <InputLabel
-            className='font-bold text-base'
+            className='font-bold'
             htmlFor='subtitle'
             value='サブタイトル'
           />
@@ -401,7 +508,7 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
         </div>
         <div className='mt-8'>
           <InputLabel
-            className='font-bold text-base'
+            className='font-bold'
             htmlFor='description'
             value='タビ概要'
           />
