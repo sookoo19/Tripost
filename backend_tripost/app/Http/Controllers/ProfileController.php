@@ -9,9 +9,11 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Models\User;
+use App\Models\Post;
 
 class ProfileController extends Controller
 {
@@ -102,10 +104,47 @@ class ProfileController extends Controller
 
     public function showPublic(User $user)
     {
-        // 必要なリレーションをロードして渡す（必要に応じて調整）
-        $user->load(['posts']);
+        // 必要なリレーションをロードして渡す
+        // 投稿数を DB 側で取得しておく（$user->posts_count が使えるようになる）
+        $user->loadCount('posts')->load('visitedCountries');
+
+        // ユーザーの投稿をページネーションで取得（必要に応じて件数を変更）
+        $posts = Post::where('user_id', $user->id)
+            ->with('user')
+            ->latest()
+            ->paginate(8);
+
+            // フロントに送るデータだけに変換（画像URLなどを整形）
+        $transformed = $posts->getCollection()->map(function (Post $p) {
+            return [
+                'id' => $p->id,
+                'title' => $p->title,
+                'subtitle' => $p->subtitle,
+                'created_at' => $p->created_at->toDateTimeString(),
+                'user' => [
+                    'id' => $p->user->id,
+                    'displayid' => $p->user->displayid,
+                    'profile_image_url' => $p->user->profile_image ? Storage::url($p->user->profile_image) : null,
+                ],
+                'photos_urls' => collect($p->photos ?? [])->map(fn($q) => Storage::url($q))->all(),
+            ];
+        });
+        $posts->setCollection($transformed);
+
         return Inertia::render('Profile/ShowPublic', [
-            'user' => $user,
+            'user' => [
+                'id' => $user->id,
+                'displayid' => $user->displayid,
+                'name' => $user->name,
+                'profile_image' => $user->profile_image,
+                'bio' => $user->bio,
+                // ここで国コード配列を渡す
+                'visited_countries' => $user->visitedCountries->pluck('code')->toArray(),
+                // 必要なら投稿も簡素化して渡す
+                'posts_count' => $user->posts->count(),
+            ],
+            'countries' => Country::all(['id', 'code', 'name', 'image']),
+            'posts' => $posts,
         ]);
     }
 }
