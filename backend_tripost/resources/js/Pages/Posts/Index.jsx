@@ -47,7 +47,7 @@ export default function Index({ posts }) {
       <Head title='投稿一覧' />
       <div className='w-full'>
         {/*ヘッダー*/}
-        <Link href='/'>
+        <Link href={route('posts.index')}>
           <img
             src='/images/header.svg'
             alt='header'
@@ -61,7 +61,7 @@ export default function Index({ posts }) {
           {items.map(post => (
             <div
               key={post.id}
-              className='bg-white rounded-xl shadow-md mb-6 overflow-hidden border'
+              className='bg-white rounded-xl shadow-md mb-8 overflow-hidden border'
             >
               <div className='flex items-center px-4 py-3'>
                 <Link href={route('users.profile', post.user.id)}>

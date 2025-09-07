@@ -23,6 +23,29 @@ class ProfileController extends Controller
     public function show(Request $request): Response
     {
         $user = auth()->user();
+        // ユーザーの投稿をページネーションで取得（必要に応じて件数を変更）
+        $posts = Post::where('user_id', $user->id)
+            ->with('user')
+            ->latest()
+            ->paginate(8);
+
+            // フロントに送るデータだけに変換（画像URLなどを整形）
+        $transformed = $posts->getCollection()->map(function (Post $p) {
+            return [
+                'id' => $p->id,
+                'title' => $p->title,
+                'subtitle' => $p->subtitle,
+                'created_at' => $p->created_at->toDateTimeString(),
+                'user' => [
+                    'id' => $p->user->id,
+                    'displayid' => $p->user->displayid,
+                    'profile_image_url' => $p->user->profile_image ? Storage::url($p->user->profile_image) : null,
+                ],
+                'photos_urls' => collect($p->photos ?? [])->map(fn($q) => Storage::url($q))->all(),
+            ];
+        });
+        $posts->setCollection($transformed);
+
         return Inertia::render('Profile/Show', [
             'user' => [
                 'displayid' => $user->displayid,
@@ -33,6 +56,7 @@ class ProfileController extends Controller
                 'visited_countries' => $user->visitedCountries->pluck('code')->toArray(),
             ],
             'countries' => Country::all(['id', 'code', 'name', 'image']),
+            'posts' => $posts
         ]);
     }
 

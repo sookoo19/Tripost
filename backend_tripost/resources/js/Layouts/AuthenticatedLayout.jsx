@@ -4,7 +4,7 @@ export default function AuthenticatedLayout({ header, children }) {
   return (
     <div className='flex min-h-screen flex-col items-center bg-white'>
       <div className='w-full'>
-        <Link href='/'>
+        <Link href={route('posts.index')}>
           <img
             src='/images/header.svg'
             alt='header'

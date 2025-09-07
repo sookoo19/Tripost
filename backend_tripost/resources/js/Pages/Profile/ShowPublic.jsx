@@ -52,12 +52,13 @@ export default function Show({ user, countries, posts }) {
     if (post.photos && post.photos[0]) return `/storage/${post.photos[0]}`;
     return;
   };
+
   return (
     <div className='flex min-h-screen flex-col items-center bg-white'>
       <Head title='Profile' />
       <div className='w-full'>
         {/*ヘッダー*/}
-        <Link href='/'>
+        <Link href={route('posts.index')}>
           <img
             src='/images/header.svg'
             alt='header'

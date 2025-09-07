@@ -74,14 +74,20 @@ export default function Show({ post }) {
       <Head title={post.title} />
 
       <div className='w-full overflow-hidden bg-white px-3 pt-6'>
-        <Link href=''>
-          <button
-            className='shadow-md inline-flex items-center rounded-xl border border-transparent bg-white px-3 text-[10px] font-semibold uppercase tracking-widest text-black transition duration-150 ease-in-out hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
-            disabled={false}
-          >
-            戻る
-          </button>
-        </Link>
+        <button
+          onClick={() => {
+            if (window.history.length > 1) {
+              window.history.back();
+            } else {
+              // Ziggy の route が使える前提。無ければ '/posts' 等に置換してください。
+              window.location.href = route ? route('posts.index') : '/posts';
+            }
+          }}
+          className='shadow-md inline-flex items-center rounded-xl border border-transparent bg-white px-3 text-[10px] font-semibold uppercase tracking-widest text-black transition duration-150 ease-in-out hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
+          type='button'
+        >
+          戻る
+        </button>
       </div>
       <div className='w-full overflow-hidden bg-white px-6 pb-4'>
         <div className='mt-4 flex items-center'>
