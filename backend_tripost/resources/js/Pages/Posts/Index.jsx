@@ -84,6 +84,7 @@ export default function Index({ posts }) {
                 </div>
               </div>
 
+
               <Link href={route('posts.show', post.id)}>
                 <div className='relative w-full aspect-square bg-gray-100'>
                   <img
