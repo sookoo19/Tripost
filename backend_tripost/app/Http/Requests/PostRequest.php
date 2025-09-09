@@ -22,8 +22,8 @@ class PostRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'required|string|max:255',
-            'subtitle' => 'nullable|string|max:255',
+            'title' => 'required|string|max:50',
+            'subtitle' => 'nullable|string|max:50',
             'description' => 'nullable|string',
             'region' => 'nullable|string|max:255',
             'period' => 'nullable|date_format:Y-m',

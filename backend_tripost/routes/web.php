@@ -24,6 +24,8 @@ Route::get('/dashboard', function () {
 
 // ▼ ゲストも閲覧できるルート（投稿・ユーザープロフィールの閲覧）
 Route::get('/posts', [PostController::class, 'index'])->name('posts.index'); // 全投稿一覧
+Route::get('/posts/search', [PostController::class, 'searchPosts'])->name('posts.search'); // 投稿検索
+Route::get('/posts/search/result', [PostController::class, 'searchIndex'])->name('posts.searchResult'); // 投稿検索
 Route::get('/users/{user}/posts', [PostController::class, 'userPosts'])->name('users.posts'); // ユーザーごとの投稿一覧
 Route::get('/users/{user}', [ProfileController::class, 'showPublic'])->name('users.profile'); // 他ユーザーのプロフィール
 
