@@ -69,6 +69,21 @@ export default function SearchIndex({
           />
         </Link>
       </div>
+      <div className='w-full overflow-hidden bg-white pl-4'>
+        <button
+          onClick={() => {
+            if (window.history.length > 1) {
+              window.history.back();
+            } else {
+              window.location.href = route ? route('posts.index') : '/posts';
+            }
+          }}
+          className='shadow-md inline-flex items-center rounded-xl border border-transparent bg-white px-3 text-[10px] font-semibold uppercase tracking-widest text-gray-800 transition duration-150 ease-in-out hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
+          type='button'
+        >
+          戻る
+        </button>
+      </div>
 
       <h2 className='text-2xl font-semibold leading-tight text-gray-800 text-center'>
         タビ検索結果

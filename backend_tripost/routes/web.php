@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\PlaceController;
+use App\Http\Controllers\MapController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -28,6 +29,7 @@ Route::get('/posts/search', [PostController::class, 'searchPosts'])->name('posts
 Route::get('/posts/search/result', [PostController::class, 'searchIndex'])->name('posts.searchResult'); // 投稿検索
 Route::get('/users/{user}/posts', [PostController::class, 'userPosts'])->name('users.posts'); // ユーザーごとの投稿一覧
 Route::get('/users/{user}', [ProfileController::class, 'showPublic'])->name('users.profile'); // 他ユーザーのプロフィール
+Route::get('/map', [MapController::class, 'show'])->name('map.show'); //マップ機能
 
 // ▼ ログインユーザーのみ（プロフィール編集・投稿作成/編集/削除）
 Route::middleware(['auth', 'verified'])->group(function () {

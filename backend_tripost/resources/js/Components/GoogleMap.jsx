@@ -9,11 +9,6 @@ import {
 import mapStyles from './mapStyles';
 
 const libraries = ['places'];
-const mapContainerStyle = {
-  height: '60vh',
-  width: '100%',
-};
-
 const options = {
   styles: mapStyles,
   disableDefaultUI: true,
@@ -38,7 +33,14 @@ export default function GoogleMapComponent({
   searchTrigger = 0,
   markerPositions = [], // 配列: [{lat, lng, day}, ...] または null
   selectedPosition = null, // 選択された場所の位置
+  mapContainerStyle: mapContainerStyleProp = null, // 親から渡すスタイル
 }) {
+  // 親が渡さなければデフォルト
+  const mapContainerStyle = mapContainerStyleProp || {
+    height: '60vh',
+    width: '100%',
+  };
+
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_KEY,
     libraries,
