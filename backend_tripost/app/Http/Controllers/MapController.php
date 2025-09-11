@@ -12,7 +12,7 @@ class MapController extends Controller
 {
     public function show(Request $request)
     {
-        $posts = null;
+        $posts = [];
 
         if (Auth::check()) {
             $user = Auth::user();
@@ -28,7 +28,7 @@ class MapController extends Controller
                     'title' => $p->title,
                     'trip_plan' => $p->trip_plan,
                 ];
-            })->values();
+            })->values()->all();
         }
 
         return Inertia::render('Map', [

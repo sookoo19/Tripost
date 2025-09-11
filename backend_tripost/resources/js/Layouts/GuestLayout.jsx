@@ -14,7 +14,7 @@ export default function GuestLayout({ children, title }) {
       </div>
 
       <div className='w-[90%]'>
-        <h1 className='text-3xl font-black text-left mt-2'>{title}</h1>
+        <h1 className='text-3xl font-black text-left mt-6'>{title}</h1>
       </div>
 
       <div className='mt-6 w-[90%] overflow-hidden bg-white px-6 py-4 shadow-md sm:max-w-lg sm:rounded-lg'>

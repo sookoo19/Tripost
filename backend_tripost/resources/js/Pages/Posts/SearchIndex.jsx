@@ -69,7 +69,7 @@ export default function SearchIndex({
           />
         </Link>
       </div>
-      <div className='w-full overflow-hidden bg-white pl-4'>
+      <div className='w-full overflow-hidden bg-white pl-4 mt-4'>
         <button
           onClick={() => {
             if (window.history.length > 1) {

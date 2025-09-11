@@ -56,7 +56,7 @@ export default function Index({ posts }) {
         </Link>
       </div>
 
-      <div className='w-full overflow-hidden bg-white'>
+      <div className='w-full overflow-hidden mt-4 bg-white'>
         <div className='max-w-xl mx-auto p-4 pb-24'>
           {items.map(post => (
             <div

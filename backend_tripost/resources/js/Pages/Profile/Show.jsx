@@ -69,7 +69,7 @@ export default function Show({ user, countries, posts }) {
           />
         </Link>
       </div>
-      <div className='max-w-md mx-auto bg-white px-8 relative'>
+      <div className='max-w-md mx-auto bg-white px-8 mt-6 relative'>
         <div className='flex flex-col'>
           <div className='flex flex-row flex-wrap justify-start'>
             {/*プロフィール画像*/}

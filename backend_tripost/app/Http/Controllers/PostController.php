@@ -216,7 +216,7 @@ class PostController extends Controller
             });
         }
 
-        // ページネーション（例：8件／ページ）
+        // ページネーション（例：8件／ページ）、throughはページネーションの各アイテムを加工するためのメソッド
         $posts = $query->paginate(8)->through(function (Post $post) {
             $user = $post->user;
             return [
@@ -234,7 +234,7 @@ class PostController extends Controller
             ];
         });
 
-        // クエリ（フォーム送信された条件）を filters として渡す
+        // クエリ（フォーム送信された条件）を filters として渡す、これで検索結果がどの条件で出されたのか表示される
         $filters = $request->only([
             'keyword',
             'country_id',

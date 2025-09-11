@@ -1,10 +1,16 @@
 import GoogleMapComponent from '@/Components/GoogleMap';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
+import InputLabel from '@/Components/InputLabel';
 import { useMemo, useState } from 'react';
+import Select from 'react-select';
 
-export default function Map({ posts }) {
+export default function Map({ posts = [] }) {
+  //usePage「現在のページ情報」を取得
+  const auth = usePage().props?.auth ?? null;
+  const user = auth?.user ?? null;
+
   // trip_plan を持つ投稿のみ抽出
-  const postsWithTrip = useMemo(() => {
+  const postsWithTrips = useMemo(() => {
     if (!Array.isArray(posts)) return [];
     return posts.filter(p => {
       if (!p || p.trip_plan == null) return false;
@@ -16,18 +22,27 @@ export default function Map({ posts }) {
     });
   }, [posts]);
 
+  // React Select用のstyleデータ整形（useMemoでメモ化）
+  const postOptions = useMemo(() => {
+    return postsWithTrips.map(postsWithTrip => ({
+      ...postsWithTrip,
+      value: postsWithTrip.id,
+      label: postsWithTrip.title,
+    }));
+  }, [postsWithTrips]);
+
   // 初期選択は trip_plan を持つ最初の投稿
   const [selectedPostId, setSelectedPostId] = useState(
-    postsWithTrip.length ? postsWithTrip[0].id : ''
+    postOptions.length ? postOptions[0].value : ''
   );
 
   // 選択中の投稿オブジェクト（trip_plan を持つ配列内から探す）
   const selectedPost = useMemo(() => {
-    if (!postsWithTrip || !selectedPostId) return null;
+    if (!postOptions || !selectedPostId) return null;
     return (
-      postsWithTrip.find(p => String(p.id) === String(selectedPostId)) || null
+      postOptions.find(p => String(p.id) === String(selectedPostId)) || null
     );
-  }, [postsWithTrip, selectedPostId]);
+  }, [postOptions, selectedPostId]);
 
   // 選択投稿の trip_plan を正規化
   const tripPlanObject = useMemo(() => {
@@ -72,31 +87,41 @@ export default function Map({ posts }) {
           <img
             src='/images/header.svg'
             alt='header'
-            className='w-full h-auto block object-cover -mb-6 relative z-[1001]'
+            className='w-full h-auto block object-cover relative'
           />
         </Link>
       </div>
       {/* ポスト選択 UI */}
       <div className='w-full max-w-xl mx-auto px-4 py-3'>
-        {postsWithTrip && postsWithTrip.length > 0 ? (
-          <div className='flex items-center space-x-3'>
-            <label className='text-sm font-medium'>一覧 :</label>
-            <select
-              value={selectedPostId}
-              onChange={e => setSelectedPostId(e.target.value)}
-              className='ml-2 rounded border px-2 py-1 text-sm'
-            >
-              <option value=''>-- 表示したいマップを選択 --</option>
-              {postsWithTrip.map(p => (
-                <option key={p.id} value={p.id}>
-                  {p.title || `投稿 #${p.id}`}
-                </option>
-              ))}
-            </select>
+        {postOptions && postOptions.length > 0 ? (
+          <div className='flex items-center justify-center'>
+            <InputLabel className='font-bold' value='マップ一覧' />
+            <Select
+              options={postOptions}
+              className='ml-2 w-3/5 h-auto text-sm'
+              classNamePrefix='react-select'
+              // value は option オブジェクトを渡す
+              value={
+                postOptions.find(
+                  opt => String(opt.value) === String(selectedPostId)
+                ) || null
+              }
+              // onChange には選択された option が渡される（null の可能性あり）
+              onChange={option => setSelectedPostId(option?.value ?? '')}
+              placeholder='タビを選択'
+              maxMenuHeight={200}
+              isSearchable={false}
+              isClearable={true}
+            />
           </div>
         ) : (
           <div className='text-sm text-gray-600'>
-            表示可能な投稿がありません（trip_plan が空です）
+            表示可能なタビがありません
+            {!user && (
+              <Link href={route('login')} className='text-xs px-2 underline'>
+                ログイン
+              </Link>
+            )}
           </div>
         )}
       </div>
@@ -106,7 +131,7 @@ export default function Map({ posts }) {
         searchTrigger={0}
         selectedPosition={null}
         mapContainerStyle={{ height: '85vh', width: '100%' }}
-        className='mt-0 bt-0 relative z-[1000]'
+        className='mt-0 bt-0 relative'
         markerPositions={markerPositions}
       />
     </div>
