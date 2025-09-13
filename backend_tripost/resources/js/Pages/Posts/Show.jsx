@@ -1,9 +1,15 @@
 import { Head, Link } from '@inertiajs/react';
 import GoogleMapComponent from '@/Components/GoogleMap';
-import { useMemo, useState } from 'react';
+import TripDayRoutes from '@/Components/TripDayRoutes';
+import { useMemo, useState, useEffect } from 'react';
 
 export default function Show({ post }) {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  // 追加: ルート計算用の state
+  const [directionsResult, setDirectionsResult] = useState(null);
+  const [routeInfo, setRouteInfo] = useState(null);
+  const [isRouting, setIsRouting] = useState(false);
+
   // yyyy-mm -> yyyy年mm月 に整形
   const formatPeriod = period => {
     if (!period) return '';
@@ -30,7 +36,8 @@ export default function Show({ post }) {
       ? post.trip_plan
       : {};
   }, [post?.trip_plan]);
-  // マーカー配列を作成: [{ lat, lng, day, label }]
+
+  // マーカー配列を作成: [{ lat, lng, day, label }]（既存）
   const markerPositions = useMemo(() => {
     const out = [];
     try {
@@ -56,6 +63,47 @@ export default function Show({ post }) {
     return out;
   }, [tripPlanObject]);
 
+  // --- 追加: sortedTripLocations（time/place を含む場所リスト） ---
+  const sortedTripLocations = useMemo(() => {
+    const locations = [];
+    try {
+      Object.keys(tripPlanObject).forEach(dayKey => {
+        const plans = Array.isArray(tripPlanObject[dayKey])
+          ? tripPlanObject[dayKey]
+          : [];
+        plans.forEach(p => {
+          const [time, place, lat, lng] = p;
+          if (lat && lng) {
+            locations.push({
+              lat: Number(lat),
+              lng: Number(lng),
+              day: Number(dayKey),
+              time: time || '',
+              place: place || '',
+            });
+          }
+        });
+      });
+
+      // 日付と時間でソート
+      locations.sort((a, b) => {
+        if (a.day !== b.day) return a.day - b.day;
+        return (a.time || '').localeCompare(b.time || '');
+      });
+    } catch (err) {
+      // ignore
+    }
+    return locations;
+  }, [tripPlanObject]);
+
+  // --- 追加: 日リスト（TripDayRoutes 用） ---
+  const tripDays = useMemo(() => {
+    if (!sortedTripLocations.length) return [];
+    return [...new Set(sortedTripLocations.map(loc => loc.day))].sort(
+      (a, b) => a - b
+    );
+  }, [sortedTripLocations]);
+
   // 写真配列を取得
   const photos = post?.photos || [];
   const hasPhotos = photos.length > 0;
@@ -68,6 +116,109 @@ export default function Show({ post }) {
   const prevPhoto = () => {
     setCurrentPhotoIndex(prev => (prev - 1 + photos.length) % photos.length);
   };
+
+  // Show側で徒歩ルートを計算し、正確な道路距離を routeInfo にセットする
+  useEffect(() => {
+    let mounted = true;
+
+    const waitForGoogle = async (timeout = 8000) => {
+      const start = Date.now();
+      while (
+        !(
+          typeof window !== 'undefined' &&
+          ((window.google && window.google.maps) ||
+            window.__GOOGLE_MAPS_LOADED__)
+        )
+      ) {
+        if (!mounted) return false;
+        if (Date.now() - start > timeout) return false;
+        // 100ms 毎に確認
+        await new Promise(r => setTimeout(r, 100));
+      }
+      return !!(window.google && window.google.maps);
+    };
+
+    (async () => {
+      if (!sortedTripLocations || sortedTripLocations.length < 2) {
+        if (mounted) {
+          setDirectionsResult(null);
+          setRouteInfo(null);
+        }
+        return;
+      }
+
+      const ok = await waitForGoogle(8000);
+      if (!ok) {
+        // Google Maps が利用できない場合は routeInfo をクリアして終了
+        console.warn(
+          'Google Maps が読み込まれていないためルート計算をスキップします'
+        );
+        if (mounted) {
+          setDirectionsResult(null);
+          setRouteInfo(null);
+        }
+        return;
+      }
+
+      if (!mounted) return;
+
+      const origins = sortedTripLocations;
+      const origin = origins[0];
+      const destination = origins[origins.length - 1];
+      const waypoints = origins.slice(1, -1).map(p => ({
+        location: { lat: Number(p.lat), lng: Number(p.lng) },
+        stopover: true,
+      }));
+
+      setIsRouting(true);
+      const ds = new window.google.maps.DirectionsService();
+      ds.route(
+        {
+          origin: { lat: Number(origin.lat), lng: Number(origin.lng) },
+          destination: {
+            lat: Number(destination.lat),
+            lng: Number(destination.lng),
+          },
+          waypoints,
+          travelMode: window.google.maps.TravelMode.WALKING,
+          optimizeWaypoints: false,
+        },
+        (result, status) => {
+          if (!mounted) return;
+          setIsRouting(false);
+          if (status === 'OK' && result && result.routes && result.routes[0]) {
+            setDirectionsResult(result);
+
+            const route = result.routes[0];
+            let totalMeters = 0;
+            const legs = route.legs.map((leg, idx) => {
+              totalMeters += leg.distance?.value ?? 0;
+              return {
+                index: idx,
+                start_address: leg.start_address,
+                end_address: leg.end_address,
+                start_location: leg.start_location,
+                end_location: leg.end_location,
+                distance: leg.distance,
+              };
+            });
+
+            setRouteInfo({
+              legs,
+              totalDistance: (totalMeters / 1000).toFixed(1), // km
+            });
+          } else {
+            setDirectionsResult(null);
+            setRouteInfo(null);
+          }
+        }
+      );
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [sortedTripLocations]);
 
   return (
     <div className='flex min-h-screen flex-col items-center bg-whit'>
@@ -220,40 +371,19 @@ export default function Show({ post }) {
         {/* 旅程 */}
         <div className='mt-6'>
           <div className='font-semibold text-lg'>▽旅程</div>
-          {Object.keys(tripPlanObject).length === 0 && (
+
+          {tripDays.length === 0 && (
             <div className='text-sm text-gray-500 mt-2'>旅程はありません</div>
           )}
 
-          {Object.keys(tripPlanObject).map(dayKey => {
-            const plans = Array.isArray(tripPlanObject[dayKey])
-              ? tripPlanObject[dayKey]
-              : [];
-            // 時刻でソート（空時刻は最後）
-            const sorted = [...plans].sort((a, b) => {
-              if (!a[0]) return 1;
-              if (!b[0]) return -1;
-              return a[0].localeCompare(b[0]);
-            });
-
-            return (
-              <div key={dayKey} className='mt-3'>
-                <div className='font-bold'>〜 {dayKey}日目〜</div>
-                <div className='mt-2 space-y-2'>
-                  {sorted.map((p, idx) => {
-                    const [time, place] = p;
-                    return (
-                      <div key={idx} className='flex items-start gap-4'>
-                        <div className='w-16 text-sm font-medium'>
-                          {time || ''}
-                        </div>
-                        <div className='flex-1 text-sm'>{place || ''}</div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
+          {tripDays.map(day => (
+            <TripDayRoutes
+              key={day}
+              day={day}
+              locations={sortedTripLocations}
+              routeInfo={routeInfo}
+            />
+          ))}
         </div>
 
         {/* マップ */}
@@ -266,6 +396,7 @@ export default function Show({ post }) {
                 searchTrigger={0}
                 markerPositions={markerPositions}
                 selectedPosition={null}
+                directionsResult={directionsResult}
               />
             </div>
           </div>

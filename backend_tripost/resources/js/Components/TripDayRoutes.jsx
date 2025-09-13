@@ -72,7 +72,7 @@ export default function TripDayRoutes({ day, locations, routeInfo }) {
           Google Mapsで見る
         </a>
       </div>
-
+      {/*overflow-y-auto 縦方向のオーバーフローを自動にします。内容が max-height を超えると縦スクロールが表示される */}
       <div className='max-h-60 overflow-y-auto'>
         {dayLocations.map((location, index) => {
           const legInfo = getLegInfo(index);

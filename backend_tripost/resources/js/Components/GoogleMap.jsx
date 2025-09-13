@@ -32,21 +32,13 @@ const colors = [
 export default function GoogleMapComponent({
   searchPlace = '',
   searchTrigger = 0,
-  markerPositions = [], // 配列: [{lat, lng, day}, ...] または null
-  selectedPosition = null, // 選択された場所の位置
-  mapContainerStyle: mapContainerStyleProp = null, // 親から渡すスタイル
-  userPosition = null, // 追加: ユーザーの現在位置 {lat, lng}
-  directionsResult = null, // 追加: ルート情報
-  initialCenter = null, // 追加: 初期表示位置
-  isGettingLocation = false, // 位置情報取得中かどうか
+  markerPositions = [], // 配列: [{lat, lng, day, label, time}, ...]
+  selectedPosition = null,
+  mapContainerStyle: mapContainerStyleProp = null,
+  // userPosition / isGettingLocation を扱わない（現在地取得は行わない）
+  directionsResult = null,
+  initialCenter = null,
 }) {
-  console.log(
-    'GoogleMapComponent レンダリング - userPosition:',
-    userPosition,
-    'isGettingLocation:',
-    isGettingLocation
-  );
-
   // 親が渡さなければデフォルト
   const mapContainerStyle = mapContainerStyleProp || {
     height: '60vh',
@@ -58,12 +50,9 @@ export default function GoogleMapComponent({
     libraries,
   });
 
-  // 位置情報の状態管理
-  const [locationTrialComplete, setLocationTrialComplete] = useState(false);
   const [center, setCenter] = useState(null);
-  const [zoom, setZoom] = useState(15); // ズームレベルを15に固定
+  const [zoom, setZoom] = useState(15);
   const [hoveredMarker, setHoveredMarker] = useState(null);
-  const userPositionSetRef = useRef(false);
 
   // デフォルト位置
   const defaultCenter = {
@@ -85,133 +74,77 @@ export default function GoogleMapComponent({
   const mapRef = useRef();
   const onMapLoad = useCallback(
     map => {
-      console.log('Google Map 読み込み完了');
       mapRef.current = map;
-
-      // マップ読み込み完了時点でuserPositionがあれば中心に設定
-      if (userPosition && !userPositionSetRef.current) {
-        console.log('マップ読み込み時に現在位置を中心に設定:', userPosition);
-        mapRef.current.panTo(userPosition);
-        mapRef.current.setZoom(15);
-        userPositionSetRef.current = true;
+      // 初期中心は外部から渡された initialCenter を優先
+      const initial =
+        initialCenter ||
+        (markerPositions.length > 0 ? markerPositions[0] : defaultCenter);
+      if (initial) {
+        try {
+          mapRef.current.panTo(initial);
+          mapRef.current.setZoom(15);
+        } catch (e) {
+          // ignore
+        }
       }
     },
-    [userPosition]
+    [initialCenter, markerPositions]
   );
 
-  // 位置情報取得が完了したかどうかを監視
+  // markerPositions が変更されたら中心を適宜設定（ただし selectedPosition がある場合は優先しない）
   useEffect(() => {
-    // 位置情報取得中はまだ完了していない
-    if (isGettingLocation) {
-      console.log('位置情報取得中...');
-      return;
-    }
+    if (!isLoaded) return;
 
-    // 位置情報取得が完了した
-    if (!locationTrialComplete) {
-      console.log('位置情報取得完了', userPosition ? '成功' : '失敗');
-      setLocationTrialComplete(true);
-
-      if (userPosition) {
-        // 現在位置が取得できた場合
-        console.log('現在位置を中心に設定:', userPosition);
-        setCenter(userPosition);
-        userPositionSetRef.current = true;
-      } else {
-        // 現在位置が取得できなかった場合はデフォルト位置
-        console.log('デフォルト位置を設定:', defaultCenter);
-        setCenter(defaultCenter);
-      }
-    }
-  }, [isGettingLocation, userPosition, locationTrialComplete]);
-
-  // userPositionが後から更新された場合の処理
-  useEffect(() => {
-    // 位置情報が取得できた場合のみ処理
-    if (!userPosition) return;
-
-    console.log('現在位置が更新されました:', userPosition);
-
-    // 中心位置を設定
-    setCenter(userPosition);
-
-    // マップが読み込まれていれば中心を移動
-    if (mapRef.current && isLoaded) {
-      console.log('マップの中心を現在位置に移動');
-      mapRef.current.panTo(userPosition);
-      mapRef.current.setZoom(15);
-      userPositionSetRef.current = true;
-    }
-  }, [userPosition, isLoaded]);
-
-  // markerPositionsが変更されたときに地図を更新（ユーザー位置が優先）
-  useEffect(() => {
-    // 以下の条件では markerPositions による地図移動を行わない
-    if (
-      selectedPosition ||
-      !markerPositions.length ||
-      !isLoaded ||
-      userPositionSetRef.current || // ユーザー位置設定済みの場合は移動しない
-      isGettingLocation ||
-      !locationTrialComplete
-    ) {
-      return;
-    }
-
-    // 最初の有効な位置を中心に設定
-    const firstPosition = markerPositions.find(
-      pos => pos && pos.lat && pos.lng
-    );
-
-    if (firstPosition) {
-      console.log('マーカーの位置を中心に設定:', firstPosition);
-      setCenter(firstPosition);
-
-      if (mapRef.current) {
-        mapRef.current.panTo(firstPosition);
-        mapRef.current.setZoom(15);
-      }
-    }
-  }, [
-    markerPositions,
-    isLoaded,
-    selectedPosition,
-    userPosition,
-    isGettingLocation,
-    locationTrialComplete,
-  ]);
-
-  // selectedPositionが変更されたときに地図を移動
-  useEffect(() => {
-    if (selectedPosition && isLoaded && mapRef.current) {
-      setTimeout(() => {
+    if (selectedPosition && mapRef.current) {
+      try {
         mapRef.current.panTo(selectedPosition);
         mapRef.current.setZoom(15);
-      }, 100);
+        setCenter(selectedPosition);
+        return;
+      } catch (e) {
+        // ignore
+      }
     }
-  }, [selectedPosition, isLoaded]);
+
+    const first =
+      initialCenter || (markerPositions.length > 0 ? markerPositions[0] : null);
+    if (first) {
+      setCenter(first);
+      if (mapRef.current) {
+        try {
+          mapRef.current.panTo(first);
+          mapRef.current.setZoom(15);
+        } catch (e) {
+          // ignore
+        }
+      }
+    } else {
+      setCenter(defaultCenter);
+    }
+  }, [markerPositions, initialCenter, selectedPosition, isLoaded]);
 
   // ルートが表示されたときに地図の範囲を調整
   useEffect(() => {
     if (directionsResult && mapRef.current && isLoaded) {
-      // DirectionsResultのルートに合わせて地図の表示範囲を調整
       const bounds = new window.google.maps.LatLngBounds();
 
-      // ルートの全ポイントを境界に追加
       directionsResult.routes[0].legs.forEach(leg => {
-        leg.steps.forEach(step => {
-          bounds.extend(step.start_location);
-          bounds.extend(step.end_location);
-        });
+        // leg.start_location / end_location は LatLng オブジェクト
+        bounds.extend(leg.start_location);
+        bounds.extend(leg.end_location);
       });
 
       setTimeout(() => {
-        mapRef.current.fitBounds(bounds, {
-          top: 50,
-          right: 50,
-          bottom: 50,
-          left: 50,
-        });
+        try {
+          mapRef.current.fitBounds(bounds, {
+            top: 50,
+            right: 50,
+            bottom: 50,
+            left: 50,
+          });
+        } catch (e) {
+          // ignore
+        }
       }, 100);
     }
   }, [directionsResult, isLoaded]);
@@ -233,32 +166,20 @@ export default function GoogleMapComponent({
     );
   }
 
-  // 位置情報取得が完了してcenterが決まるまで待つ
-  if (isGettingLocation || (!locationTrialComplete && !center)) {
-    return (
-      <div className='flex items-center justify-center h-full min-h-[85vh] bg-gray-100'>
-        <div className='text-center'>
-          <div className='text-sm text-gray-600'>
-            {isGettingLocation ? '📍 位置情報を取得中...' : '地図を初期化中...'}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // centerが設定されていない場合はデフォルト値を使用
-  const mapCenter = center || userPosition || defaultCenter;
+  const mapCenter =
+    center ||
+    initialCenter ||
+    (markerPositions.length > 0 ? markerPositions[0] : defaultCenter);
 
   return (
     <>
-      {/* InfoWindow の閉じるボタンを非表示にする（必要ならグローバルCSSへ移動してください） */}
       <style>{`
-        /* InfoWindow の閉じボタンを隠す */
         .gm-style .gm-ui-hover-effect,
         .gm-style .gm-style-iw button {
           display: none !important;
         }
       `}</style>
+
       <GoogleMap
         id='map'
         mapContainerStyle={mapContainerStyle}
@@ -267,14 +188,14 @@ export default function GoogleMapComponent({
         options={options}
         onLoad={onMapLoad}
       >
-        {/* ルート表示（マーカーより先に描画して下層に配置） */}
+        {/* ルート表示 */}
         {directionsResult && (
           <DirectionsRenderer
             directions={directionsResult}
             options={{
-              suppressMarkers: true, // デフォルトマーカーを非表示（カスタムマーカーを使用）
+              suppressMarkers: true,
               polylineOptions: {
-                strokeColor: '#4285F4', // Google標準の青色
+                strokeColor: '#4285F4',
                 strokeWeight: 4,
                 strokeOpacity: 0.8,
               },
@@ -287,7 +208,10 @@ export default function GoogleMapComponent({
           position && position.lat && position.lng ? (
             <Marker
               key={`trip-${position.lat}-${position.lng}-${index}`}
-              position={position}
+              position={{
+                lat: Number(position.lat),
+                lng: Number(position.lng),
+              }}
               onMouseOver={() => setHoveredMarker(index)}
               onMouseOut={() =>
                 setHoveredMarker(prev => (prev === index ? null : prev))
@@ -304,28 +228,6 @@ export default function GoogleMapComponent({
               }}
             />
           ) : null
-        )}
-
-        {/* ユーザーの現在位置マーカー */}
-        {userPosition && (
-          <Marker
-            // 座標をキーにすることで確実に再描画されるようにする
-            key={`user-${userPosition.lat}-${userPosition.lng}`}
-            position={{
-              lat: Number(userPosition.lat),
-              lng: Number(userPosition.lng),
-            }}
-            icon={{
-              url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-              // window.google が未定義の場合をガード
-              scaledSize:
-                typeof window !== 'undefined' && window.google
-                  ? new window.google.maps.Size(40, 40)
-                  : undefined,
-            }}
-            title='現在位置'
-            zIndex={1000} // 他のマーカーより上に表示
-          />
         )}
 
         {/* hoveredMarker がセットされていれば InfoWindow を表示 */}
