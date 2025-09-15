@@ -1,13 +1,4 @@
 export default function TripDayRoutes({ day, locations, routeInfo }) {
-  console.log('TripDayRoutes rendered:', {
-    day,
-    locations: locations?.length,
-  });
-
-  if (!locations || locations.length === 0) {
-    return null;
-  }
-
   // 同じ日の場所のみフィルタリング
   const dayLocations = locations.filter(loc => loc.day === day);
   console.log('Day locations filtered:', { day, dayLocations });
