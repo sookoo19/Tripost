@@ -14,6 +14,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use App\Models\User;
 use App\Models\Post;
+use App\Models\Follow;
 
 class ProfileController extends Controller
 {
@@ -22,7 +23,12 @@ class ProfileController extends Controller
      */
     public function show(Request $request): Response
     {
-        $user = auth()->user();
+        $user = auth()->user()->loadCount('posts');
+        
+        // フォロー数・フォロワー数を取得
+        $user->followers_count = $user->followerRelations()->count();
+        $user->following_count = $user->followingRelations()->count();
+        
         // ユーザーの投稿をページネーションで取得（必要に応じて件数を変更）
         $posts = Post::where('user_id', $user->id)
             ->with('user')
@@ -54,6 +60,10 @@ class ProfileController extends Controller
                 'bio' => $user->bio,
                 // ここで国コード配列を渡す
                 'visited_countries' => $user->visitedCountries->pluck('code')->toArray(),
+                'posts_count' => $user->posts_count,
+                // フォロー数・フォロワー数を追加
+                'followers_count' => $user->followers_count,
+                'following_count' => $user->following_count,
             ],
             'countries' => Country::all(['id', 'code', 'name', 'image']),
             'posts' => $posts
@@ -72,6 +82,7 @@ class ProfileController extends Controller
                 'bio' => $user->bio,
                 // ここで国コード配列を渡す
                 'visited_countries' => $user->visitedCountries->pluck('code')->toArray(),
+                
             ],
             'countries' => Country::all(['id', 'code', 'name', 'image']),
         ]);
@@ -132,6 +143,18 @@ class ProfileController extends Controller
         // 投稿数を DB 側で取得しておく（$user->posts_count が使えるようになる）
         $user->loadCount('posts')->load('visitedCountries');
 
+        // フォロー数・フォロワー数を取得
+        $user->followers_count = $user->followerRelations()->count();
+        $user->following_count = $user->followingRelations()->count();
+        
+        // 現在のユーザーがこのユーザーをフォローしているかチェック
+        $user->is_followed = false;
+        if (Auth::check()) {
+            $user->is_followed = Follow::where('following', Auth::id())
+                                  ->where('followed', $user->id)
+                                  ->exists();
+        }
+
         // ユーザーの投稿をページネーションで取得（必要に応じて件数を変更）
         $posts = Post::where('user_id', $user->id)
             ->with('user')
@@ -165,10 +188,20 @@ class ProfileController extends Controller
                 // ここで国コード配列を渡す
                 'visited_countries' => $user->visitedCountries->pluck('code')->toArray(),
                 // 必要なら投稿も簡素化して渡す
-                'posts_count' => $user->posts->count(),
+                'posts_count' => $user->posts_count,
+                // フォロー数・フォロワー数・フォロー状態を追加
+                'followers_count' => $user->followers_count,
+                'following_count' => $user->following_count,
+                'is_followed' => $user->is_followed,
             ],
             'countries' => Country::all(['id', 'code', 'name', 'image']),
             'posts' => $posts,
         ]);
+    }
+
+    public function get_user($user_id){
+
+        $user = User::with('following')->with('followed')->findOrFail($user_id);
+        return response()->json($user);
     }
 }

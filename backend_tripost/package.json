@@ -39,6 +39,7 @@
         "vite": "^7.0.4"
     },
     "dependencies": {
+        "@inertiajs/inertia": "^0.11.1",
         "@react-google-maps/api": "^2.20.7",
         "cropperjs": "^1.5.13",
         "dayjs": "^1.11.15",

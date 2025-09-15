@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\FollowController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\PlaceController;
 use Illuminate\Foundation\Application;
@@ -27,7 +28,7 @@ Route::get('/posts', [PostController::class, 'index'])->name('posts.index'); // 
 Route::get('/posts/search', [PostController::class, 'searchPosts'])->name('posts.search'); // 投稿検索
 Route::get('/posts/search/result', [PostController::class, 'searchIndex'])->name('posts.searchResult'); // 投稿検索
 Route::get('/users/{user}/posts', [PostController::class, 'userPosts'])->name('users.posts'); // ユーザーごとの投稿一覧
-Route::get('/users/{user}', [ProfileController::class, 'showPublic'])->name('users.profile'); // 他ユーザーのプロフィール
+Route::get('/profile/{user}', [ProfileController::class, 'showPublic'])->name('users.profile'); // 他ユーザーのプロフィール
 
 // ▼ ログインユーザーのみ（プロフィール編集・投稿作成/編集/削除）
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -36,6 +37,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    //フォロー状態の確認・付与・解除
+    Route::get('/follow/status/{id}',[FollowController::class,'check_following'])->name('follow.check');
+    Route::post('/follow/add',[FollowController::class,'following'])->name('following');
+    Route::post('/follow/remove',[FollowController::class,'unfollowing'])->name('unfollowing');
 
     // 投稿詳細・作成・編集・削除
     Route::get('/posts/create', [PostController::class, 'create'])->name('posts.create');

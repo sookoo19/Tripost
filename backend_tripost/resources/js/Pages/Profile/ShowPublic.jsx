@@ -1,6 +1,48 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
+import { useState, useEffect } from 'react';
 
 export default function Show({ user, countries, posts }) {
+  const [followStatus, setFollowStatus] = useState(user.is_followed || false);
+  const [loadingFollow, setLoadingFollow] = useState(false);
+
+  const handleAddFollow = async e => {
+    e.preventDefault();
+    if (loadingFollow) return;
+    setLoadingFollow(true);
+
+    // Inertia.jsのrouterを使用（CSRFトークン不要）
+    router.post(
+      route('following'),
+      { user_id: user.id },
+      {
+        preserveState: true,
+        preserveScroll: true,
+        onFinish: () => setLoadingFollow(false),
+        onSuccess: () => setFollowStatus(true),
+        onError: errors => {
+          console.error('フォローに失敗しました', errors);
+          setFollowStatus(false);
+        },
+      }
+    );
+  };
+
+  const handleRemoveFollow = e => {
+    e.preventDefault();
+    if (loadingFollow) return;
+    setLoadingFollow(true);
+    router.post(
+      route('unfollowing'),
+      { user_id: user.id },
+      {
+        preserveState: true,
+        preserveScroll: true,
+        onFinish: () => setLoadingFollow(false),
+        onSuccess: () => setFollowStatus(false),
+      }
+    );
+  };
+
   const getCountry = code => countries.find(c => c.code === code);
   // 訪問国の絵文字リストを事前に作成
   const visitedCountryImages =
@@ -98,9 +140,13 @@ export default function Show({ user, countries, posts }) {
                 {user.posts_count ?? 0}
               </span>
               <span className='text-xs xs:text-sm'>タビ</span>
-              <span className='ml-3 text-base font-bold'>1</span>
+              <span className='ml-3 text-base font-bold'>
+                {user.followers_count ?? 0}
+              </span>
               <span className='text-xs xs:text-sm'>フォロワー</span>
-              <span className='ml-3 text-base font-bold'>1</span>
+              <span className='ml-3 text-base font-bold'>
+                {user.following_count ?? 0}
+              </span>
               <span className='text-xs xs:text-sm'>フォロー</span>
             </div>
           </div>
@@ -118,6 +164,37 @@ export default function Show({ user, countries, posts }) {
           <div className='mt-2 flex flex-wrap gap-1'>
             {visitedCountryImages}
           </div>
+        </div>
+      </div>
+      <div className='w-full mt-3 mb-4'>
+        <div className='flex justify-center items-center gap-4'>
+          {!followStatus && (
+            <button
+              type='button'
+              className='w-2/5 shadow inline-flex items-center justify-center rounded-2xl border border-gray-100 border-transparent bg-blue-400 px-2 xs:px-4 py-2 text-xs xs:text-sm font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out hover:bg-blue-500 focus:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-blue-500'
+              disabled={loadingFollow}
+              onClick={handleAddFollow}
+            >
+              フォローする
+            </button>
+          )}
+          {followStatus && (
+            <button
+              type='button'
+              className='w-2/5 shadow inline-flex items-center justify-center rounded-2xl border border-gray-100 border-transparent bg-white px-2 xs:px-4 py-2 text-xs xs:text-sm font-semibold uppercase tracking-widest text-black transition duration-150 ease-in-out hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-200'
+              disabled={loadingFollow}
+              onClick={handleRemoveFollow}
+            >
+              フォロー中
+            </button>
+          )}
+
+          <button
+            className='w-2/5 shadow inline-flex items-center justify-center rounded-2xl border border-gray-100 border-transparent bg-white px-2 xs:px-4 py-2 text-xs xs:text-sm font-semibold uppercase tracking-widest text-black transition duration-150 ease-in-out hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
+            disabled={false}
+          >
+            共有
+          </button>
         </div>
       </div>
 

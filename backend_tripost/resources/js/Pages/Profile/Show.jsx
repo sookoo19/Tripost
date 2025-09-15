@@ -139,11 +139,17 @@ export default function Show({ user, countries, posts }) {
             </div>
             <div className='mt-1'>
               {/*フォロー数、フォロワー数、投稿数*/}
-              <span className='text-base font-bold'>1</span>
+              <span className='text-base font-bold'>
+                {user.posts_count ?? 0}
+              </span>
               <span className='text-xs xs:text-sm'>タビ</span>
-              <span className='ml-3 text-base font-bold'>1</span>
+              <span className='ml-3 text-base font-bold'>
+                {user.followers_count ?? 0}
+              </span>
               <span className='text-xs xs:text-sm'>フォロワー</span>
-              <span className='ml-3 text-base font-bold'>1</span>
+              <span className='ml-3 text-base font-bold'>
+                {user.following_count ?? 0}
+              </span>
               <span className='text-xs xs:text-sm'>フォロー</span>
             </div>
           </div>
@@ -166,14 +172,14 @@ export default function Show({ user, countries, posts }) {
       <div className='mt-3 mb-4'>
         <Link href='/profile/edit'>
           <button
-            className='shadow-md inline-flex items-center rounded-2xl border border-transparent bg-white px-2 xs:px-4 py-2 text-xs xs:text-sm font-semibold uppercase tracking-widest text-black transition duration-150 ease-in-out hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
+            className='shadow inline-flex items-center rounded-2xl border border-gray-100 border-transparent bg-white px-2 xs:px-4 py-2 text-xs xs:text-sm font-semibold uppercase tracking-widest text-black transition duration-150 ease-in-out hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
             disabled={false}
           >
             プロフィールを編集
           </button>
         </Link>
         <button
-          className=' ml-4 shadow-md inline-flex items-center rounded-2xl border border-transparent bg-white px-2 xs:px-4 py-2 text-xs xs:text-sm font-semibold uppercase tracking-widest text-black transition duration-150 ease-in-out hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
+          className=' ml-4 shadow inline-flex items-center rounded-2xl border border-gray-100 border-transparent bg-white px-2 xs:px-4 py-2 text-xs xs:text-sm font-semibold uppercase tracking-widest text-black transition duration-150 ease-in-out hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
           disabled={false}
         >
           プロフィールを共有

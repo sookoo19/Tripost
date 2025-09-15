@@ -68,4 +68,42 @@ class User extends Authenticatable implements MustVerifyEmailContract
     {
         $this->notify(new CustomVerifyEmail());
     }
+
+     //フォローしているユーザー・'follows'などの指定を省くと Laravel はデフォルトの pivot 名・カラム名（user_user / user_id など）を期待し、正しく動きません。
+    public function following()
+    {
+        return $this->belongsToMany(User::class, 'follows','following', 'followed');
+        
+        
+    }
+
+    //フォローされているユーザー（pivot.followed = 自分の id, pivot.following = 相手の id）
+    public function followers()
+    {
+        
+        return $this->belongsToMany(User::class, 'follows','followed','following');
+        
+    }
+
+    public function followerRelations()
+    {
+        return $this->hasMany(Follow::class, 'followed', 'id');
+    }
+
+    public function followingRelations()
+    {
+        return $this->hasMany(Follow::class, 'following', 'id');
+    }
+
+    // フォロワー数を取得するアクセサ
+    public function getFollowersCountAttribute()
+    {
+        return $this->followerRelations()->count();
+    }
+
+    // フォロー数を取得するアクセサ
+    public function getFollowingCountAttribute()
+    {
+        return $this->followingRelations()->count();
+    }
 }
