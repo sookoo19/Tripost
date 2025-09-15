@@ -1,9 +1,9 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, usePage, router } from '@inertiajs/react';
 import GoogleMapComponent from '@/Components/GoogleMap';
 import TripDayRoutes from '@/Components/TripDayRoutes';
 import { useMemo, useState, useEffect } from 'react';
 
-export default function Show({ post }) {
+export default function Show({ post, user }) {
   const page = usePage();
   const currentUserId = page.props?.auth?.user?.id;
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
@@ -11,6 +11,30 @@ export default function Show({ post }) {
   const [directionsResult, setDirectionsResult] = useState(null);
   const [routeInfo, setRouteInfo] = useState(null);
   const [isRouting, setIsRouting] = useState(false);
+  const [followStatus, setFollowStatus] = useState(user.is_followed || false);
+  const [loadingFollow, setLoadingFollow] = useState(false);
+
+  const handleAddFollow = async e => {
+    e.preventDefault();
+    if (loadingFollow) return;
+    setLoadingFollow(true);
+
+    // Inertia.jsのrouterを使用（CSRFトークン不要）
+    router.post(
+      route('following'),
+      { user_id: user.id },
+      {
+        preserveState: true,
+        preserveScroll: true,
+        onFinish: () => setLoadingFollow(false),
+        onSuccess: () => setFollowStatus(true),
+        onError: errors => {
+          console.error('フォローに失敗しました', errors);
+          setFollowStatus(false);
+        },
+      }
+    );
+  };
 
   // yyyy-mm -> yyyy年mm月 に整形
   const formatPeriod = period => {
@@ -274,7 +298,24 @@ export default function Show({ post }) {
                   @{post?.user?.displayid}
                 </div>
               </Link>
-              <div className='ml-1 mt-1 text-xs text-gray-500'>フォロー中</div>
+              {currentUserId !== post.user.id && (
+                <>
+                  {followStatus && (
+                    <div className='ml-1 mt-1 text-xs text-gray-500'>
+                      フォロー中
+                    </div>
+                  )}
+                  {!followStatus && (
+                    <button
+                      className='ml-1 mt-0.5 text-xs font-bold text-gray-600 border rounded px-1 border-gray-300'
+                      disabled={loadingFollow}
+                      onClick={handleAddFollow}
+                    >
+                      フォロー
+                    </button>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -282,7 +323,7 @@ export default function Show({ post }) {
         <div>
           {/* 写真カルーセル */}
           {hasPhotos && (
-            <div className='relative w-full aspect-square bg-gray-100 overflow-hidden group'>
+            <div className='mt-2 relative w-full aspect-square bg-gray-100 overflow-hidden group'>
               {/* 写真表示 */}
               <div
                 className='flex transition-transform duration-500 ease-in-out h-full'

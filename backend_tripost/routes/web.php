@@ -42,6 +42,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/follow/status/{id}',[FollowController::class,'check_following'])->name('follow.check');
     Route::post('/follow/add',[FollowController::class,'following'])->name('following');
     Route::post('/follow/remove',[FollowController::class,'unfollowing'])->name('unfollowing');
+    Route::get('/follow/following/index/{user}',[FollowController::class,'following_index'])->name('following.index');
+    Route::get('/follow/follower/index/{user}',[FollowController::class,'follower_index'])->name('follower.index');
 
     // 投稿詳細・作成・編集・削除
     Route::get('/posts/create', [PostController::class, 'create'])->name('posts.create');

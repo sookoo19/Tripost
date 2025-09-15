@@ -9,12 +9,14 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Post;
 use App\Models\Country;
 use App\Models\User;
 use App\Models\Style;
 use App\Models\Purpose;
 use App\Models\Budget;
+use App\Models\Follow;
 
 class PostController extends Controller
 {
@@ -94,14 +96,29 @@ class PostController extends Controller
     /**
      * Display the post detail.
      */
-    public function show(Post $post): Response
+    public function show(Post $post, User $user): Response
     {
         $post->user->profile_image_url = $post->user->profile_image
             ? Storage::url($post->user->profile_image)
             : null;
+
+        // 現在のユーザーがこのユーザーをフォローしているかチェック
+        $user = $post->user;
+        $isFollowed = false;
+        if (Auth::check()) {
+            $isFollowed = Follow::where('following', Auth::id())
+                                ->where('followed', $user->id)
+                                ->exists();
+        }
+
         //render(resources/js/Pages/Posts/Show.jsx)
         return Inertia::render('Posts/Show', [
             'post' => $post->load(['user', 'country', 'style', 'purpose', 'budget']),
+            'user' => [
+                'id' => $user->id,
+                'displayid' => $user->displayid,
+                'is_followed' => $isFollowed,
+            ],
         ]);
     }
 

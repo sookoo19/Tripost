@@ -54,6 +54,7 @@ class ProfileController extends Controller
 
         return Inertia::render('Profile/Show', [
             'user' => [
+                'id' => $user->id,
                 'displayid' => $user->displayid,
                 'name' => $user->name,
                 'profile_image' => $user->profile_image,

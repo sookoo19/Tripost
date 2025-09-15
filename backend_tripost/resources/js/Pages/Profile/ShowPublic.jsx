@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export default function Show({ user, countries, posts }) {
   const [followStatus, setFollowStatus] = useState(user.is_followed || false);
@@ -140,14 +140,18 @@ export default function Show({ user, countries, posts }) {
                 {user.posts_count ?? 0}
               </span>
               <span className='text-xs xs:text-sm'>タビ</span>
-              <span className='ml-3 text-base font-bold'>
-                {user.followers_count ?? 0}
-              </span>
-              <span className='text-xs xs:text-sm'>フォロワー</span>
-              <span className='ml-3 text-base font-bold'>
-                {user.following_count ?? 0}
-              </span>
-              <span className='text-xs xs:text-sm'>フォロー</span>
+              <Link href={route('follower.index', { user: user.id })}>
+                <span className='ml-3 text-base font-bold'>
+                  {user.followers_count ?? 0}
+                </span>
+                <span className='text-xs xs:text-sm'>フォロワー</span>
+              </Link>
+              <Link href={route('following.index', { user: user.id })}>
+                <span className='ml-3 text-base font-bold'>
+                  {user.following_count ?? 0}
+                </span>
+                <span className='text-xs xs:text-sm'>フォロー</span>
+              </Link>
             </div>
           </div>
           {/*自己紹介文*/}
