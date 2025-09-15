@@ -1,6 +1,8 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 
 export default function Index({ posts }) {
+  const page = usePage();
+  const currentUserId = page.props?.auth?.user?.id;
   // Inertia の paginator に合わせて安全に取得
   const items = posts?.data ?? posts ?? [];
 
@@ -64,7 +66,13 @@ export default function Index({ posts }) {
               className='bg-white rounded-xl shadow-md mb-8 overflow-hidden border'
             >
               <div className='flex items-center px-4 py-3'>
-                <Link href={route('users.profile', post.user.id)}>
+                <Link
+                  href={
+                    currentUserId === post.user.id
+                      ? route('profile.show')
+                      : route('users.profile', post.user.id)
+                  }
+                >
                   <img
                     src={
                       post.user.profile_image_url ||
@@ -76,7 +84,11 @@ export default function Index({ posts }) {
                 </Link>
                 <div className='ml-1'>
                   <Link
-                    href={route('users.profile', post.user.id)}
+                    href={
+                      currentUserId === post.user.id
+                        ? route('profile.show')
+                        : route('users.profile', post.user.id)
+                    }
                     className='font-semibold text-sm'
                   >
                     @{post.user.displayid}
