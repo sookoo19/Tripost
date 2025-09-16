@@ -72,22 +72,23 @@ class ProfileController extends Controller
     }
 
     public function edit(Request $request): Response
-        {
-            $user = auth()->user()->load('visitedCountries');
-
-            return Inertia::render('Profile/Edit', [
-            'user' => [
-                'displayid' => $user->displayid,
-                'name' => $user->name,
-                'profile_image' => $user->profile_image,
-                'bio' => $user->bio,
-                // ここで国コード配列を渡す
-                'visited_countries' => $user->visitedCountries->pluck('code')->toArray(),
-                
-            ],
-            'countries' => Country::all(['id', 'code', 'name', 'image']),
-        ]);
-    }
+{
+    $user = auth()->user()->load('visitedCountries');
+    
+    // 必要なユーザー情報をすべて含める
+    return Inertia::render('Profile/Edit', [
+        'user' => [
+            'id' => $user->id,
+            'displayid' => $user->displayid,
+            'name' => $user->name,
+            'email' => $user->email,
+            'profile_image' => $user->profile_image,
+            'bio' => $user->bio,
+            'visited_countries' => $user->visitedCountries->pluck('code')->toArray(),
+        ],
+        'countries' => Country::all(['id', 'code', 'name', 'image']),
+    ]);
+}
 
     /**
      * Update the user's profile information.

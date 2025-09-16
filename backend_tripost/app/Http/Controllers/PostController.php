@@ -90,7 +90,7 @@ class PostController extends Controller
     }
 
 
-        return redirect()->route('posts.show', $post);   
+        return redirect()->route('profile.show', $post);   
     }
 
     /**

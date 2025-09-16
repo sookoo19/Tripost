@@ -28,7 +28,6 @@ Route::get('/posts', [PostController::class, 'index'])->name('posts.index'); // 
 Route::get('/posts/search', [PostController::class, 'searchPosts'])->name('posts.search'); // 投稿検索
 Route::get('/posts/search/result', [PostController::class, 'searchIndex'])->name('posts.searchResult'); // 投稿検索
 Route::get('/users/{user}/posts', [PostController::class, 'userPosts'])->name('users.posts'); // ユーザーごとの投稿一覧
-Route::get('/profile/{user}', [ProfileController::class, 'showPublic'])->name('users.profile'); // 他ユーザーのプロフィール
 
 // ▼ ログインユーザーのみ（プロフィール編集・投稿作成/編集/削除）
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -54,5 +53,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
 });
 
+// 他ユーザーのプロフィール（最後に配置）
+Route::get('/profile/{user}', [ProfileController::class, 'showPublic'])->name('users.profile'); 
 
 require __DIR__.'/auth.php';
