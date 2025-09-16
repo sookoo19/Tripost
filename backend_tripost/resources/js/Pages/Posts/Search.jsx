@@ -6,6 +6,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PrimaryButton from '@/Components/PrimaryButton';
 import Select from 'react-select';
 import { useMemo } from 'react';
+import BottomNav from '@/Components/BottomNav';
 
 export default function Search({ countries, styles, purposes, budgets }) {
   const { data, setData, get, processing, errors } = useForm({
@@ -370,6 +371,7 @@ export default function Search({ countries, styles, purposes, budgets }) {
           </PrimaryButton>
         </div>
       </form>
+      <BottomNav />
     </AuthenticatedLayout>
   );
 }

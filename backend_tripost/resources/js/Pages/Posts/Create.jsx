@@ -336,6 +336,7 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
                 placeholder='例：日本'
                 isSearchable
                 maxMenuHeight={200}
+                autoFocus
                 required
               />
             </div>
@@ -351,7 +352,6 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
                 value={data.region}
                 className='ml-auto block w-3/5 h-auto text-sm'
                 autoComplete='region'
-                isFocused={true}
                 onChange={e => setData('region', e.target.value)}
                 placeholder='例：東京'
               />
@@ -564,7 +564,6 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
             value={data.title}
             className='mt-1 block w-full bg-gray-50'
             autoComplete='title'
-            isFocused={true}
             onChange={e => setData('title', e.target.value)}
             required
           />
@@ -586,7 +585,6 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
             value={data.subtitle}
             className='mt-1 block w-full bg-gray-50'
             autoComplete='subtitle'
-            isFocused={true}
             onChange={e => setData('subtitle', e.target.value)}
           />
 
@@ -714,6 +712,21 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
           </PrimaryButton>
         </div>
       </form>
+      <button
+        className='w-full h-12 mt-2 flex justify-center items-center inline-flex items-center rounded-md border border-transparent bg-gray-200 px-4 py-2 text-lg font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out hover:bg-gray-300 focus:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
+        disabled={false}
+        onClick={() => {
+          if (!confirm('入力内容が破棄されます。本当にキャンセルしますか？'))
+            return;
+          if (window.history.length > 1) {
+            window.history.back();
+          } else {
+            window.location.href = route ? route('posts.index') : '/posts';
+          }
+        }}
+      >
+        キャンセル
+      </button>
     </AuthenticatedLayout>
   );
 }

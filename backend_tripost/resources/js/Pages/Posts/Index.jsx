@@ -1,4 +1,5 @@
 import { Head, Link, usePage } from '@inertiajs/react';
+import BottomNav from '@/Components/BottomNav';
 
 export default function Index({ posts }) {
   const page = usePage();
@@ -146,6 +147,7 @@ export default function Index({ posts }) {
           )}
         </div>
       </div>
+      <BottomNav />
     </div>
   );
 }

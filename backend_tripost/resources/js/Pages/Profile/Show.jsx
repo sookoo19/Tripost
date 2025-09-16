@@ -1,5 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
+import BottomNav from '@/Components/BottomNav';
 
 export default function Show({ user, countries, posts }) {
   const [showModal, setShowModal] = useState(false);
@@ -272,7 +273,7 @@ export default function Show({ user, countries, posts }) {
       <Link
         href={route('posts.create')}
         aria-label='新規投稿'
-        className='fixed right-5 bottom-6 md:right-8 md:bottom-8 z-50'
+        className='fixed right-5 bottom-20 z-10'
       >
         <button
           type='button'
@@ -296,6 +297,7 @@ export default function Show({ user, countries, posts }) {
           </svg>
         </button>
       </Link>
+      <BottomNav />
     </div>
   );
 }

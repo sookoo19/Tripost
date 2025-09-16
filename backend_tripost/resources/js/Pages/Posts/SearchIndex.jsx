@@ -1,4 +1,5 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
+import BottomNav from '@/Components/BottomNav';
 
 export default function SearchIndex({
   posts,
@@ -72,13 +73,10 @@ export default function SearchIndex({
       <div className='w-full overflow-hidden bg-white pl-4 mt-4'>
         <button
           onClick={() => {
-            if (window.history.length > 1) {
-              window.history.back();
-            } else {
-              window.location.href = route ? route('posts.index') : '/posts';
-            }
+            // 明示的に検索ページへ遷移
+            router.get(route('posts.search'));
           }}
-          className='shadow-md inline-flex items-center rounded-xl border border-transparent bg-white px-3 text-[10px] font-semibold uppercase tracking-widest text-gray-800 transition duration-150 ease-in-out hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
+          className='shadow-md inline-flex items-center rounded-xl border border-gray-100 bg-white px-3 text-xs font-semibold uppercase tracking-widest text-gray-800 transition duration-150 ease-in-out hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
           type='button'
         >
           戻る
@@ -203,6 +201,7 @@ export default function SearchIndex({
           )}
         </div>
       </div>
+      <BottomNav />
     </div>
   );
 }

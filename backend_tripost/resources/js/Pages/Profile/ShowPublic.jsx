@@ -1,5 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
+import BottomNav from '@/Components/BottomNav';
 
 export default function Show({ user, countries, posts }) {
   const [followStatus, setFollowStatus] = useState(user.is_followed || false);
@@ -280,6 +281,7 @@ export default function Show({ user, countries, posts }) {
           )}
         </div>
       </div>
+      <BottomNav />
     </div>
   );
 }
