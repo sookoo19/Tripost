@@ -268,6 +268,34 @@ export default function Show({ user, countries, posts }) {
           )}
         </div>
       </div>
+      {/* 右下の浮遊プラスボタン（新規投稿） */}
+      <Link
+        href={route('posts.create')}
+        aria-label='新規投稿'
+        className='fixed right-5 bottom-6 md:right-8 md:bottom-8 z-50'
+      >
+        <button
+          type='button'
+          className='w-14 h-14 md:w-16 md:h-16 rounded-full bg-yellow-300 hover:bg-yellow-400 text-white flex items-center justify-center shadow-lg border-2 border-white focus:outline-none'
+        >
+          <svg
+            className='w-7 h-7'
+            viewBox='0 0 24 24'
+            fill='none'
+            xmlns='http://www.w3.org/2000/svg'
+            aria-hidden
+          >
+            <rect width='24' height='24' rx='12' fill='transparent' />
+            <path
+              d='M12 7v10M7 12h10'
+              stroke='currentColor'
+              strokeWidth='4'
+              strokeLinecap='round'
+              strokeLinejoin='round'
+            />
+          </svg>
+        </button>
+      </Link>
     </div>
   );
 }

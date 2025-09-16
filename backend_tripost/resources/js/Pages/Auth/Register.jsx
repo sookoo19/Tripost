@@ -110,20 +110,18 @@ export default function Register() {
         </div>
 
         <PrimaryButton
-          className='w-full h-12 mt-10 flex justify-center items-center'
+          className='w-full h-12 mt-10 mb-4 flex justify-center items-center'
           disabled={processing}
         >
           登録
         </PrimaryButton>
 
-        <div className='mt-4 flex items-center justify-end'>
-          <Link
-            href={route('login')}
-            className='rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
-          >
-            すでにアカウントをお持ちですか？
-          </Link>
-        </div>
+        <Link
+          href={route('login')}
+          className='rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
+        >
+          すでにアカウントをお持ちですか？
+        </Link>
       </form>
     </GuestLayout>
   );

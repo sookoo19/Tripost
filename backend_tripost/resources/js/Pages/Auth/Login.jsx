@@ -77,6 +77,12 @@ export default function Login({ status, canResetPassword }) {
           >
             ログイン
           </PrimaryButton>
+          <Link
+            href={route('register')}
+            className='mt-4 rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
+          >
+            新規登録はこちらから
+          </Link>
         </div>
       </form>
     </GuestLayout>
