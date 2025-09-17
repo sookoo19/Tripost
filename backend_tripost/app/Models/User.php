@@ -106,4 +106,36 @@ class User extends Authenticatable implements MustVerifyEmailContract
     {
         return $this->followingRelations()->count();
     }
+
+    /**
+     * ユーザーが付けたいいね（likes テーブルのレコード）
+     */
+    public function likes()
+    {
+        return $this->hasMany(Like::class, 'user_id');
+    }
+
+    /**
+     * ユーザーがいいねした投稿（posts テーブル）
+     */
+    public function likedPosts()
+    {
+        return $this->belongsToMany(Post::class, 'likes', 'user_id', 'post_id');
+    }
+
+    /**
+     * ユーザーが書いたコメント
+     */
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'user_id');
+    }
+
+    /**
+     * 指定投稿に対してこのユーザーがいいねしているか
+     */
+    public function hasLikedPost($postId): bool
+    {
+        return $this->likes()->where('post_id', $postId)->exists();
+    }
 }

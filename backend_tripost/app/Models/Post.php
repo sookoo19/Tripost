@@ -32,6 +32,8 @@ class Post extends Model
         'photos' => 'array',
     ];
 
+    protected $appends = ['is_liked'];
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -55,5 +57,34 @@ class Post extends Model
     public function budget()
     {
         return $this->belongsTo(Budget::class);
+    }
+
+    public function likes() 
+    { 
+        return $this->hasMany(Like::class); 
+    }
+
+    public function comments() {
+         return $this->hasMany(Comment::class); 
+    }
+    //（likes）は中間テーブルのため
+    public function isLikedBy($userId) {
+      return $this->likes()->where('user_id', $userId)->exists();
+    }
+
+    public function getIsLikedAttribute()
+    {
+        if (!auth()->check()) {
+            return false;
+        }
+        
+        // キャッシュしていない場合はDBにクエリ
+        if (!array_key_exists('is_liked', $this->attributes)) {
+            $this->attributes['is_liked'] = $this->likes()
+                ->where('user_id', auth()->id())
+                ->exists();
+        }
+        
+        return $this->attributes['is_liked'];
     }
 }

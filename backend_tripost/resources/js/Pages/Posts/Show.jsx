@@ -2,6 +2,7 @@ import { Head, Link, usePage, router } from '@inertiajs/react';
 import GoogleMapComponent from '@/Components/GoogleMap';
 import TripDayRoutes from '@/Components/TripDayRoutes';
 import { useMemo, useState, useEffect } from 'react';
+import axios from 'axios';
 
 export default function Show({ post, user }) {
   const page = usePage();
@@ -13,6 +14,13 @@ export default function Show({ post, user }) {
   const [isRouting, setIsRouting] = useState(false);
   const [followStatus, setFollowStatus] = useState(user.is_followed || false);
   const [loadingFollow, setLoadingFollow] = useState(false);
+  const [likesCount, setLikesCount] = useState(
+    post.likes_count ?? post.likes?.length ?? 0
+  );
+  const [liked, setLiked] = useState(
+    post?.is_liked ?? (post?.isLikedBy?.includes(currentUserId) || false)
+  );
+  const [loadingLike, setLoadingLike] = useState(false);
 
   const handleAddFollow = async e => {
     e.preventDefault();
@@ -246,6 +254,77 @@ export default function Show({ post, user }) {
     };
   }, [sortedTripLocations]);
 
+  // トグル関数（いいね/いいね解除を切り替える）
+  const toggleLike = e => {
+    // イベントのデフォルト動作を確実に停止
+    if (e) e.preventDefault();
+
+    if (!currentUserId) {
+      router.get(route('login'));
+      return;
+    }
+
+    if (liked) {
+      handleRemoveLike(e);
+    } else {
+      handleAddLike(e);
+    }
+  };
+
+  // いいね追加
+  const handleAddLike = e => {
+    if (e) e.preventDefault();
+    if (loadingLike) return;
+    setLoadingLike(true);
+
+    // CSRFトークン設定を削除し、シンプルなリクエストに
+    axios
+      .post(`/posts/${post.id}/like`)
+      .then(response => {
+        setLiked(true);
+        setLikesCount(prev => prev + 1);
+      })
+      .catch(error => {
+        console.error('いいねに失敗しました', error);
+      })
+      .finally(() => {
+        setLoadingLike(false);
+      });
+  };
+
+  // いいね解除
+  const handleRemoveLike = e => {
+    if (e) e.preventDefault();
+    if (loadingLike) return;
+    setLoadingLike(true);
+
+    // CSRFトークンを取得
+    const token = document
+      .querySelector('meta[name="csrf-token"]')
+      ?.getAttribute('content');
+
+    // router.deleteの代わりにaxiosを使用
+    axios
+      .delete(`/posts/${post.id}/like`, {
+        headers: {
+          'X-CSRF-TOKEN': token,
+          Accept: 'application/json', // JSONレスポンスを明示的にリクエスト
+        },
+      })
+      .then(response => {
+        // サーバーからのデータを使用
+        const data = response.data;
+        setLiked(data.is_liked || false);
+        setLikesCount(data.likes_count || Math.max(0, likesCount - 1));
+      })
+      .catch(error => {
+        console.error('いいね解除に失敗しました', error);
+      })
+      .finally(() => {
+        setLoadingLike(false);
+      });
+  };
+
   return (
     <div className='flex min-h-screen flex-col items-center bg-whit'>
       <Head title={post.title} />
@@ -369,7 +448,7 @@ export default function Show({ post, user }) {
                     </svg>
                   </button>
 
-                  {/* 右矢印（ホバー時のみ表示） */}
+                  {/* 右矢印（ホバー時のみ表示）*/}
                   <button
                     onClick={nextPhoto}
                     className='absolute right-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white rounded-full w-10 h-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-opacity-70'
@@ -456,6 +535,18 @@ export default function Show({ post, user }) {
             </div>
           </div>
         </div>
+        {/* いいねボタンの実装 */}
+        <button
+          type='button'
+          onClick={e => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleLike(e);
+          }}
+          className={`px-3 py-1 rounded ${liked ? 'bg-red-500 text-white' : 'bg-gray-100'}`}
+        >
+          {liked ? 'いいね済み' : 'いいね'} ({likesCount})
+        </button>
 
         {/* フッターの余白 */}
         <div className='h-24' />

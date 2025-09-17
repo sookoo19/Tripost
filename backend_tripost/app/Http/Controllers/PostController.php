@@ -96,29 +96,30 @@ class PostController extends Controller
     /**
      * Display the post detail.
      */
-    public function show(Post $post, User $user): Response
+    public function show(Post $post)
     {
-        $post->user->profile_image_url = $post->user->profile_image
-            ? Storage::url($post->user->profile_image)
-            : null;
-
-        // 現在のユーザーがこのユーザーをフォローしているかチェック
+        // 投稿情報と関連データのロード
+        $post->load(['user', 'comments.user']);
+        $post->loadCount('likes');
+        
+        // 投稿のユーザー情報
         $user = $post->user;
-        $isFollowed = false;
-        if (Auth::check()) {
-            $isFollowed = Follow::where('following', Auth::id())
-                                ->where('followed', $user->id)
-                                ->exists();
+        
+        // 現在のユーザーがログインしている場合、フォロー状態を確認
+        if (auth()->check()) {
+            $currentUser = auth()->user();
+            // いいね状態
+            $post->is_liked = $post->likes()->where('user_id', $currentUser->id)->exists();
+            // フォロー状態
+            $user->is_followed = $currentUser->following()->where('users.id', $user->id)->exists();
+        } else {
+            $post->is_liked = false;
+            $user->is_followed = false;
         }
 
-        //render(resources/js/Pages/Posts/Show.jsx)
         return Inertia::render('Posts/Show', [
-            'post' => $post->load(['user', 'country', 'style', 'purpose', 'budget']),
-            'user' => [
-                'id' => $user->id,
-                'displayid' => $user->displayid,
-                'is_followed' => $isFollowed,
-            ],
+            'post' => $post,
+            'user' => $user,
         ]);
     }
 

@@ -6,7 +6,7 @@ export default function Show({ user, countries, posts }) {
   const [followStatus, setFollowStatus] = useState(user.is_followed || false);
   const [loadingFollow, setLoadingFollow] = useState(false);
 
-  const handleAddFollow = async e => {
+  const handleAddFollow = e => {
     e.preventDefault();
     if (loadingFollow) return;
     setLoadingFollow(true);
