@@ -24,7 +24,7 @@ class PostController extends Controller
     public function index(Request $request)
     {
         // 基本のクエリ：最新順、ユーザーを事前ロード
-        $query = Post::with('user')->latest();
+        $query = Post::with('user')->withCount('likes')->latest();
 
 
         // ページネーション（例：8件／ページ）
@@ -42,6 +42,7 @@ class PostController extends Controller
                 ],
                 'photos' => $post->photos ?? [],
                 'photos_urls' => collect($post->photos ?? [])->map(fn($p) => Storage::url($p))->all(),
+                'likes_count' => $post->likes_count,
             ];
         });
 

@@ -1,7 +1,10 @@
+import { useMemo } from 'react';
+
 export default function TripDayRoutes({ day, locations, routeInfo }) {
-  // 同じ日の場所のみフィルタリング
-  const dayLocations = locations.filter(loc => loc.day === day);
-  console.log('Day locations filtered:', { day, dayLocations });
+  // useMemoを使用してdayLocationsをメモ化
+  const dayLocations = useMemo(() => {
+    return locations.filter(loc => loc.day === day);
+  }, [locations, day]);
 
   if (dayLocations.length === 0) {
     return null;
