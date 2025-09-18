@@ -1,5 +1,6 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, usePage, router } from '@inertiajs/react';
 import BottomNav from '@/Components/BottomNav';
+import { useEffect } from 'react';
 
 export default function Index({ posts }) {
   const page = usePage();
@@ -45,6 +46,14 @@ export default function Index({ posts }) {
     return;
   };
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (sessionStorage.getItem('tripost_reload_on_back') === '1') {
+      sessionStorage.removeItem('tripost_reload_on_back');
+      // Inertia 経由でサーバから再取得
+      router.reload();
+    }
+  }, []);
   return (
     <div className='flex min-h-screen flex-col items-center bg-white'>
       <Head title='投稿一覧' />

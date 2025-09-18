@@ -32,6 +32,7 @@ class ProfileController extends Controller
         // ユーザーの投稿をページネーションで取得（必要に応じて件数を変更）
         $posts = Post::where('user_id', $user->id)
             ->with('user')
+            ->withCount('likes')
             ->latest()
             ->paginate(8);
 
@@ -48,6 +49,7 @@ class ProfileController extends Controller
                     'profile_image_url' => $p->user->profile_image ? Storage::url($p->user->profile_image) : null,
                 ],
                 'photos_urls' => collect($p->photos ?? [])->map(fn($q) => Storage::url($q))->all(),
+                'likes_count' => $p->likes_count,
             ];
         });
         $posts->setCollection($transformed);
@@ -65,9 +67,10 @@ class ProfileController extends Controller
                 // フォロー数・フォロワー数を追加
                 'followers_count' => $user->followers_count,
                 'following_count' => $user->following_count,
+    
             ],
             'countries' => Country::all(['id', 'code', 'name', 'image']),
-            'posts' => $posts
+            'posts' => $posts,
         ]);
     }
 
@@ -160,6 +163,7 @@ class ProfileController extends Controller
         // ユーザーの投稿をページネーションで取得（必要に応じて件数を変更）
         $posts = Post::where('user_id', $user->id)
             ->with('user')
+            ->withCount('likes')
             ->latest()
             ->paginate(8);
 
@@ -176,6 +180,7 @@ class ProfileController extends Controller
                     'profile_image_url' => $p->user->profile_image ? Storage::url($p->user->profile_image) : null,
                 ],
                 'photos_urls' => collect($p->photos ?? [])->map(fn($q) => Storage::url($q))->all(),
+                'likes_count' => $p->likes_count,
             ];
         });
         $posts->setCollection($transformed);

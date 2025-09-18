@@ -164,7 +164,7 @@ class PostController extends Controller
     public function searchIndex(Request $request)
     {
         // 基本のクエリ：最新順、ユーザーを事前ロード
-        $query = Post::with('user')->latest();
+        $query = Post::with('user')->withCount('likes')->latest();
 
         // 検索パラメータの処理
         if ($request->filled('keyword')) {
@@ -250,6 +250,7 @@ class PostController extends Controller
                 ],
                 'photos' => $post->photos ?? [],
                 'photos_urls' => collect($post->photos ?? [])->map(fn($p) => Storage::url($p))->all(),
+                'likes_count' => $post->likes_count,
             ];
         });
 
@@ -274,6 +275,7 @@ class PostController extends Controller
             'styles' => Style::all(['id', 'name']),
             'purposes' => Purpose::all(['id', 'name']),
             'budgets' => Budget::all(['id', 'label', 'min', 'max']),
+            
         ]);
     }
 

@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import BottomNav from '@/Components/BottomNav';
 
 export default function Show({ user, countries, posts }) {
@@ -56,6 +56,15 @@ export default function Show({ user, countries, posts }) {
     if (post.photos && post.photos[0]) return `/storage/${post.photos[0]}`;
     return;
   };
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (sessionStorage.getItem('tripost_reload_on_back') === '1') {
+      sessionStorage.removeItem('tripost_reload_on_back');
+      // Inertia 経由でサーバから再取得
+      router.reload();
+    }
+  }, []);
 
   return (
     <div className='flex min-h-screen flex-col items-center bg-white'>
@@ -216,6 +225,20 @@ export default function Show({ user, countries, posts }) {
                   >
                     @{post.user.displayid}
                   </Link>
+                </div>
+                <div className='text-sm font-bold ml-auto flex flex-row items-center'>
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    width={28}
+                    height={28}
+                    viewBox='0 0 24 24'
+                  >
+                    <path
+                      fill='#fcf16eff'
+                      d='m12 21.35l-1.45-1.32C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5c0 3.77-3.4 6.86-8.55 11.53z'
+                    ></path>
+                  </svg>
+                  {post.likes_count}
                 </div>
               </div>
 

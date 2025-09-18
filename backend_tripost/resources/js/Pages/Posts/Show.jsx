@@ -325,10 +325,16 @@ export default function Show({ post, user }) {
       <div className='w-full overflow-hidden bg-white px-4 pt-6'>
         <button
           onClick={() => {
-            if (window.history.length > 1) {
-              window.history.back();
-            } else {
-              window.location.href = route ? route('posts.index') : '/posts';
+            if (typeof window !== 'undefined') {
+              // 前ページで再読み込みさせるフラグを立てる
+              sessionStorage.setItem('tripost_reload_on_back', '1');
+              // 通常の履歴戻る
+              if (window.history.length > 1) {
+                window.history.back();
+              } else {
+                // 履歴が無ければ posts.index に遷移
+                router.get(route('posts.index'));
+              }
             }
           }}
           className='shadow-md inline-flex items-center rounded-xl border border-transparent bg-white px-3 text-[10px] font-semibold uppercase tracking-widest text-gray-800 transition duration-150 ease-in-out hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
