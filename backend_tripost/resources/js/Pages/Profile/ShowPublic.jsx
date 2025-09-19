@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import BottomNav from '@/Components/BottomNav';
 
 export default function Show({ user, countries, posts }) {
@@ -105,6 +105,31 @@ export default function Show({ user, countries, posts }) {
     }
   }, []);
 
+  const handleShareClick = useCallback(() => {
+    const url = window.location.origin + window.location.pathname;
+
+    void (async () => {
+      if (navigator.share) {
+        // Web share API
+        try {
+          await navigator.share({
+            url,
+          });
+        } catch (error) {
+          console.error('共有に失敗しました:', error);
+        }
+      } else {
+        // Web Share APIが使えないブラウザの処理
+        try {
+          await navigator.clipboard.writeText(url);
+          alert('URLをコピーしました');
+        } catch (error) {
+          console.error('URLのコピーに失敗しました:', error);
+        }
+      }
+    })();
+  }, []);
+
   return (
     <div className='flex min-h-screen flex-col items-center bg-white'>
       <Head title='Profile' />
@@ -143,8 +168,13 @@ export default function Show({ user, countries, posts }) {
               </div>
               {/*ユーザー名*/}
               <div className='text-2xl font-bold'>{user.name}</div>
+              {user.follow_you && (
+                <div className='my-0.5 px-1 text-xs bg-gray-100 rounded-md text-center'>
+                  フォローされています
+                </div>
+              )}
             </div>
-            <div className='mt-1'>
+            <div>
               {/*フォロー数、フォロワー数、投稿数*/}
               <span className='text-base font-bold'>
                 {user.posts_count ?? 0}
@@ -206,8 +236,9 @@ export default function Show({ user, countries, posts }) {
           <button
             className='w-2/5 shadow inline-flex items-center justify-center rounded-2xl border border-gray-100 border-transparent bg-white px-2 xs:px-4 py-2 text-xs xs:text-sm font-semibold uppercase tracking-widest text-black transition duration-150 ease-in-out hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
             disabled={false}
+            onClick={handleShareClick}
           >
-            共有
+            アカウントを共有
           </button>
         </div>
       </div>

@@ -152,12 +152,17 @@ class ProfileController extends Controller
         $user->followers_count = $user->followerRelations()->count();
         $user->following_count = $user->followingRelations()->count();
         
-        // 現在のユーザーがこのユーザーをフォローしているかチェック
+        // 表示ユーザーのフォロー状態を判定
         $user->is_followed = false;
+        $user->follow_you = false;
         if (Auth::check()) {
-            $user->is_followed = Follow::where('following', Auth::id())
-                                  ->where('followed', $user->id)
-                                  ->exists();
+            $authId = Auth::id();
+            $user->is_followed = Follow::where('following', $authId)
+                                       ->where('followed', $user->id)
+                                       ->exists();
+            $user->follow_you = Follow::where('following', $user->id)
+                                      ->where('followed', $authId)
+                                      ->exists();
         }
 
         // ユーザーの投稿をページネーションで取得（必要に応じて件数を変更）
@@ -200,6 +205,7 @@ class ProfileController extends Controller
                 'followers_count' => $user->followers_count,
                 'following_count' => $user->following_count,
                 'is_followed' => $user->is_followed,
+                'follow_you' => $user->follow_you,
             ],
             'countries' => Country::all(['id', 'code', 'name', 'image']),
             'posts' => $posts,

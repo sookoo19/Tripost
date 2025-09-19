@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import BottomNav from '@/Components/BottomNav';
 
 export default function Show({ user, countries, posts }) {
@@ -64,6 +64,31 @@ export default function Show({ user, countries, posts }) {
       // Inertia 経由でサーバから再取得
       router.reload();
     }
+  }, []);
+
+  const handleShareClick = useCallback(() => {
+    const url = window.location.origin + window.location.pathname;
+
+    void (async () => {
+      if (navigator.share) {
+        // Web share API
+        try {
+          await navigator.share({
+            url,
+          });
+        } catch (error) {
+          console.error('共有に失敗しました:', error);
+        }
+      } else {
+        // Web Share APIが使えないブラウザの処理
+        try {
+          await navigator.clipboard.writeText(url);
+          alert('URLをコピーしました');
+        } catch (error) {
+          console.error('URLのコピーに失敗しました:', error);
+        }
+      }
+    })();
   }, []);
 
   return (
@@ -195,6 +220,7 @@ export default function Show({ user, countries, posts }) {
         <button
           className=' ml-4 shadow inline-flex items-center rounded-2xl border border-gray-100 border-transparent bg-white px-2 xs:px-4 py-2 text-xs xs:text-sm font-semibold uppercase tracking-widest text-black transition duration-150 ease-in-out hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
           disabled={false}
+          onClick={handleShareClick}
         >
           プロフィールを共有
         </button>
