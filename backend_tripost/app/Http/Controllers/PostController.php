@@ -163,13 +163,27 @@ class PostController extends Controller
 
     public function searchIndex(Request $request)
     {
-        // 基本のクエリ：最新順、ユーザーを事前ロード
-        $query = Post::with('user')->withCount('likes')->latest();
+        // 基本のクエリ：ユーザーを事前ロード
+        $query = Post::with('user')->withCount('likes');
+
+        // ここで全検索条件を確実に取得する（空でも値として保持する）
+        $filters = [
+            'keyword' => $request->input('keyword', ''),
+            'country_id' => $request->input('country_id', ''),
+            'period_from' => $request->input('period_from', ''),
+            'period_to' => $request->input('period_to', ''),
+            'days' => $request->input('days', ''),
+            'style_id' => $request->input('style_id', ''),
+            'purpose_id' => $request->input('purpose_id', ''),
+            'budget_min' => $request->input('budget_min', ''),
+            'budget_max' => $request->input('budget_max', ''),
+            'sort' => $request->input('sort', 'latest'),
+        ];
 
         // 検索パラメータの処理
-        if ($request->filled('keyword')) {
+        if (!empty($filters['keyword'])) {
             // カンマ、読点、空白などで分割できるように正規表現を改善
-            $keywords = preg_split('/[,、]+/u', trim($request->keyword));
+            $keywords = preg_split('/[,、]+/u', trim($filters['keyword']));
             $keywords = array_filter($keywords, fn($v) => $v !== '');
             
             foreach ($keywords as $keyword) {
@@ -181,8 +195,6 @@ class PostController extends Controller
                       ->orWhere('subtitle', 'like', '%' . $keyword . '%')
                       ->orWhere('description', 'like', '%' . $keyword . '%')
                       ->orWhere('region', 'like', '%' . $keyword . '%')
-                      // trip_plan(JSON) の中身を文字列化して部分一致検索
-                      // orWhereJsonContains は JSON の「完全一致」や要素単位の一致を期待する際に使うため、部分一致検索には向きません。
                       ->orWhereRaw("CAST(trip_plan AS CHAR) LIKE ?", ['%' . $keyword . '%'])
                       ->orWhereHas('country', function ($subQ) use ($keyword) {
                           $subQ->where('name', 'like', '%' . $keyword . '%');
@@ -200,43 +212,54 @@ class PostController extends Controller
             }
         }
 
-        if ($request->filled('country_id')) {
-            $query->where('country_id', $request->country_id);
+        if (!empty($filters['country_id'])) {
+            $query->where('country_id', $filters['country_id']);
         }
 
-        if ($request->filled('period_from') && $request->filled('period_to')) {
-            $query->whereBetween('created_at', [$request->period_from . '-01', $request->period_to . '-31']); // 月範囲を日付に変換
-        } elseif ($request->filled('period_from')) {
-            $query->where('created_at', '>=', $request->period_from . '-01');
-        } elseif ($request->filled('period_to')) {
-            $query->where('created_at', '<=', $request->period_to . '-31');
+        if (!empty($filters['period_from']) && !empty($filters['period_to'])) {
+            $query->whereBetween('created_at', [$filters['period_from'] . '-01', $filters['period_to'] . '-31']);
+        } elseif (!empty($filters['period_from'])) {
+            $query->where('created_at', '>=', $filters['period_from'] . '-01');
+        } elseif (!empty($filters['period_to'])) {
+            $query->where('created_at', '<=', $filters['period_to'] . '-31');
         }
 
-        if ($request->filled('days')) {
-            $query->where('days', $request->days);
+        if (!empty($filters['days'])) {
+            $query->where('days', $filters['days']);
         }
 
-        if ($request->filled('style_id')) {
-            $query->where('style_id', $request->style_id);
+        if (!empty($filters['style_id'])) {
+            $query->where('style_id', $filters['style_id']);
         }
 
-        if ($request->filled('purpose_id')) {
-            $query->where('purpose_id', $request->purpose_id);
+        if (!empty($filters['purpose_id'])) {
+            $query->where('purpose_id', $filters['purpose_id']);
         }
 
-        if ($request->filled('budget_min') || $request->filled('budget_max')) {
-            $query->whereHas('budget', function ($q) use ($request) {
-                if ($request->filled('budget_min')) {
-                    $q->where('min', '>=', $request->budget_min);
+        if (!empty($filters['budget_min']) || !empty($filters['budget_max'])) {
+            $query->whereHas('budget', function ($q) use ($filters) {
+                if (!empty($filters['budget_min'])) {
+                    $q->where('min', '>=', $filters['budget_min']);
                 }
-                if ($request->filled('budget_max')) {
-                    $q->where('max', '<=', $request->budget_max);
+                if (!empty($filters['budget_max'])) {
+                    $q->where('max', '<=', $filters['budget_max']);
                 }
             });
         }
 
-        // ページネーション（例：8件／ページ）、throughはページネーションの各アイテムを加工するためのメソッド
-        $posts = $query->paginate(8)->through(function (Post $post) {
+        // 並び替えとページネーション（両方を先に取得）
+        $queryForLatest = (clone $query);
+        $queryForLikes = (clone $query);
+
+        // クエリビルダを実行して結果を取得
+        $postsLatest = $queryForLatest->latest()->paginate(8);
+        $postsLatest->appends($filters); // 重要: クエリパラメータをページネーションリンクに追加
+
+        $postsLikes = $queryForLikes->orderBy('likes_count', 'desc')->orderBy('created_at', 'desc')->paginate(8);
+        $postsLikes->appends($filters); // 重要: クエリパラメータをページネーションリンクに追加
+
+        // データ変換ロジック
+        $postsLatestProcessed = $postsLatest->through(function (Post $post) {
             $user = $post->user;
             return [
                 'id' => $post->id,
@@ -254,28 +277,36 @@ class PostController extends Controller
             ];
         });
 
-        // クエリ（フォーム送信された条件）を filters として渡す、これで検索結果がどの条件で出されたのか表示される
-        $filters = $request->only([
-            'keyword',
-            'country_id',
-            'period_from',
-            'period_to',
-            'days',
-            'style_id',
-            'purpose_id',
-            'budget_min',
-            'budget_max',
-        ]);
+        $postsLikesProcessed = $postsLikes->through(function (Post $post) {
+            $user = $post->user;
+            return [
+                'id' => $post->id,
+                'title' => $post->title,
+                'subtitle' => $post->subtitle,
+                'created_at' => $post->created_at->toDateTimeString(),
+                'user' => [
+                    'id' => $user->id,
+                    'displayid' => $user->displayid,
+                    'profile_image_url' => $user->profile_image ? Storage::url($user->profile_image) : null,
+                ],
+                'photos' => $post->photos ?? [],
+                'photos_urls' => collect($post->photos ?? [])->map(fn($p) => Storage::url($p))->all(),
+                'likes_count' => $post->likes_count,
+            ];
+        });
+
+        // 表示用はリクエストの sort に合わせる
+        $posts = $filters['sort'] === 'likes' ? $postsLikesProcessed : $postsLatestProcessed;
 
         return Inertia::render('Posts/SearchIndex', [
             'posts' => $posts,
-            'filters' => $filters,
-            // 表示のために id -> name 参照テーブルも渡す（軽量化のため必要項目のみ）
+            'posts_latest' => $postsLatestProcessed,
+            'posts_likes' => $postsLikesProcessed,
+            'filters' => $filters, // 確実に全フィルターを渡す
             'countries' => Country::all(['id', 'name']),
             'styles' => Style::all(['id', 'name']),
             'purposes' => Purpose::all(['id', 'name']),
             'budgets' => Budget::all(['id', 'label', 'min', 'max']),
-            
         ]);
     }
 

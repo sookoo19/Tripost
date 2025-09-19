@@ -142,16 +142,6 @@ export default function Show({ post, user }) {
 
   // 写真配列を取得
   const photos = post?.photos || [];
-  const hasPhotos = photos.length > 0;
-
-  // 写真切り替え
-  const nextPhoto = () => {
-    setCurrentPhotoIndex(prev => (prev + 1) % photos.length);
-  };
-
-  const prevPhoto = () => {
-    setCurrentPhotoIndex(prev => (prev - 1 + photos.length) % photos.length);
-  };
 
   // Show側で徒歩ルートを計算し、正確な道路距離を routeInfo にセットする
   useEffect(() => {

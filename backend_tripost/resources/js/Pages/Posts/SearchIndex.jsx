@@ -1,17 +1,51 @@
 import { Head, Link, router } from '@inertiajs/react';
 import BottomNav from '@/Components/BottomNav';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function SearchIndex({
   posts,
+  posts_latest,
+  posts_likes,
   filters,
   countries,
   styles,
   purposes,
-  budgets,
-}) {
+} = {}) {
   // Inertia の paginator に合わせて安全に取得
   const items = posts?.data ?? posts ?? [];
+  const [sort, setSort] = useState(filters.sort || 'latest');
+
+  const handleSortByLikes = () => {
+    setSort('likes');
+
+    // すべての現在のフィルター条件を含めて遷移
+    const currentFilters = { ...filters, sort: 'likes' };
+    router.get(route('posts.searchResult'), currentFilters, {
+      preserveState: true,
+    });
+  };
+
+  const handleSortNewest = () => {
+    setSort('latest');
+
+    // すべての現在のフィルター条件を含めて遷移（sortを明示的に削除）
+    const currentFilters = { ...filters };
+    delete currentFilters.sort;
+
+    router.get(route('posts.searchResult'), currentFilters, {
+      preserveState: true,
+    });
+  };
+
+  const handleSortChange = e => {
+    e.preventDefault();
+    const v = e.target.value;
+    if (v === 'likes') {
+      handleSortByLikes();
+    } else {
+      handleSortNewest();
+    }
+  };
 
   // 日時表示用フォーマット（1日未満→分/時間前、1日以上→日付）
   const formatDate = s => {
@@ -100,7 +134,7 @@ export default function SearchIndex({
         <div className='max-w-xl mx-auto p-4 pb-24'>
           {/* --- 絞り込み条件表示 --- */}
           <div className='max-w-xl mx-auto p-4 w-full'>
-            <div className='text-sm text-gray-600 mb-3'>
+            <div className='text-sm text-gray-600 mb-1'>
               <strong>絞り込み条件：</strong>
               <span className='ml-2'>
                 {filters.country_id
@@ -133,6 +167,18 @@ export default function SearchIndex({
                   : ''}
               </span>
             </div>
+          </div>
+
+          {/* ソート選択 */}
+          <div className='w-full px-2 mb-2 flex'>
+            <select
+              value={sort}
+              onChange={handleSortChange}
+              className='ml-auto px-3 py-1 rounded-full border bg-white text-xs text-gray-900'
+            >
+              <option value='latest'>新着順</option>
+              <option value='likes'>いいね順</option>
+            </select>
           </div>
 
           {items.map(post => (
@@ -200,17 +246,21 @@ export default function SearchIndex({
             </div>
           ))}
 
-          {/* ページネーション */}
-          {posts?.links && (
+          {/* ページネーション: Laravelが生成したリンクをそのまま使用 */}
+          {((sort === 'likes' ? posts_likes : posts_latest) ?? posts)
+            ?.links && (
             <nav className='mt-4 flex justify-center space-x-2 text-sm'>
-              {posts.links.map((ln, i) =>
+              {(
+                (sort === 'likes' ? posts_likes : posts_latest) ?? posts
+              ).links.map((ln, i) =>
                 ln.url ? (
                   <Link
                     key={i}
                     href={ln.url}
                     className={ln.active ? 'font-semibold' : 'text-gray-600'}
+                    preserveScroll={true}
+                    preserveState={true}
                   >
-                    {/* label に HTML が入る場合があるので safe に表示 */}
                     <span dangerouslySetInnerHTML={{ __html: ln.label }} />
                   </Link>
                 ) : (
