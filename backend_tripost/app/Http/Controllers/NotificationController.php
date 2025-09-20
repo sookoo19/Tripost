@@ -18,9 +18,24 @@ class NotificationController extends Controller
         
         // 通知を取得（アクター情報も一緒に）
         $notifications = $user->notifications()
-            ->with('actor')
+            ->with(['actor' => function($query) {
+                $query->select('id', 'name', 'profile_image');
+                // アクセサを追加してもwithには反映されないため、
+                // コレクション取得後に加工する必要があります
+            }])
             ->latest()
             ->paginate(10);
+        
+        // profile_image_urlを各通知のactorに追加
+        $notifications->getCollection()->transform(function ($notification) {
+            if ($notification->actor) {
+                $notification->actor->profile_image_url = 
+                    $notification->actor->profile_image ? 
+                    \Illuminate\Support\Facades\Storage::url($notification->actor->profile_image) : 
+                    null;
+            }
+            return $notification;
+        });
         
         // 表示時に全て既読にする
         $user->notifications()->where('read', false)->update(['read' => true]);

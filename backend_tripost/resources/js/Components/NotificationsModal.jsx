@@ -135,13 +135,6 @@ export default function NotificationsModal({ isOpen, closeModal }) {
                               </Link>
                             )}
 
-                            <div className='flex-1'>
-                              <p className='text-sm'>{notification.message}</p>
-                              <p className='text-xs text-gray-500 mt-1'>
-                                {notification.date}
-                              </p>
-                            </div>
-
                             {notification.type === 'like' &&
                               notification.notifiable_id && (
                                 <Link
@@ -149,10 +142,16 @@ export default function NotificationsModal({ isOpen, closeModal }) {
                                     'posts.show',
                                     notification.notifiable_id
                                   )}
-                                  className='text-blue-500 text-sm hover:underline whitespace-nowrap ml-2'
                                   onClick={closeModal}
                                 >
-                                  投稿を見る
+                                  <div className='flex-1'>
+                                    <p className='text-sm'>
+                                      {notification.message}
+                                    </p>
+                                    <p className='text-xs text-gray-500 mt-1'>
+                                      {notification.date}
+                                    </p>
+                                  </div>
                                 </Link>
                               )}
 
@@ -163,10 +162,16 @@ export default function NotificationsModal({ isOpen, closeModal }) {
                                     'users.profile',
                                     notification.actor.id
                                   )}
-                                  className='text-blue-500 text-sm hover:underline whitespace-nowrap ml-2'
                                   onClick={closeModal}
                                 >
-                                  プロフィール
+                                  <div className='flex-1'>
+                                    <p className='text-sm'>
+                                      {notification.message}
+                                    </p>
+                                    <p className='text-xs text-gray-500 mt-1'>
+                                      {notification.date}
+                                    </p>
+                                  </div>
                                 </Link>
                               )}
                           </div>
@@ -200,21 +205,9 @@ export default function NotificationsModal({ isOpen, closeModal }) {
                   </div>
                 )}
 
-                <div className='mt-6 text-center'>
-                  <Link
-                    href={route('notifications.index')}
-                    className='text-blue-500 hover:underline text-sm'
-                    onClick={closeModal}
-                  >
-                    通知一覧を見る
-                  </Link>
-                </div>
-
                 {/* エラー表示を追加 */}
                 {error && (
-                  <div className='text-red-500 text-center py-4'>
-                    {error}
-                  </div>
+                  <div className='text-red-500 text-center py-4'>{error}</div>
                 )}
               </Dialog.Panel>
             </Transition.Child>
