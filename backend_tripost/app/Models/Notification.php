@@ -58,14 +58,14 @@ class Notification extends Model
 
                 switch ($this->type) {
                     case 'follow':
-                        return "{$actor->name}さんがあなたをフォローしました";
+                        return "{$actor->displayid}があなたをフォローしました";
                     
                     case 'like':
                         $post = $this->post();
-                        if (!$post) return "{$actor->name}さんがあなたの投稿にいいねしました";
+                        if (!$post) return "{$actor->displayid}があなたの投稿にいいねしました";
                         
                         $title = $post->title ?? '投稿';
-                        return "{$actor->name}さんがあなたの投稿「{$title}」にいいねしました";
+                        return "{$actor->displayid}があなたの投稿「{$title}」にいいねしました";
                     
                     default:
                         return '新しい通知があります';

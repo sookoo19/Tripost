@@ -123,6 +123,7 @@ export default function NotificationsModal({ isOpen, closeModal }) {
                                   'users.profile',
                                   notification.actor.id
                                 )}
+                                className='flex-shrink-0' // 追加：画像が縮まないようにする
                               >
                                 <img
                                   src={
@@ -130,7 +131,7 @@ export default function NotificationsModal({ isOpen, closeModal }) {
                                     '/images/default-avatar.png'
                                   }
                                   alt={notification.actor.name}
-                                  className='w-8 h-8 rounded-full mr-3'
+                                  className='w-8 h-8 rounded-full mr-3 mt-1 object-cover' // object-coverを追加
                                 />
                               </Link>
                             )}
@@ -143,8 +144,9 @@ export default function NotificationsModal({ isOpen, closeModal }) {
                                     notification.notifiable_id
                                   )}
                                   onClick={closeModal}
+                                  className='flex-1 min-w-0' // min-w-0を追加してテキストオーバーフローを防ぐ
                                 >
-                                  <div className='flex-1'>
+                                  <div>
                                     <p className='text-sm'>
                                       {notification.message}
                                     </p>
@@ -163,8 +165,9 @@ export default function NotificationsModal({ isOpen, closeModal }) {
                                     notification.actor.id
                                   )}
                                   onClick={closeModal}
+                                  className='flex-1 min-w-0' // min-w-0を追加
                                 >
-                                  <div className='flex-1'>
+                                  <div className='p-1'>
                                     <p className='text-sm'>
                                       {notification.message}
                                     </p>

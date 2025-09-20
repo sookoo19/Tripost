@@ -19,7 +19,7 @@ class NotificationController extends Controller
         // 通知を取得（アクター情報も一緒に）
         $notifications = $user->notifications()
             ->with(['actor' => function($query) {
-                $query->select('id', 'name', 'profile_image');
+                $query->select('id', 'displayid', 'profile_image');
                 // アクセサを追加してもwithには反映されないため、
                 // コレクション取得後に加工する必要があります
             }])
