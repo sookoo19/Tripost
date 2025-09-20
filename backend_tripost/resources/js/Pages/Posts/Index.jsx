@@ -8,9 +8,6 @@ export default function Index({ posts }) {
   const page = usePage();
   const user = page.props?.auth?.user;
   const currentUserId = page.props?.auth?.user?.id;
-
-  const [showingNavigationDropdown, setShowingNavigationDropdown] =
-    useState(false);
   const [notificationModalOpen, setNotificationModalOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(
     user?.unreadNotificationsCount || 0
@@ -103,14 +100,14 @@ export default function Index({ posts }) {
       </div>
 
       {/* 通知アイコンを追加 */}
-      <div className='ml-3 relative'>
+      <div className='relative ml-auto mr-4 mt-2'>
         <button
           onClick={() => setNotificationModalOpen(true)}
           className='flex items-center text-gray-500 hover:text-gray-700 focus:outline-none transition duration-150 ease-in-out'
         >
           <svg
             xmlns='http://www.w3.org/2000/svg'
-            className='h-6 w-6'
+            className='h-8 w-8'
             fill='none'
             viewBox='0 0 24 24'
             stroke='currentColor'
@@ -130,7 +127,7 @@ export default function Index({ posts }) {
         </button>
       </div>
 
-      <div className='w-full overflow-hidden mt-4 bg-white'>
+      <div className='w-full overflow-hidden mt-2 bg-white'>
         <div className='max-w-xl mx-auto p-4 pb-24'>
           {items.map(post => (
             <div

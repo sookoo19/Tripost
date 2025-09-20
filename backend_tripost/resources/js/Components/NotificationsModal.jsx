@@ -42,7 +42,7 @@ export default function NotificationsModal({ isOpen, closeModal }) {
           leaveFrom='opacity-100'
           leaveTo='opacity-0'
         >
-          <div className='fixed inset-0 bg-black bg-opacity-25' />
+          <div className='fixed inset-0 bg-black bg-opacity-10' />
         </Transition.Child>
 
         <div className='fixed inset-0 overflow-y-auto'>
@@ -59,7 +59,7 @@ export default function NotificationsModal({ isOpen, closeModal }) {
               <Dialog.Panel className='w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all'>
                 <Dialog.Title
                   as='h3'
-                  className='text-lg font-medium leading-6 text-gray-900 flex justify-between items-center'
+                  className='text-lg font-bold leading-6 text-gray-900 flex justify-between items-center'
                 >
                   <span>通知</span>
                   <button
@@ -184,26 +184,6 @@ export default function NotificationsModal({ isOpen, closeModal }) {
                     </p>
                   )}
                 </div>
-
-                {notifications.links && notifications.links.length > 3 && (
-                  <div className='mt-4 flex justify-center'>
-                    {notifications.links.map((link, i) => (
-                      <Link
-                        key={i}
-                        href={link.url}
-                        className={`px-3 py-1 mx-1 text-sm rounded ${
-                          link.active
-                            ? 'bg-blue-500 text-white'
-                            : link.url
-                              ? 'bg-white text-blue-500 hover:bg-blue-100 border'
-                              : 'bg-gray-100 text-gray-400'
-                        }`}
-                        preserveScroll
-                        dangerouslySetInnerHTML={{ __html: link.label }}
-                      />
-                    ))}
-                  </div>
-                )}
 
                 {/* エラー表示を追加 */}
                 {error && (
