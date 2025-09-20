@@ -138,4 +138,16 @@ class User extends Authenticatable implements MustVerifyEmailContract
     {
         return $this->likes()->where('post_id', $postId)->exists();
     }
+
+    // 通知関連メソッド
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
+    }
+
+    // 未読通知数を取得
+    public function unreadNotificationsCount()
+    {
+        return $this->notifications()->where('read', false)->count();
+    }
 }

@@ -1,6 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 
-export default function Following({ user, follower_index }) {
+export default function Follower({ user, follower_index }) {
   const page = usePage();
   const currentUserId = page.props?.auth?.user?.id;
   const list = follower_index ?? [];

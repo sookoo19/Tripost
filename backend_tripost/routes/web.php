@@ -6,6 +6,7 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\PlaceController;
 use App\Http\Controllers\PostLikeController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -57,6 +58,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/posts/{post}/like', [PostLikeController::class, 'store'])->name('posts.like');
     Route::delete('/posts/{post}/like', [PostLikeController::class, 'destroy'])->name('posts.unlike');
     Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->name('posts.comments.store');
+});
+
+// 通知関連
+Route::middleware('auth')->group(function () {
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/count', [NotificationController::class, 'getUnreadCount'])->name('notifications.count');
+    Route::patch('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllRead');
 });
 
 // 他ユーザーのプロフィール（最後に配置）

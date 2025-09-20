@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Post;
 use App\Models\Like;
+use App\Models\Notification;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class PostLikeController extends Controller
@@ -11,7 +13,22 @@ class PostLikeController extends Controller
     public function store(Post $post, Request $request)
     {
         $user = $request->user();
-        Like::firstOrCreate(['post_id' => $post->id, 'user_id' => $user->id]);
+        
+        // firstOrCreate を使って重複を防ぐ
+        $created = Like::firstOrCreate(
+            ['post_id' => $post->id, 'user_id' => $user->id]
+        )->wasRecentlyCreated; // 新規作成されたかどうかを取得
+        
+        // 新規いいねの場合のみ通知を作成
+        if ($created && $post->user_id !== $user->id) {
+            Notification::create([
+                'user_id' => $post->user_id, // 投稿者に通知
+                'actor_id' => $user->id,     // いいねしたユーザー
+                'type' => 'like',
+                'notifiable_id' => $post->id,
+                'notifiable_type' => Post::class,
+            ]);
+        }
 
         $post = $post->fresh()->load('user')->loadCount('likes')->load('comments.user');
         

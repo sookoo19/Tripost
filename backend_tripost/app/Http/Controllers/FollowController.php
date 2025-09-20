@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Follow;//Followモデルをインポート
 use Illuminate\Support\Facades\Auth; // Authファサードを読み込む
 use App\Models\User;
+use App\Models\Notification;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
 
@@ -19,10 +20,20 @@ class FollowController extends Controller
 
         //検索結果が0(まだフォローしていない)場合のみフォローする
         if($check->count() == 0):
-            $follow = new Follow;
-            $follow->following = Auth::id();
-            $follow->followed = $request->user_id;
-            $follow->save();
+            // フォロー処理
+            $follow = Follow::create([
+                'following' => Auth::id(),
+                'followed' => $request->user_id
+            ]);
+
+            // 通知を作成（フォローされたユーザーに通知）
+            Notification::create([
+                'user_id' => $request->user_id, // 通知を受け取るユーザー
+                'actor_id' => Auth::id(), // アクションを起こしたユーザー
+                'type' => 'follow',
+                'notifiable_id' => Auth::id(),
+                'notifiable_type' => User::class,
+            ]);
             
             // Inertiaレスポンスに変更
             return redirect()->back()->with('message', 'フォローしました');
@@ -81,7 +92,7 @@ class FollowController extends Controller
                 'id' => $u->id,
                 'name' => $u->name,
                 'displayid' => $u->displayid,
-                'profile_image' => $u->profile_image ? Storage::url($u->profile_image) : null,
+                'profile_image_url' => $u->profile_image ? Storage::url($u->profile_image) : null,
             ];
         });
         
