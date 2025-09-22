@@ -347,4 +347,35 @@ class PostController extends Controller
             'posts' => $posts,
         ]);
     }
+
+    public function unpublic(Request $request)
+    {
+         // 基本のクエリ：最新順、ユーザーを事前ロード
+        $query = Post::with('user')->withCount('likes')->latest();
+        $query->where('share_scope', '非公開')->where('post_status', '旅行済'); 
+
+
+        // ページネーション（例：8件／ページ）
+        $posts = $query->paginate(8)->through(function (Post $post) {
+            $user = $post->user;
+            return [
+                'id' => $post->id,
+                'title' => $post->title,
+                'subtitle' => $post->subtitle,
+                'created_at' => $post->created_at->toDateTimeString(),
+                'user' => [
+                    'id' => $user->id,
+                    'displayid' => $user->displayid,
+                    'profile_image_url' => $user->profile_image ? Storage::url($user->profile_image) : null,
+                ],
+                'photos' => $post->photos ?? [],
+                'photos_urls' => collect($post->photos ?? [])->map(fn($p) => Storage::url($p))->all(),
+                'likes_count' => $post->likes_count,
+            ];
+        });
+
+        return Inertia::render('Posts/Unpublic', [
+            'posts' => $posts,
+        ]);
+    }
 }

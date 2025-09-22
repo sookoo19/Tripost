@@ -143,10 +143,45 @@ export default function Show({ user, countries, posts }) {
               </div>
               {/*モーダル*/}
               {showModal && (
-                <div className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40'>
+                <button
+                  className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-10'
+                  onClick={() => setShowModal(false)}
+                >
                   <div className='bg-white rounded-lg p-6 shadow-lg min-w-[250px]'>
-                    <div className='mb-4 text-lg font-bold'>メニュー</div>
-                    <div className='mb-4 text-lg font-normal'>
+                    <div className='flex flex-row'>
+                      <div className='mb-4 text-lg font-bold'>メニュー</div>
+                      <button
+                        type='button'
+                        className='flex ml-auto rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none'
+                        onClick={() => setShowModal(false)}
+                      >
+                        <span className='sr-only'>閉じる</span>
+                        <svg
+                          className='h-6 w-6'
+                          xmlns='http://www.w3.org/2000/svg'
+                          fill='none'
+                          viewBox='0 0 24 24'
+                          stroke='currentColor'
+                        >
+                          <path
+                            strokeLinecap='round'
+                            strokeLinejoin='round'
+                            strokeWidth={2}
+                            d='M6 18L18 6M6 6l12 12'
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                    <button
+                      type='button'
+                      className='mb-4 text-lg text-gray-700 font-semibold w-full text-left'
+                      onClick={() => {
+                        router.get('/posts/unpublic');
+                      }}
+                    >
+                      非公開投稿一覧
+                    </button>
+                    <div className='text-left mb-4 text-lg text-gray-700 font-semibold'>
                       このアプリについて
                     </div>
                     <button
@@ -160,14 +195,8 @@ export default function Show({ user, countries, posts }) {
                     >
                       ログアウト
                     </button>
-                    <button
-                      className='mt-2 px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600'
-                      onClick={() => setShowModal(false)}
-                    >
-                      閉じる
-                    </button>
                   </div>
-                </div>
+                </button>
               )}
               {/*ユーザー名*/}
               <div className='text-2xl font-bold'>{user.name}</div>
@@ -318,34 +347,6 @@ export default function Show({ user, countries, posts }) {
           )}
         </div>
       </div>
-      {/* 右下の浮遊プラスボタン（新規投稿） */}
-      <Link
-        href={route('posts.create')}
-        aria-label='新規投稿'
-        className='fixed right-5 bottom-20 z-10'
-      >
-        <button
-          type='button'
-          className='w-14 h-14 md:w-16 md:h-16 rounded-full bg-yellow-300 hover:bg-yellow-400 text-white flex items-center justify-center shadow-lg border-2 border-white focus:outline-none'
-        >
-          <svg
-            className='w-7 h-7'
-            viewBox='0 0 24 24'
-            fill='none'
-            xmlns='http://www.w3.org/2000/svg'
-            aria-hidden
-          >
-            <rect width='24' height='24' rx='12' fill='transparent' />
-            <path
-              d='M12 7v10M7 12h10'
-              stroke='currentColor'
-              strokeWidth='4'
-              strokeLinecap='round'
-              strokeLinejoin='round'
-            />
-          </svg>
-        </button>
-      </Link>
       <BottomNav />
     </div>
   );

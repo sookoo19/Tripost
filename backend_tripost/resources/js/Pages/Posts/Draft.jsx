@@ -68,7 +68,7 @@ export default function Draft({ posts }) {
           />
         </Link>
       </div>
-      <h2 className='mt-4 text-xl font-semibold leading-tight text-gray-800 text-center'>
+      <h2 className='mt-5 text-xl font-semibold leading-tight text-gray-800 text-center'>
         下書き一覧
       </h2>
       <div className='w-full overflow-hidden bg-white'>

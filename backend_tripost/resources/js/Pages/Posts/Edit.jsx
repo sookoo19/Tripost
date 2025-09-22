@@ -265,10 +265,10 @@ export default function Edit({
 
   // ファイルプレビュー URL を管理（initialPhotoUrlsを削除）
   useEffect(() => {
-    const urls = (data.photos || []).map(f =>
-      f instanceof File ? URL.createObjectURL(f) : null
-    ).filter(Boolean); // nullを除外
-    
+    const urls = (data.photos || [])
+      .map(f => (f instanceof File ? URL.createObjectURL(f) : null))
+      .filter(Boolean); // nullを除外
+
     setPreviewUrls(urls);
 
     return () => urls.forEach(u => URL.revokeObjectURL(u));
@@ -307,38 +307,38 @@ export default function Edit({
 
   const handleSubmit = e => {
     e.preventDefault();
-    
+
     // trip_plan をクリーンにする
     const cleanedTripPlan = cleanTripPlan(data.trip_plan);
-    
+
     // FormDataを作成（既存画像は削除、新しい画像のみ送信）
     const formData = new FormData();
-    
+
     // 通常のフィールドを追加
     Object.keys(data).forEach(key => {
       if (key !== 'photos' && key !== 'trip_plan') {
         formData.append(key, data[key] || '');
       }
     });
-    
+
     // trip_planを追加
     formData.append('trip_plan', JSON.stringify(cleanedTripPlan));
-    
+
     // 新しい写真のみを追加
     (data.photos || []).forEach((file, index) => {
       if (file instanceof File) {
         formData.append(`photos[${index}]`, file);
       }
     });
-    
+
     // _methodフィールドを追加（LaravelのPUTリクエストのため）
     formData.append('_method', 'PUT');
-    
+
     console.log('FormData contents:');
-    for (let [key, value] of formData.entries()) {
+    for (const [key, value] of formData.entries()) {
       console.log(key, value);
     }
-    
+
     // Inertiaのpostメソッドを使用してFormDataを送信
     post(route('posts.update', { post: initialPost.id }), {
       data: formData,
