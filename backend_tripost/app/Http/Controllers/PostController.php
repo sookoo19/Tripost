@@ -128,6 +128,10 @@ class PostController extends Controller
     public function edit(Post $post): Response
     {
         return Inertia::render('Posts/Edit', [
+            'countries' => Country::all(['id', 'code', 'name']),
+            'styles' => Style::all(['id', 'name']),
+            'purposes' => Purpose::all(['id', 'name']),
+            'budgets' => Budget::all(['id', 'min','max','label']),
             'post' => $post->load(['user', 'country', 'style', 'purpose', 'budget']),
         ]);
     }
@@ -137,17 +141,21 @@ class PostController extends Controller
         $validated = $request->validated();
         $post->update($validated);
 
-        $existing = is_array($post->photos) ? $post->photos : [];
-
+        // 写真は既存を削除して新しい写真のみを保存
+        $newPhotoPaths = [];
         if ($request->hasFile('photos')) {
             foreach ($request->file('photos') as $file) {
-                if (!$file) continue;
-                $existing[] = $file->store('posts_photos', 'public');
-                if (count($existing) >= 8) break;
+                if (!$file || !$file->isValid()) continue;
+                $newPhotoPaths[] = $file->store('posts_photos', 'public');
+                // 最大8枚まで
+                if (count($newPhotoPaths) >= 8) break;
             }
-            $post->photos = array_slice($existing, 0, 8);
-            $post->save();
         }
+
+        // 新しい写真のみを保存（既存写真は削除）
+        $post->photos = $newPhotoPaths;
+        $post->save();
+
         return redirect()->route('posts.show', $post)->with('success', '投稿を更新しました');
     }
 
@@ -331,8 +339,6 @@ class PostController extends Controller
                     'displayid' => $user->displayid,
                     'profile_image_url' => $user->profile_image ? Storage::url($user->profile_image) : null,
                 ],
-                'photos' => $post->photos ?? [],
-                'photos_urls' => collect($post->photos ?? [])->map(fn($p) => Storage::url($p))->all(),
                 'post_status' => $post->post_status,
             ];
         });

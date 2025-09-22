@@ -166,10 +166,31 @@ export default function GoogleMapComponent({
     );
   }
 
-  const mapCenter =
-    center ||
-    initialCenter ||
-    (markerPositions.length > 0 ? markerPositions[0] : defaultCenter);
+  // mapCenterの計算部分を修正
+  const mapCenter = (() => {
+    // 各候補をチェックして有効な座標のみを返す
+    const candidates = [
+      center,
+      initialCenter,
+      markerPositions.length > 0 ? markerPositions[0] : null,
+      defaultCenter,
+    ];
+
+    for (const candidate of candidates) {
+      if (
+        candidate &&
+        typeof candidate.lat === 'number' &&
+        typeof candidate.lng === 'number' &&
+        isFinite(candidate.lat) &&
+        isFinite(candidate.lng)
+      ) {
+        return candidate;
+      }
+    }
+
+    // フォールバック
+    return defaultCenter;
+  })();
 
   return (
     <>

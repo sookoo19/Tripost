@@ -2,7 +2,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import BottomNav from '@/Components/BottomNav';
 import { useEffect } from 'react';
 
-export default function SearchIndex({ posts }) {
+export default function Draft({ posts }) {
   // Inertia の paginator に合わせて安全に取得
   const items = posts?.data ?? posts ?? [];
 
@@ -75,22 +75,24 @@ export default function SearchIndex({ posts }) {
         <div className='max-w-xl mx-auto p-4 pb-24'>
           {items.map(post => (
             <div key={post.id} className='bg-white overflow-hidden border mb-2'>
-              <div
-                className={`inline-block ml-1 mt-1 px-3 py-1 text-xs rounded-2xl border ${statusClass(post.post_status)}`}
-              >
-                {post.post_status}
-              </div>
-              <div className='px-4 py-2'>
-                <h2 className='text-xl font-bold text-gray-700'>
-                  {post.title}
-                </h2>
-                <p className='text-sm text-gray-700 line-clamp-2'>
-                  {post.subtitle || ''}
-                </p>
-                <div className='text-xs text-gray-500'>
-                  {formatDate(post.created_at)}
+              <Link href={route('posts.edit', post)}>
+                <div
+                  className={`inline-block ml-1 mt-1 px-3 py-1 text-xs rounded-2xl border ${statusClass(post.post_status)}`}
+                >
+                  {post.post_status}
                 </div>
-              </div>
+                <div className='px-4 py-2'>
+                  <h2 className='text-xl font-bold text-gray-700'>
+                    {post.title}
+                  </h2>
+                  <p className='text-sm text-gray-700 line-clamp-2'>
+                    {post.subtitle || ''}
+                  </p>
+                  <div className='text-xs text-gray-500'>
+                    {formatDate(post.created_at)}
+                  </div>
+                </div>
+              </Link>
             </div>
           ))}
 

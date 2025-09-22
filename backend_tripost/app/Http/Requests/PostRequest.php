@@ -47,5 +47,6 @@ class PostRequest extends FormRequest
             'photos' => 'nullable|array|max:8',
             'photos.*' => 'file|image|max:2048', // 2MB 上限に例
         ];
+        
     }
 }
