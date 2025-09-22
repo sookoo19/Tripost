@@ -31,6 +31,7 @@ class ProfileController extends Controller
         
         // ユーザーの投稿をページネーションで取得（必要に応じて件数を変更）
         $posts = Post::where('user_id', $user->id)
+            ->where('share_scope', '公開')
             ->with('user')
             ->withCount('likes')
             ->latest()
@@ -167,6 +168,7 @@ class ProfileController extends Controller
 
         // ユーザーの投稿をページネーションで取得（必要に応じて件数を変更）
         $posts = Post::where('user_id', $user->id)
+            ->where('share_scope', '公開')
             ->with('user')
             ->withCount('likes')
             ->latest()
@@ -210,11 +212,5 @@ class ProfileController extends Controller
             'countries' => Country::all(['id', 'code', 'name', 'image']),
             'posts' => $posts,
         ]);
-    }
-
-    public function get_user($user_id){
-
-        $user = User::with('following')->with('followed')->findOrFail($user_id);
-        return response()->json($user);
     }
 }

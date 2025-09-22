@@ -25,6 +25,7 @@ class PostController extends Controller
     {
         // 基本のクエリ：最新順、ユーザーを事前ロード
         $query = Post::with('user')->withCount('likes')->latest();
+        $query->where('share_scope', '公開');
 
 
         // ページネーション（例：8件／ページ）
@@ -165,6 +166,7 @@ class PostController extends Controller
     {
         // 基本のクエリ：ユーザーを事前ロード
         $query = Post::with('user')->withCount('likes');
+        $query->where('share_scope', '公開');
 
         // ここで全検索条件を確実に取得する（空でも値として保持する）
         $filters = [
@@ -310,4 +312,33 @@ class PostController extends Controller
         ]);
     }
 
+    public function draft(Request $request)
+    {
+        $query = Post::with('user')->latest();
+        $query->where('share_scope', '非公開')->whereIn('post_status', ['準備中', '旅行中']); 
+
+
+        // ページネーション（例：8件／ページ）
+        $posts = $query->paginate(8)->through(function (Post $post) {
+            $user = $post->user;
+            return [
+                'id' => $post->id,
+                'title' => $post->title,
+                'subtitle' => $post->subtitle,
+                'created_at' => $post->created_at->toDateTimeString(),
+                'user' => [
+                    'id' => $user->id,
+                    'displayid' => $user->displayid,
+                    'profile_image_url' => $user->profile_image ? Storage::url($user->profile_image) : null,
+                ],
+                'photos' => $post->photos ?? [],
+                'photos_urls' => collect($post->photos ?? [])->map(fn($p) => Storage::url($p))->all(),
+                'post_status' => $post->post_status,
+            ];
+        });
+
+        return Inertia::render('Posts/Draft', [
+            'posts' => $posts,
+        ]);
+    }
 }

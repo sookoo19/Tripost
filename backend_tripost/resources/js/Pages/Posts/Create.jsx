@@ -60,6 +60,15 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
     }));
   }, [budgets]);
 
+  // share_scope の選択肢（表示はするが、post_status が '旅行済' のときのみ公開を有効化）
+  const shareScopeOptions = useMemo(() => {
+    const canPublic = data.post_status === '旅行済';
+    return [
+      { value: '非公開', label: '非公開', isDisabled: false },
+      { value: '公開', label: '公開', isDisabled: !canPublic },
+    ];
+  }, [data.post_status]);
+
   // 日数選択用 options (react-select)
   const daysOptions = useMemo(
     () =>
@@ -657,9 +666,14 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
                   { value: '旅行済', label: '旅行済' },
                 ].find(opt => opt.value === data.post_status) || null
               }
-              onChange={option =>
-                setData('post_status', option ? option.value : '準備中')
-              }
+              onChange={option => {
+                const newStatus = option ? option.value : '準備中';
+                setData('post_status', newStatus);
+                // 旅行済以外になったら公開が選ばれていれば非公開に戻す
+                if (newStatus !== '旅行済' && data.share_scope === '公開') {
+                  setData('share_scope', '非公開');
+                }
+              }}
               placeholder='準備中'
               isClearable={false}
               isSearchable={false}
@@ -679,19 +693,17 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
               name='share_scope'
               className='ml-auto w-3/5 h-auto text-sm'
               classNamePrefix='react-select'
-              options={[
-                { value: '非公開', label: '非公開' },
-                { value: '公開', label: '公開' },
-              ]}
+              options={shareScopeOptions}
+              // disabled オプションを含めた options 配列から value を解決
               value={
-                [
-                  { value: '非公開', label: '非公開' },
-                  { value: '公開', label: '公開' },
-                ].find(opt => opt.value === data.share_scope) || null
+                shareScopeOptions.find(opt => opt.value === data.share_scope) ||
+                shareScopeOptions[0]
               }
-              onChange={option =>
-                setData('share_scope', option ? option.value : '非公開')
-              }
+              onChange={option => {
+                // isDisabled が true の option は react-select 側で選択不可なので追加チェックは冗長だが安全策として
+                if (option && option.isDisabled) return;
+                setData('share_scope', option ? option.value : '非公開');
+              }}
               placeholder='非公開'
               isClearable={false}
               isSearchable={false}

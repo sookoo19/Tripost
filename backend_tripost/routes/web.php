@@ -49,11 +49,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // 投稿詳細・作成・編集・削除
     Route::get('/posts/create', [PostController::class, 'create'])->name('posts.create');
+    Route::get('/posts/draft', [PostController::class, 'draft'])->name('posts.draft');
     Route::get('/posts/{post}', [PostController::class, 'show'])->name('posts.show'); 
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
     Route::get('/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit');
     Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update');
     Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
+
 
     Route::post('/posts/{post}/like', [PostLikeController::class, 'store'])->name('posts.like');
     Route::delete('/posts/{post}/like', [PostLikeController::class, 'destroy'])->name('posts.unlike');
