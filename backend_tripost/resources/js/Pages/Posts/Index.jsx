@@ -188,19 +188,19 @@ export default function Index({ posts }) {
                     loading='lazy'
                   />
                 </div>
-              </Link>
 
-              <div className='px-4 py-3'>
-                <h2 className='text-xl font-bold text-gray-700'>
-                  {post.title}
-                </h2>
-                <p className='text-sm text-gray-700 line-clamp-2'>
-                  {post.subtitle || post.excerpt || ''}
-                </p>
-                <div className='text-xs text-gray-500'>
-                  {formatDate(post.created_at)}
+                <div className='px-4 py-3'>
+                  <h2 className='text-xl font-bold text-gray-700'>
+                    {post.title}
+                  </h2>
+                  <p className='text-sm text-gray-700 line-clamp-2'>
+                    {post.subtitle || post.excerpt || ''}
+                  </p>
+                  <div className='text-xs text-gray-500'>
+                    {formatDate(post.created_at)}
+                  </div>
                 </div>
-              </div>
+              </Link>
             </div>
           ))}
 

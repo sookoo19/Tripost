@@ -156,7 +156,7 @@ class PostController extends Controller
         $post->photos = $newPhotoPaths;
         $post->save();
 
-        return redirect()->route('posts.show', $post)->with('success', '投稿を更新しました');
+        return redirect()->route('posts.draft', $post)->with('success', '投稿を更新しました');
     }
 
     public function searchPosts(): Response
@@ -322,7 +322,8 @@ class PostController extends Controller
 
     public function draft(Request $request)
     {
-        $query = Post::with('user')->latest();
+        $user = auth()->user()->loadCount('posts');
+        $query = Post::where('user_id', $user->id)->with('user')->latest();
         $query->where('share_scope', '非公開')->whereIn('post_status', ['準備中', '旅行中']); 
 
 
@@ -351,7 +352,8 @@ class PostController extends Controller
     public function unpublic(Request $request)
     {
          // 基本のクエリ：最新順、ユーザーを事前ロード
-        $query = Post::with('user')->withCount('likes')->latest();
+        $user = auth()->user()->loadCount('posts');
+        $query = Post::where('user_id', $user->id)->with('user')->latest();
         $query->where('share_scope', '非公開')->where('post_status', '旅行済'); 
 
 
@@ -377,5 +379,16 @@ class PostController extends Controller
         return Inertia::render('Posts/Unpublic', [
             'posts' => $posts,
         ]);
+    }
+
+
+    public function update_share_scope(Request $request, Post $post)
+    {
+        $request->validate(['share_scope' => 'required|string']);
+
+        $post->update($request->only('share_scope'));
+
+        // Inertia/AJAX で扱いやすい JSON を返す
+        return response()->json(['ok' => true, 'share_scope' => $post->share_scope]);
     }
 }

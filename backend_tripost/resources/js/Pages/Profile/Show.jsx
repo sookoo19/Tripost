@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState, useEffect, useCallback } from 'react';
 import BottomNav from '@/Components/BottomNav';
+import axios from 'axios';
 
 export default function Show({ user, countries, posts }) {
   const [showModal, setShowModal] = useState(false);
@@ -282,6 +283,39 @@ export default function Show({ user, countries, posts }) {
                   </Link>
                 </div>
                 <div className='text-sm font-bold ml-auto flex flex-row items-center'>
+                  <button
+                    type='button'
+                    onClick={() => {
+                      // 公開確認ダイアログ
+                      if (!window.confirm('この投稿を非公開にしますか？')) {
+                        return;
+                      }
+                      // post を直接変更せず、サーバへ PATCH を送る
+                      axios
+                        .patch(route('posts.share_scope', post.id), {
+                          share_scope: '非公開',
+                        })
+                        .then(() => {
+                          // 必要なら Inertia で再取得
+                          router.reload();
+                        })
+                        .catch(err => {
+                          console.error(err);
+                        });
+                    }}
+                  >
+                    <svg
+                      xmlns='http://www.w3.org/2000/svg'
+                      width={26}
+                      height={26}
+                      viewBox='0 0 24 24'
+                    >
+                      <path
+                        fill='#4c5a70ff'
+                        d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m-1 17.93c-3.95-.49-7-3.85-7-7.93c0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41c0 2.08-.8 3.97-2.1 5.39'
+                      ></path>
+                    </svg>
+                  </button>
                   <svg
                     xmlns='http://www.w3.org/2000/svg'
                     width={28}

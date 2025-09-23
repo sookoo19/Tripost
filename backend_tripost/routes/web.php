@@ -55,6 +55,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
     Route::get('/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit');
     Route::post('/posts/{post}', [PostController::class, 'update'])->name('posts.update');
+    Route::patch('/posts/{post}/sharescope', [PostController::class, 'update_share_scope'])->name('posts.share_scope');
     Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
 
 

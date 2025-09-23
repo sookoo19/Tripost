@@ -1,12 +1,10 @@
 import { Head, Link, usePage, router } from '@inertiajs/react';
 import BottomNav from '@/Components/BottomNav';
-import { useState, useEffect } from 'react';
-import NotificationsModal from '@/Components/NotificationsModal';
+import { useEffect } from 'react';
 import axios from 'axios';
 
 export default function Unpublic({ posts }) {
   const page = usePage();
-  const user = page.props?.auth?.user;
   const currentUserId = page.props?.auth?.user?.id;
 
   // Inertia の paginator に合わせて安全に取得
@@ -58,6 +56,7 @@ export default function Unpublic({ posts }) {
       router.reload();
     }
   }, []);
+
   return (
     <div className='flex min-h-screen flex-col items-center bg-white'>
       <Head title='投稿一覧' />
@@ -111,18 +110,40 @@ export default function Unpublic({ posts }) {
                   </Link>
                 </div>
                 <div className='text-sm font-bold ml-auto flex flex-row items-center'>
-                  <svg
-                    xmlns='http://www.w3.org/2000/svg'
-                    width={24}
-                    height={24}
-                    viewBox='0 0 24 24'
-                    className='ml-auto mr-1'
+                  <button
+                    type='button'
+                    onClick={() => {
+                      // 公開確認ダイアログ
+                      if (!window.confirm('この投稿を公開しますか？')) {
+                        return;
+                      }
+                      // post を直接変更せず、サーバへ PATCH を送る
+                      axios
+                        .patch(route('posts.share_scope', post.id), {
+                          share_scope: '公開',
+                        })
+                        .then(() => {
+                          // 必要なら Inertia で再取得
+                          router.reload();
+                        })
+                        .catch(err => {
+                          console.error(err);
+                        });
+                    }}
                   >
-                    <path
-                      fill='#4c5a70ff'
-                      d='m20.475 23.3l-2.95-2.95q-1.2.8-2.587 1.225T12 22q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12q0-1.55.425-2.937T3.65 6.475L.675 3.5L2.1 2.075l19.8 19.8zM11 19.95V18q-.825 0-1.412-.587T9 16v-1l-4.8-4.8q-.075.45-.137.9T4 12q0 3.025 1.988 5.3T11 19.95m9.35-2.475l-1.45-1.45q.525-.925.813-1.937T20 12q0-2.45-1.362-4.475T15 4.6V5q0 .825-.587 1.413T13 7h-2v1.125L6.525 3.65q1.2-.775 2.575-1.212T12 2q2.075 0 3.9.788t3.175 2.137T21.213 8.1T22 12q0 1.525-.437 2.9t-1.213 2.575'
-                    ></path>
-                  </svg>
+                    <svg
+                      xmlns='http://www.w3.org/2000/svg'
+                      width={24}
+                      height={24}
+                      viewBox='0 0 24 24'
+                      className='ml-auto mr-1'
+                    >
+                      <path
+                        fill='#4c5a70ff'
+                        d='m20.475 23.3l-2.95-2.95q-1.2.8-2.587 1.225T12 22q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12q0-1.55.425-2.937T3.65 6.475L.675 3.5L2.1 2.075l19.8 19.8zM11 19.95V18q-.825 0-1.412-.587T9 16v-1l-4.8-4.8q-.075.45-.137.9T4 12q0 3.025 1.988 5.3T11 19.95m9.35-2.475l-1.45-1.45q.525-.925.813-1.937T20 12q0-2.45-1.362-4.475T15 4.6V5q0 .825-.587 1.413T13 7h-2v1.125L6.525 3.65q1.2-.775 2.575-1.212T12 2q2.075 0 3.9.788t3.175 2.137T21.213 8.1T22 12q0 1.525-.437 2.9t-1.213 2.575'
+                      ></path>
+                    </svg>
+                  </button>
                   <svg
                     xmlns='http://www.w3.org/2000/svg'
                     width={28}
