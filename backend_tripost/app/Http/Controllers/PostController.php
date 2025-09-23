@@ -391,4 +391,22 @@ class PostController extends Controller
         // Inertia/AJAX で扱いやすい JSON を返す
         return response()->json(['ok' => true, 'share_scope' => $post->share_scope]);
     }
+
+    public function destroy(Request $request, Post $post)
+    {
+        // 画像ファイルがあれば削除
+        if (!empty($post->photos) && is_array($post->photos)) {
+            foreach ($post->photos as $path) {
+                // public ディスクに保存している前提
+                if (Storage::disk('public')->exists($path)) {
+                    Storage::disk('public')->delete($path);
+                }
+            }
+        }
+
+        $post->delete();
+
+        // axios などの AJAX で呼ばれる想定 => JSON を返す
+        return response()->json(['ok' => true]);
+    }
 }

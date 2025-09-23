@@ -285,7 +285,7 @@ export default function Show({ user, countries, posts }) {
                 <div className='text-sm font-bold ml-auto flex flex-row items-center'>
                   <button
                     type='button'
-                    className='text-gray-600 hover:text-black transition-colors duration-150'
+                    className='text-gray-600 hover:text-blue-500 transition-colors duration-150'
                     onClick={() => {
                       // 公開確認ダイアログ
                       if (!window.confirm('この投稿を非公開にしますか？')) {
@@ -310,6 +310,7 @@ export default function Show({ user, countries, posts }) {
                       width={26}
                       height={26}
                       viewBox='0 0 24 24'
+                      className='mr-1'
                     >
                       <path
                         fill='currentColor'
@@ -350,8 +351,41 @@ export default function Show({ user, countries, posts }) {
                 <p className='text-sm text-gray-700 line-clamp-2'>
                   {post.subtitle || post.excerpt || ''}
                 </p>
-                <div className='text-xs text-gray-500'>
-                  {formatDate(post.created_at)}
+                <div className='flex flex-row'>
+                  <div className='text-xs text-gray-500 mt-1.5'>
+                    {formatDate(post.created_at)}
+                  </div>
+                  <button
+                    type='button'
+                    onClick={() => {
+                      // 公開確認ダイアログ
+                      if (!window.confirm('この投稿を本当に消去しますか？')) {
+                        return;
+                      }
+                      // post を直接変更せず、サーバへ PATCH を送る
+                      axios
+                        .delete(route('posts.destroy', post.id))
+                        .then(() => {
+                          // 必要なら Inertia で再取得
+                          router.reload();
+                        })
+                        .catch(err => {
+                          console.error(err);
+                        });
+                    }}
+                    className='ml-auto text-gray-500 text-sm hover:text-red-500 transition-colors duration-150 self-end'
+                  >
+                    <svg
+                      xmlns='http://www.w3.org/2000/svg'
+                      className='w-6 h-6'
+                      viewBox='0 0 24 24'
+                    >
+                      <path
+                        fill='currentColor'
+                        d='M7 21q-.825 0-1.412-.587T5 19V6q-.425 0-.712-.288T4 5t.288-.712T5 4h4q0-.425.288-.712T10 3h4q.425 0 .713.288T15 4h4q.425 0 .713.288T20 5t-.288.713T19 6v13q0 .825-.587 1.413T17 21zM17 6H7v13h10zm-7 11q.425 0 .713-.288T11 16V9q0-.425-.288-.712T10 8t-.712.288T9 9v7q0 .425.288.713T10 17m4 0q.425 0 .713-.288T15 16V9q0-.425-.288-.712T14 8t-.712.288T13 9v7q0 .425.288.713T14 17M7 6v13z'
+                      ></path>
+                    </svg>
+                  </button>
                 </div>
               </div>
             </div>

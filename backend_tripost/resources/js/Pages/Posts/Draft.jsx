@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import BottomNav from '@/Components/BottomNav';
 import { useEffect } from 'react';
+import axios from 'axios';
 
 export default function Draft({ posts }) {
   // Inertia の paginator に合わせて安全に取得
@@ -75,12 +76,45 @@ export default function Draft({ posts }) {
         <div className='max-w-xl mx-auto p-4 pb-24'>
           {items.map(post => (
             <div key={post.id} className='bg-white overflow-hidden border mb-2'>
-              <Link href={route('posts.edit', post)}>
+              <div className='flex flex-row'>
                 <div
                   className={`inline-block ml-1 mt-1 px-3 py-1 text-xs rounded-2xl border ${statusClass(post.post_status)}`}
                 >
                   {post.post_status}
                 </div>
+                <button
+                  type='button'
+                  onClick={() => {
+                    // 公開確認ダイアログ
+                    if (!window.confirm('この下書きを本当に消去しますか？')) {
+                      return;
+                    }
+                    // post を直接変更せず、サーバへ PATCH を送る
+                    axios
+                      .delete(route('posts.destroy', post.id))
+                      .then(() => {
+                        // 必要なら Inertia で再取得
+                        router.reload();
+                      })
+                      .catch(err => {
+                        console.error(err);
+                      });
+                  }}
+                  className='ml-auto mr-2 text-gray-500 text-sm hover:text-red-500 transition-colors duration-150 self-end'
+                >
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    className='w-6 h-6'
+                    viewBox='0 0 24 24'
+                  >
+                    <path
+                      fill='currentColor'
+                      d='M7 21q-.825 0-1.412-.587T5 19V6q-.425 0-.712-.288T4 5t.288-.712T5 4h4q0-.425.288-.712T10 3h4q.425 0 .713.288T15 4h4q.425 0 .713.288T20 5t-.288.713T19 6v13q0 .825-.587 1.413T17 21zM17 6H7v13h10zm-7 11q.425 0 .713-.288T11 16V9q0-.425-.288-.712T10 8t-.712.288T9 9v7q0 .425.288.713T10 17m4 0q.425 0 .713-.288T15 16V9q0-.425-.288-.712T14 8t-.712.288T13 9v7q0 .425.288.713T14 17M7 6v13z'
+                    ></path>
+                  </svg>
+                </button>
+              </div>
+              <Link href={route('posts.edit', post)}>
                 <div className='px-4 py-2'>
                   <h2 className='text-xl font-bold text-gray-700'>
                     {post.title}
