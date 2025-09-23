@@ -353,7 +353,7 @@ class PostController extends Controller
     {
          // 基本のクエリ：最新順、ユーザーを事前ロード
         $user = auth()->user()->loadCount('posts');
-        $query = Post::where('user_id', $user->id)->with('user')->latest();
+        $query = Post::where('user_id', $user->id)->with('user')->withCount('likes')->latest();
         $query->where('share_scope', '非公開')->where('post_status', '旅行済'); 
 
 
