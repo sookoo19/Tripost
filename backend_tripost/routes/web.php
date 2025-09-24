@@ -52,6 +52,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/posts/create', [PostController::class, 'create'])->name('posts.create');
     Route::get('/posts/draft', [PostController::class, 'draft'])->name('posts.draft');
     Route::get('/posts/unpublic', [PostController::class, 'unpublic'])->name('posts.unpublic');
+    Route::get('/posts/mylikes', [PostController::class, 'mylikes'])->name('posts.mylikes');
     Route::get('/posts/{post}', [PostController::class, 'show'])->name('posts.show'); 
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
     Route::get('/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit');

@@ -1,9 +1,11 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, usePage, router } from '@inertiajs/react';
 import BottomNav from '@/Components/BottomNav';
 import { useEffect } from 'react';
-import axios from 'axios';
 
-export default function Draft({ posts }) {
+export default function Unpublic({ posts }) {
+  const page = usePage();
+  const currentUserId = page.props?.auth?.user?.id;
+
   // Inertia の paginator に合わせて安全に取得
   const items = posts?.data ?? posts ?? [];
 
@@ -39,6 +41,12 @@ export default function Draft({ posts }) {
     }
   };
 
+  const firstPhotoUrl = post => {
+    if (post.photos_urls && post.photos_urls[0]) return post.photos_urls[0];
+    if (post.photos && post.photos[0]) return `/storage/${post.photos[0]}`;
+    return;
+  };
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (sessionStorage.getItem('tripost_reload_on_back') === '1') {
@@ -48,17 +56,9 @@ export default function Draft({ posts }) {
     }
   }, []);
 
-  const statusClass = st => {
-    const s = String(st ?? '').trim();
-    // デバッグ用ログ（開発時のみ）
-
-    if (s === '準備中') return 'bg-gray-100 text-gray-700';
-    return 'bg-white text-gray-700 font-bold';
-  };
-
   return (
     <div className='flex min-h-screen flex-col items-center bg-white'>
-      <Head title='下書き一覧' />
+      <Head title='投稿一覧' />
       <div className='w-full'>
         {/*ヘッダー*/}
         <Link href={route('posts.index')}>
@@ -70,71 +70,89 @@ export default function Draft({ posts }) {
         </Link>
       </div>
       <h2 className='mt-5 text-xl font-semibold leading-tight text-gray-800 text-center'>
-        下書き一覧
+        いいねしたタビ
       </h2>
-      <div className='w-full overflow-hidden bg-white'>
+      <div className='w-full overflow-hidden mt-2 bg-white'>
         <div className='max-w-xl mx-auto p-4 pb-24'>
           {items.length === 0 ? (
             <div className='text-center text-gray-500 py-12'>
-              下書きはまだありません。新しい投稿を作成してみましょう。
+              いいねした投稿はまだありません。
             </div>
           ) : (
             items.map(post => (
               <div
                 key={post.id}
-                className='bg-white overflow-hidden border mb-2'
+                className='bg-white rounded-xl shadow-md mb-8 overflow-hidden border'
               >
-                <div className='flex flex-row'>
-                  <div
-                    className={`inline-block ml-1 mt-1 px-3 py-1 text-xs rounded-2xl border ${statusClass(post.post_status)}`}
+                <div className='flex items-center px-4 py-3'>
+                  <Link
+                    href={
+                      currentUserId === post.user.id
+                        ? route('profile.show')
+                        : route('users.profile', post.user.id)
+                    }
                   >
-                    {post.post_status}
-                  </div>
-                  <button
-                    type='button'
-                    onClick={() => {
-                      // 公開確認ダイアログ
-                      if (!window.confirm('この下書きを本当に消去しますか？')) {
-                        return;
+                    <img
+                      src={
+                        post.user.profile_image_url ||
+                        '/images/default-avatar.png'
                       }
-                      // post を直接変更せず、サーバへ PATCH を送る
-                      axios
-                        .delete(route('posts.destroy', post.id))
-                        .then(() => {
-                          // 必要なら Inertia で再取得
-                          router.reload();
-                        })
-                        .catch(err => {
-                          console.error(err);
-                        });
-                    }}
-                    className='ml-auto mr-2 text-gray-500 text-sm hover:text-red-500 transition-colors duration-150 self-end'
-                  >
+                      alt='avatar'
+                      className='w-5 h-5 rounded-full object-cover'
+                    />
+                  </Link>
+                  <div className='ml-1'>
+                    <Link
+                      href={
+                        currentUserId === post.user.id
+                          ? route('profile.show')
+                          : route('users.profile', post.user.id)
+                      }
+                      className='font-semibold text-sm'
+                    >
+                      @{post.user.displayid}
+                    </Link>
+                  </div>
+                  <div className='text-sm font-bold ml-auto flex flex-row items-center'>
                     <svg
                       xmlns='http://www.w3.org/2000/svg'
-                      className='w-6 h-6'
+                      width={28}
+                      height={28}
                       viewBox='0 0 24 24'
                     >
                       <path
-                        fill='currentColor'
-                        d='M7 21q-.825 0-1.412-.587T5 19V6q-.425 0-.712-.288T4 5t.288-.712T5 4h4q0-.425.288-.712T10 3h4q.425 0 .713.288T15 4h4q.425 0 .713.288T20 5t-.288.713T19 6v13q0 .825-.587 1.413T17 21zM17 6H7v13h10zm-7 11q.425 0 .713-.288T11 16V9q0-.425-.288-.712T10 8t-.712.288T9 9v7q0 .425.288.713T10 17m4 0q.425 0 .713-.288T15 16V9q0-.425-.288-.712T14 8t-.712.288T13 9v7q0 .425.288.713T14 17M7 6v13z'
+                        fill='#fcf16eff'
+                        d='m12 21.35l-1.45-1.32C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5c0 3.77-3.4 6.86-8.55 11.53z'
                       ></path>
                     </svg>
-                  </button>
+                    {post.likes_count}
+                  </div>
                 </div>
-                <Link href={route('posts.edit', post)}>
-                  <div className='px-4 py-2'>
-                    <h2 className='text-xl font-bold text-gray-700'>
-                      {post.title}
-                    </h2>
-                    <p className='text-sm text-gray-700 line-clamp-2'>
-                      {post.subtitle || ''}
-                    </p>
-                    <div className='text-xs text-gray-500'>
+
+                <Link href={route('posts.show', post.id)}>
+                  <div className='relative w-full aspect-square bg-gray-100'>
+                    <img
+                      src={firstPhotoUrl(post)}
+                      alt={post.title || 'photo'}
+                      className='w-full h-full object-cover'
+                      loading='lazy'
+                    />
+                  </div>
+                </Link>
+
+                <div className='px-4 py-3'>
+                  <h2 className='text-xl font-bold text-gray-700'>
+                    {post.title}
+                  </h2>
+                  <p className='text-sm text-gray-700 line-clamp-2'>
+                    {post.subtitle || post.excerpt || ''}
+                  </p>
+                  <div className='flex flex-row'>
+                    <div className='text-xs text-gray-500 mt-2'>
                       {formatDate(post.created_at)}
                     </div>
                   </div>
-                </Link>
+                </div>
               </div>
             ))
           )}

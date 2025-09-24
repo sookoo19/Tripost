@@ -140,11 +140,13 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
-        // 関連データを削除
-        $user->posts()->delete(); // ユーザーの投稿を削除
+
+        $user->posts()->delete();
         $user->likes()->delete(); // いいねを削除
-        $user->follows()->delete(); // フォロー関係を削除
-        $user->followers()->delete(); // フォロワー関係を削除
+        // follows()/followers() が User モデルに存在しないため、Follow モデルで直接削除する
+        \App\Models\Follow::where('following', $user->id)
+            ->orWhere('followed', $user->id)
+            ->delete();
 
         Auth::logout();
         $user->delete();

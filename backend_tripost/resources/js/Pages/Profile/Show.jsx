@@ -150,7 +150,6 @@ export default function Show({ user, countries, posts }) {
                 >
                   <div className='bg-white rounded-lg p-6 shadow-lg min-w-[250px]'>
                     <div className='flex flex-row'>
-                      <div className='mb-4 text-lg font-bold'>メニュー</div>
                       <button
                         type='button'
                         className='flex ml-auto rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none'
@@ -173,15 +172,16 @@ export default function Show({ user, countries, posts }) {
                         </svg>
                       </button>
                     </div>
-                    <button
-                      type='button'
-                      className='mb-4 text-lg text-gray-700 font-semibold w-full text-left'
-                      onClick={() => {
-                        router.get('/posts/unpublic');
-                      }}
-                    >
-                      非公開タビ一覧
-                    </button>
+                    <Link href={route('posts.mylikes')}>
+                      <div className='mb-4 text-lg text-gray-700 font-semibold w-full text-left'>
+                        いいねしたタビ
+                      </div>
+                    </Link>
+                    <Link href={route('posts.unpublic')}>
+                      <div className='mb-4 text-lg text-gray-700 font-semibold w-full text-left'>
+                        非公開タビ
+                      </div>
+                    </Link>
                     <div className='text-left mb-4 text-lg text-gray-700 font-semibold'>
                       このアプリについて
                     </div>

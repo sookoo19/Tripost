@@ -17,6 +17,7 @@ use App\Models\Style;
 use App\Models\Purpose;
 use App\Models\Budget;
 use App\Models\Follow;
+use App\Models\Like; // 追加
 
 class PostController extends Controller
 {
@@ -147,7 +148,6 @@ class PostController extends Controller
             foreach ($request->file('photos') as $file) {
                 if (!$file || !$file->isValid()) continue;
                 $newPhotoPaths[] = $file->store('posts_photos', 'public');
-                // 最大8枚まで
                 if (count($newPhotoPaths) >= 8) break;
             }
         }
@@ -155,6 +155,13 @@ class PostController extends Controller
         // 新しい写真のみを保存（既存写真は削除）
         $post->photos = $newPhotoPaths;
         $post->save();
+
+        // 「編集した日時で並べたい」場合は created_at を更新する
+        // created_at のみを上書きしたいので timestamps を一時的に無効化して保存
+        $post->timestamps = false;
+        $post->created_at = now();
+        $post->save();
+        $post->timestamps = true;
 
         return redirect()->route('posts.draft', $post)->with('success', '投稿を更新しました');
     }
@@ -381,6 +388,41 @@ class PostController extends Controller
         ]);
     }
 
+    public function mylikes(Request $request)
+    {
+        $userId = auth()->id();
+
+        $likes = Like::where('user_id', $userId)
+            ->with('post.user')
+            ->orderBy('created_at', 'desc')
+            ->paginate(8);
+
+        // Like ページネータを通して posts 表示用に変換（Paginator を維持）
+        $posts = $likes->through(function ($like) {
+            $post = $like->post;
+            if (! $post) return null;
+            return [
+                'id' => $post->id,
+                'title' => $post->title,
+                'subtitle' => $post->subtitle,
+                'created_at' => $post->created_at->toDateTimeString(),
+                'liked_at' => $like->created_at->toDateTimeString(),
+                'user' => [
+                    'id' => $post->user->id,
+                    'displayid' => $post->user->displayid,
+                    'profile_image_url' => $post->user->profile_image ? Storage::url($post->user->profile_image) : null,
+                ],
+                'photos_urls' => collect($post->photos ?? [])->map(fn($p) => Storage::url($p))->all(),
+                'likes_count' => $post->likes()->count(),
+            ];
+        });
+
+       
+
+        return Inertia::render('Posts/MyLikes', [
+            'posts' => $posts,
+        ]);
+    }
 
     public function update_share_scope(Request $request, Post $post)
     {
