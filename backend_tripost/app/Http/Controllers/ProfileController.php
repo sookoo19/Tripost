@@ -122,6 +122,13 @@ class ProfileController extends Controller
         return Redirect::route('profile.show');
     }
 
+    public function destroy_confirm (Request $request): Response
+    {
+
+        return Inertia::render('Profile/Destroy');
+            
+    }
+
     /**
      * Delete the user's account.
      */
@@ -133,14 +140,19 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
-        Auth::logout();
+        // 関連データを削除
+        $user->posts()->delete(); // ユーザーの投稿を削除
+        $user->likes()->delete(); // いいねを削除
+        $user->follows()->delete(); // フォロー関係を削除
+        $user->followers()->delete(); // フォロワー関係を削除
 
+        Auth::logout();
         $user->delete();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return Redirect::to('/');
+        return Redirect::to('auth/register')->with('success', 'アカウントを削除しました');
     }
 
     public function showPublic(User $user)

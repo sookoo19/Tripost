@@ -179,7 +179,7 @@ export default function Unpublic({ posts }) {
                   {post.subtitle || post.excerpt || ''}
                 </p>
                 <div className='flex flex-row'>
-                  <div className='text-xs text-gray-500 mt-1.5'>
+                  <div className='text-xs text-gray-500 mt-2'>
                     {formatDate(post.created_at)}
                   </div>
                   <button

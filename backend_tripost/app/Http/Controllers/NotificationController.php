@@ -17,14 +17,11 @@ class NotificationController extends Controller
         $user = Auth::user();
         
         // 通知を取得（アクター情報も一緒に）
-        $notifications = $user->notifications()
-            ->with(['actor' => function($query) {
-                $query->select('id', 'displayid', 'profile_image');
-                // アクセサを追加してもwithには反映されないため、
-                // コレクション取得後に加工する必要があります
-            }])
+        $notifications = auth()->user()
+            ->notifications()
+            ->whereHas('actor') // 削除されたユーザーの通知を除外
             ->latest()
-            ->paginate(10);
+            ->paginate(20);
         
         // profile_image_urlを各通知のactorに追加
         $notifications->getCollection()->transform(function ($notification) {

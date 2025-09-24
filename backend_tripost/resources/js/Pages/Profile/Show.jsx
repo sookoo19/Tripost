@@ -196,6 +196,11 @@ export default function Show({ user, countries, posts }) {
                     >
                       ログアウト
                     </button>
+                    <Link href={route('profile.destroy_confirm')}>
+                      <div className='text-left mb-4 text-lg text-red-500 font-semibold'>
+                        アカウントを消去する
+                      </div>
+                    </Link>
                   </div>
                 </button>
               )}
@@ -352,7 +357,7 @@ export default function Show({ user, countries, posts }) {
                   {post.subtitle || post.excerpt || ''}
                 </p>
                 <div className='flex flex-row'>
-                  <div className='text-xs text-gray-500 mt-1.5'>
+                  <div className='text-xs text-gray-500 mt-2'>
                     {formatDate(post.created_at)}
                   </div>
                   <button

@@ -37,6 +37,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // 自分のプロフィール管理
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('/profile/destroy', [ProfileController::class, 'destroy_confirm'])->name('profile.destroy_confirm');
     Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
