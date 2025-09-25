@@ -239,7 +239,7 @@ export default function SearchIndex({
                 <p className='text-sm text-gray-700 line-clamp-2'>
                   {post.subtitle || post.excerpt || ''}
                 </p>
-                <div className='text-xs text-gray-500'>
+                <div className='text-xs text-gray-500 mt-2'>
                   {formatDate(post.created_at)}
                 </div>
               </div>

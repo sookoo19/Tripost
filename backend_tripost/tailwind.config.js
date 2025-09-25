@@ -18,7 +18,7 @@ export default {
             },
         },
         screens: {
-            'xs': '360px', // 追加: 360px以下用
+            'xs': '361px', // 追加: 360px以下用
             'sm': '640px',
             'md': '768px',
             'lg': '1024px',

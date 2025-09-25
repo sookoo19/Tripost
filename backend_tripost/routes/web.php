@@ -13,6 +13,10 @@ use Inertia\Inertia;
 
 // トップページ
 Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect()->route('posts.index');
+    }
+
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
@@ -21,10 +25,6 @@ Route::get('/', function () {
     ]);
 });
 
-// ダッシュボード（要ログイン・認証）
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
 
 // ▼ ゲストも閲覧できるルート（投稿・ユーザープロフィールの閲覧）
 Route::get('/posts', [PostController::class, 'index'])->name('posts.index'); // 全投稿一覧
