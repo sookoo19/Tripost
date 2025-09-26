@@ -191,7 +191,7 @@ export default function SearchIndex({
                   <img
                     src={
                       post.user.profile_image_url ||
-                      '/images/default-avatar.png'
+                      '/images/defalt_profile.jpg'
                     }
                     alt='avatar'
                     className='w-5 h-5 rounded-full object-cover'
@@ -224,8 +224,8 @@ export default function SearchIndex({
               <Link href={route('posts.show', post.id)}>
                 <div className='relative w-full aspect-square bg-gray-100'>
                   <img
-                    src={firstPhotoUrl(post)}
-                    alt={post.title || 'photo'}
+                    src={firstPhotoUrl(post) || '/images/defalt_post.png'}
+                    alt={'photo'}
                     className='w-full h-full object-cover'
                     loading='lazy'
                   />

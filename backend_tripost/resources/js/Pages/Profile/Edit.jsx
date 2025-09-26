@@ -94,15 +94,11 @@ export default function Edit({ user, countries = [] }) {
           <InputLabel htmlFor='profile_image' value='プロフィール画像' />
           <div className='flex flex-col items-center mt-2'>
             <div className='w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden mb-2'>
-              {previewUrl ? (
-                <img
-                  src={previewUrl}
-                  alt='プロフィール画像'
-                  className='object-cover w-full h-full'
-                />
-              ) : (
-                <span className='text-gray-400 text-6xl'>👤</span>
-              )}
+              <img
+                src={previewUrl || '/images/defalt_profile.jpg'}
+                alt='avatar'
+                className='w-full h-full rounded-full object-cover'
+              />
             </div>
             <input
               id='profile_image'

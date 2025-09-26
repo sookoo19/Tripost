@@ -348,7 +348,7 @@ export default function Show({ post, user }) {
                   post?.user?.profile_image_url ||
                   (post?.user?.profile_image
                     ? `/storage/${post?.user?.profile_image}`
-                    : '/images/default-avatar.png')
+                    : '/images/defalt_profile.jpg')
                 }
                 alt='avatar'
                 className='w-6 h-6 rounded-full object-cover'

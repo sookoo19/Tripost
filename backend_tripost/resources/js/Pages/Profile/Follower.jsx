@@ -44,8 +44,8 @@ export default function Follower({ user, follower_index }) {
 
         <div>
           {list.length === 0 ? (
-            <div className='text-sm text-gray-500'>
-              フォロー中のユーザーはいません
+            <div className='text-sm text-gray-500 text-center'>
+              フォローされているユーザーはいません
             </div>
           ) : (
             <ul className='space-y-2 max-h-[80vh] overflow-y-auto'>
@@ -62,7 +62,7 @@ export default function Follower({ user, follower_index }) {
                     }
                   >
                     <img
-                      src={u.profile_image_url || '/images/default-avatar.png'}
+                      src={u.profile_image_url || '/images/defalt_profile.jpg'}
                       alt={u.displayid}
                       className='w-10 h-10 rounded-full object-cover'
                     />

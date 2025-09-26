@@ -118,7 +118,12 @@ export default function Show({ user, countries, posts }) {
                   draggable={false}
                 />
               ) : (
-                <span className='text-gray-400 text-6xl'>👤</span>
+                <img
+                  src='/images/defalt_profile.jpg'
+                  alt='プロフィール画像'
+                  className='object-cover w-full h-full'
+                  draggable={false}
+                />
               )}
             </div>
             <div className='flex flex-col ml-3'>
@@ -263,6 +268,11 @@ export default function Show({ user, countries, posts }) {
 
       <div className='w-full overflow-hidden bg-white'>
         <div className='max-w-xl mx-auto p-4 pb-24'>
+          {items.length === 0 && (
+            <div className='text-center text-gray-500 py-12'>
+              投稿したタビはありません
+            </div>
+          )}
           {items.map(post => (
             <div
               key={post.id}
@@ -273,7 +283,7 @@ export default function Show({ user, countries, posts }) {
                   <img
                     src={
                       post.user.profile_image_url ||
-                      '/images/default-avatar.png'
+                      '/images/defalt_profile.jpg'
                     }
                     alt='avatar'
                     className='w-5 h-5 rounded-full object-cover'
@@ -341,8 +351,8 @@ export default function Show({ user, countries, posts }) {
               <Link href={route('posts.show', post.id)}>
                 <div className='relative w-full aspect-square bg-gray-100'>
                   <img
-                    src={firstPhotoUrl(post)}
-                    alt={post.title || 'photo'}
+                    src={firstPhotoUrl(post) || '/images/defalt_post.png'}
+                    alt={'photo'}
                     className='w-full h-full object-cover'
                     loading='lazy'
                   />

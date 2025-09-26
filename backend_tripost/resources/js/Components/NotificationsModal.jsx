@@ -128,7 +128,7 @@ export default function NotificationsModal({ isOpen, closeModal }) {
                                 <img
                                   src={
                                     notification.actor.profile_image_url ||
-                                    '/images/default-avatar.png'
+                                    '/images/defalt_profile.jpg'
                                   }
                                   alt={notification.actor.name}
                                   className='w-8 h-8 rounded-full mr-3 mt-1 object-cover' // object-coverを追加

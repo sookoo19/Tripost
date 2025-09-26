@@ -149,7 +149,7 @@ return [
     'starts_with' => ':attributeには、:valuesのどれかで始まる値を指定してください。',
     'string' => ':attributeは文字列を指定してください。',
     'timezone' => ':attributeには、有効なゾーンを指定してください。',
-    'unique' => ':attributeの値は既に存在しています。',
+    'unique' => ':attributeは既に使用されています。',
     'uploaded' => ':attributeのアップロードに失敗しました。',
     'uppercase' => ':attributeは、大文字のみで指定してください。',
     'url' => ':attributeに正しい形式を指定してください。',

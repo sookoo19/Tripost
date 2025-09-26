@@ -6,18 +6,6 @@ export default function Welcome() {
     <>
       <Head title='Tripost' />
       <div className='min-h-screen relative bg-yellow-400'>
-        <div className='absolute top-0 left-0 right-0 z-30'>
-          {/*ヘッダー（上に重なるよう z-index を高く）*/}
-          <div className='max-w-full mx-auto'>
-            <Link href={route('posts.index')}>
-              <img
-                src='/images/header.svg'
-                alt='header'
-                className='w-full h-auto block object-cover'
-              />
-            </Link>
-          </div>
-        </div>
         {/* 背景画像 */}
         <img
           src='/images/main_tripost.png'
@@ -33,7 +21,7 @@ export default function Welcome() {
             <br />
             みんなとシェアしよう。
           </h2>
-          <p className='text-white/90 text-lg sm:text-xl mb-72 drop-shadow'>
+          <p className='text-white/90 text-lg sm:text-xl mb-80  drop-shadow'>
             Tripost — タビを、手軽に
           </p>
 
