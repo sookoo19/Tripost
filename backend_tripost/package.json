@@ -19,7 +19,7 @@
         "@tailwindcss/vite": "^4.0.0",
         "@vitejs/plugin-react": "^4.2.0",
         "autoprefixer": "^10.4.12",
-        "axios": "^1.11.0",
+        "axios": "^1.12.2",
         "babel-plugin-react-compiler": "^19.1.0-rc.3",
         "concurrently": "^9.0.1",
         "eslint": "^9.33.0",
@@ -47,5 +47,10 @@
         "laravel-precognition-react-inertia": "^0.7.2",
         "react-cropper": "^2.3.3",
         "react-select": "^5.10.2"
+    },
+    "overrides": {
+        "@inertiajs/inertia": {
+            "axios": "1.12.2"
+        }
     }
 }

@@ -1,5 +1,4 @@
 import { Head, Link } from '@inertiajs/react';
-import { Inertia } from '@inertiajs/inertia';
 
 export default function Welcome() {
   return (
@@ -26,12 +25,12 @@ export default function Welcome() {
           </p>
 
           {/* 大きな中央ボタン（黒いピル） */}
-          <button
-            onClick={() => Inertia.visit('/auth/register')}
-            className='mt-6 mb-3 z-20 px-8 py-4 bg-black text-white font-bold rounded-full shadow-xl text-lg max-w-xs w-full hover:scale-105 transition-transform duration-200 ease-in-out'
+          <Link
+            href='/auth/register'
+            className='mt-6 mb-3 z-20 px-8 py-4 bg-black text-white font-bold rounded-full shadow-xl text-lg max-w-xs w-full hover:scale-105 transition-transform duration-200 ease-in-out inline-block text-center'
           >
             登録 / ログインはこちら
-          </button>
+          </Link>
           <Link href={route('posts.index')} className='underline'>
             ゲストで利用する
           </Link>
