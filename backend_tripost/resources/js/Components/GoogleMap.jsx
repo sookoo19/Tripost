@@ -7,7 +7,7 @@ import {
   DirectionsRenderer,
 } from '@react-google-maps/api';
 
-import mapStyles from './mapStyles';
+import mapStyles from './MapStyles';
 
 const libraries = ['places'];
 const options = {
