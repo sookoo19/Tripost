@@ -212,7 +212,7 @@ export default function Show({ user, countries, posts }) {
               {/*ユーザー名*/}
               <div className='text-2xl font-bold'>{user.name}</div>
             </div>
-            <div className='mt-1'>
+            <div className='mt-1 w-full'>
               {/*フォロー数、フォロワー数、投稿数*/}
               <span className='text-base font-bold'>
                 {user.posts_count ?? 0}

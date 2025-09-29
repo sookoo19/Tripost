@@ -32,7 +32,7 @@ Route::get('/posts/search', [PostController::class, 'searchPosts'])->name('posts
 Route::get('/posts/search/result', [PostController::class, 'searchIndex'])->name('posts.searchResult'); // 投稿検索
 Route::get('/users/{user}/posts', [PostController::class, 'userPosts'])->name('users.posts'); // ユーザーごとの投稿一覧
 
-// ▼ ログインユーザーのみ（プロフィール編集・投稿作成/編集/削除）
+// ▼ ログインユーザーのみ
 Route::middleware(['auth', 'verified'])->group(function () {
     // 自分のプロフィール管理
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');

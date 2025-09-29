@@ -1,10 +1,14 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, usePage, router } from '@inertiajs/react';
 import { useState, useEffect, useCallback } from 'react';
 import BottomNav from '@/Components/BottomNav';
+import ToLoginModal from '@/Components/ToLoginModal';
 
 export default function Show({ user, countries, posts }) {
+  const page = usePage();
+  const auth = page.props?.auth?.user;
   const [followStatus, setFollowStatus] = useState(user.is_followed || false);
   const [loadingFollow, setLoadingFollow] = useState(false);
+  const [toLoginModalOpen, setToLoginModalOpen] = useState(false);
 
   const handleAddFollow = e => {
     e.preventDefault();
@@ -179,8 +183,8 @@ export default function Show({ user, countries, posts }) {
                 </div>
               )}
             </div>
-            <div>
-              {/*フォロー数、フォロワー数、投稿数*/}
+            <div className='mt-1 w-full'>
+              {/* フォロー数、フォロワー数、投稿数*/}
               <span className='text-base font-bold'>
                 {user.posts_count ?? 0}
               </span>
@@ -222,7 +226,7 @@ export default function Show({ user, countries, posts }) {
               type='button'
               className='w-2/5 shadow inline-flex items-center justify-center rounded-2xl border border-gray-100 border-transparent bg-blue-400 px-2 xs:px-4 py-2 text-xs xs:text-sm font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out hover:bg-blue-500 focus:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-blue-500'
               disabled={loadingFollow}
-              onClick={handleAddFollow}
+              onClick={auth ? handleAddFollow : () => setToLoginModalOpen(true)}
             >
               フォローする
             </button>
@@ -232,7 +236,9 @@ export default function Show({ user, countries, posts }) {
               type='button'
               className='w-2/5 shadow inline-flex items-center justify-center rounded-2xl border border-gray-100 border-transparent bg-white px-2 xs:px-4 py-2 text-xs xs:text-sm font-semibold uppercase tracking-widest text-black transition duration-150 ease-in-out hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-200'
               disabled={loadingFollow}
-              onClick={handleRemoveFollow}
+              onClick={
+                auth ? handleRemoveFollow : () => setToLoginModalOpen(true)
+              }
             >
               フォロー中
             </button>
@@ -290,28 +296,57 @@ export default function Show({ user, countries, posts }) {
                 </div>
               </div>
 
-              <Link href={route('posts.show', post.id)}>
-                <div className='relative w-full aspect-square bg-gray-100'>
-                  <img
-                    src={firstPhotoUrl(post) || '/images/defalt_post.png'}
-                    alt={'photo'}
-                    className='w-full h-full object-cover'
-                    loading='lazy'
-                  />
-                </div>
-              </Link>
+              {auth ? (
+                <Link href={route('posts.show', post.id)}>
+                  <div className='relative w-full aspect-square bg-gray-100'>
+                    <img
+                      src={firstPhotoUrl(post) || '/images/defalt_post.png'}
+                      alt={'photo'}
+                      className='w-full h-full object-cover'
+                      loading='lazy'
+                    />
+                  </div>
 
-              <div className='px-4 py-3'>
-                <h2 className='text-xl font-bold text-gray-700'>
-                  {post.title}
-                </h2>
-                <p className='text-sm text-gray-700 line-clamp-2'>
-                  {post.subtitle || post.excerpt || ''}
-                </p>
-                <div className='text-xs text-gray-500'>
-                  {formatDate(post.created_at)}
-                </div>
-              </div>
+                  <div className='px-4 py-3'>
+                    <h2 className='text-xl font-bold text-gray-700'>
+                      {post.title}
+                    </h2>
+                    <p className='text-sm text-gray-700 line-clamp-2'>
+                      {post.subtitle || post.excerpt || ''}
+                    </p>
+                    <div className='text-xs text-gray-500 mt-2'>
+                      {formatDate(post.created_at)}
+                    </div>
+                  </div>
+                </Link>
+              ) : (
+                <button
+                  type='button'
+                  onClick={() => setToLoginModalOpen(true)}
+                  className='w-full text-left'
+                >
+                  <div className='relative w-full aspect-square bg-gray-100'>
+                    <img
+                      src={firstPhotoUrl(post) || '/images/defalt_post.png'}
+                      alt={'photo'}
+                      className='w-full h-full object-cover'
+                      loading='lazy'
+                    />
+                  </div>
+
+                  <div className='px-4 py-3'>
+                    <h2 className='text-xl font-bold text-gray-700'>
+                      {post.title}
+                    </h2>
+                    <p className='text-sm text-gray-700 line-clamp-2'>
+                      {post.subtitle || post.excerpt || ''}
+                    </p>
+                    <div className='text-xs text-gray-500 mt-2'>
+                      {formatDate(post.created_at)}
+                    </div>
+                  </div>
+                </button>
+              )}
             </div>
           ))}
 
@@ -341,6 +376,11 @@ export default function Show({ user, countries, posts }) {
         </div>
       </div>
       <BottomNav />
+      {/* 未ログイン時に投稿クリックで表示するモーダル */}
+      <ToLoginModal
+        show={toLoginModalOpen}
+        closeModal={() => setToLoginModalOpen(false)}
+      />
     </div>
   );
 }
