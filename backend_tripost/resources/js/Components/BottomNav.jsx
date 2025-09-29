@@ -1,8 +1,12 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import ToLoginModal from '@/Components/ToLoginModal';
 
 export default function BottomNav() {
+  const page = usePage();
+  const user = page.props?.auth?.user;
   const [showModal, setShowModal] = useState(false);
+  const [toLoginModalOpen, setToLoginModalOpen] = useState(false);
 
   return (
     <div className='fixed bottom-0 left-0 w-full bg-gray-50 z-10 grid grid-cols-4 items-center justify-items-center py-2 border-t'>
@@ -22,7 +26,12 @@ export default function BottomNav() {
           draggable={false}
         />
       </Link>
-      <button onClick={() => setShowModal(true)}>
+
+      <button
+        onClick={
+          user ? () => setShowModal(true) : () => setToLoginModalOpen(true)
+        }
+      >
         <svg
           xmlns='http://www.w3.org/2000/svg'
           width={50}
@@ -83,14 +92,30 @@ export default function BottomNav() {
           </div>
         </button>
       )}
-      <Link href={route('profile.show')} aria-label='プロフィール画面'>
-        <img
-          src='/images/profile _button.svg'
-          alt='profile'
-          className='h-10 w-10'
-          draggable={false}
-        />
-      </Link>
+      {user ? (
+        <Link href={route('profile.show')} aria-label='プロフィール画面'>
+          <img
+            src='/images/profile _button.svg'
+            alt='profile'
+            className='h-10 w-10'
+            draggable={false}
+          />
+        </Link>
+      ) : (
+        <button type='button' onClick={() => setToLoginModalOpen(true)}>
+          <img
+            src='/images/profile _button.svg'
+            alt='profile'
+            className='h-10 w-10'
+            draggable={false}
+          />
+        </button>
+      )}
+      {/* 未ログイン時に投稿クリックで表示するモーダル */}
+      <ToLoginModal
+        show={toLoginModalOpen}
+        closeModal={() => setToLoginModalOpen(false)}
+      />
     </div>
   );
 }
