@@ -105,10 +105,11 @@ class ProfileController extends Controller
         $user->fill($request->validated());
         $user->save();
 
-        if ($request->has('visited_countries')) {
-            $countryIds = Country::whereIn('code', $request->input('visited_countries', []))->pluck('id')->toArray();
-            $user->visitedCountries()->sync($countryIds);
-        }
+        // フロントで未選択（キーが無い）でも空配列をデフォルトにして必ず同期する
+        // これにより未選択時は既存データをクリアできます
+        $codes = $request->input('visited_countries', []);
+        $countryIds = Country::whereIn('code', $codes)->pluck('id')->toArray();
+        $user->visitedCountries()->sync($countryIds);
 
          if ($request->hasFile('profile_image')) {
             // パスだけ保存される
