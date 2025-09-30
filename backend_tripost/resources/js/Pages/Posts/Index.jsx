@@ -5,7 +5,7 @@ import NotificationsModal from '@/Components/NotificationsModal';
 import ToLoginModal from '@/Components/ToLoginModal';
 import axios from 'axios';
 
-export default function Index({ posts }) {
+export default function Index({ posts, filter }) {
   const page = usePage();
   const user = page.props?.auth?.user;
   const currentUserId = page.props?.auth?.user?.id;
@@ -100,7 +100,6 @@ export default function Index({ posts }) {
           />
         </Link>
       </div>
-
       {/* 通知アイコンを追加 */}
       <div className='relative ml-auto mr-5 mt-4'>
         <button
@@ -127,6 +126,36 @@ export default function Index({ posts }) {
             </span>
           )}
         </button>
+      </div>
+      <div className='flex gap-6 justify-center'>
+        <Link
+          href={route('posts.index')}
+          className={
+            filter === 'following' ? 'text-gray-600' : 'font-semibold underline'
+          }
+        >
+          すべて
+        </Link>
+        {user ? (
+          <Link
+            href={route('posts.index', { filter: 'following' })}
+            className={
+              filter === 'following'
+                ? 'font-semibold underline'
+                : 'text-gray-600'
+            }
+          >
+            フォロー中
+          </Link>
+        ) : (
+          <button
+            type='button'
+            onClick={() => setToLoginModalOpen(true)}
+            className='text-gray-600'
+          >
+            フォロー中
+          </button>
+        )}
       </div>
 
       <div className='w-full overflow-hidden mt-2 bg-white'>

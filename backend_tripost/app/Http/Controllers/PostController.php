@@ -24,13 +24,26 @@ class PostController extends Controller
 
     public function index(Request $request)
     {
+        $filter = $request->query('filter', '');
+
         // 基本のクエリ：最新順、ユーザーを事前ロード
         $query = Post::with('user')->withCount('likes')->latest();
         $query->where('share_scope', '公開');
 
+        // フィルタ: フォロー中ユーザーの投稿のみ
+        if ($filter === 'following') {
+            if (auth()->check()) {
+                $followingIds = Follow::where('following', auth()->id())->pluck('followed')->toArray();
+                // フォロー中が空なら確実に空結果にするため [0] を指定 //フォロー中ユーザー ID が配列なのでwhereIn 
+                $query->whereIn('user_id', $followingIds ?: [0]);
+            } else {
+                // 未ログインなら空結果
+                $query->whereRaw('0 = 1');
+            }
+        }
 
-        // ページネーション（例：8件／ページ）
-        $posts = $query->paginate(8)->through(function (Post $post) {
+        // ページネーション（例：8件／ページ） + クエリパラメータを維持
+        $posts = $query->paginate(8)->appends($request->query())->through(function (Post $post) {
             $user = $post->user;
             return [
                 'id' => $post->id,
@@ -50,6 +63,7 @@ class PostController extends Controller
 
         return Inertia::render('Posts/Index', [
             'posts' => $posts,
+            'filter' => $filter,
         ]);
     }
     /**
