@@ -42,33 +42,52 @@ export default function ToLoginModal({
               leaveTo='opacity-0 scale-95'
             >
               <Dialog.Panel
-                className={`w-full max-w-${maxWidth} transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all sm:mx-auto sm:w-full ${maxWidthClass}`}
+                className={`relative w-full max-w-${maxWidth} transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all sm:mx-auto sm:w-full ${maxWidthClass}`}
               >
-                {/* loginPrompt 用の固定内容（children の分岐は不要のため削除） */}
-                <div>
-                  <div className='flex justify-between items-center mb-4'>
-                    <h3 className='text-lg font-bold'>ログインしてください</h3>
-                    <button
-                      type='button'
-                      className='pb-1 rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none'
-                      onClick={closeModal}
+                {/* loginPrompt 用の固定内容（閉じるボタンは右上に絶対配置） */}
+                <div className='flex flex-col items-center'>
+                  <div>
+                    <svg
+                      xmlns='http://www.w3.org/2000/svg'
+                      width={52}
+                      height={52}
+                      viewBox='0 0 24 24'
                     >
-                      <span className='sr-only'>閉じる</span>
-                      <svg
-                        className='h-6 w-6'
-                        xmlns='http://www.w3.org/2000/svg'
-                        fill='none'
-                        viewBox='0 0 24 24'
-                        stroke='currentColor'
-                      >
-                        <path
-                          strokeLinecap='round'
-                          strokeLinejoin='round'
-                          strokeWidth={2}
-                          d='M6 18L18 6M6 6l12 12'
-                        />
-                      </svg>
-                    </button>
+                      <path
+                        fill='#ffea00ff'
+                        d='M11.001 10h2v5h-2zM11 16h2v2h-2z'
+                      ></path>
+                      <path
+                        fill='#ffea00ff'
+                        d='M13.768 4.2C13.42 3.545 12.742 3.138 12 3.138s-1.42.407-1.768 1.063L2.894 18.064a1.99 1.99 0 0 0 .054 1.968A1.98 1.98 0 0 0 4.661 21h14.678c.708 0 1.349-.362 1.714-.968a1.99 1.99 0 0 0 .054-1.968zM4.661 19L12 5.137L19.344 19z'
+                      ></path>
+                    </svg>
+                  </div>
+                  {/* 右上に固定する閉じるボタン */}
+                  <button
+                    type='button'
+                    className='absolute top-4 right-4 rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none'
+                    onClick={closeModal}
+                  >
+                    <span className='sr-only'>閉じる</span>
+                    <svg
+                      className='h-6 w-6'
+                      xmlns='http://www.w3.org/2000/svg'
+                      fill='none'
+                      viewBox='0 0 24 24'
+                      stroke='currentColor'
+                    >
+                      <path
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth={2}
+                        d='M6 18L18 6M6 6l12 12'
+                      />
+                    </svg>
+                  </button>
+
+                  <div className='flex justify-between items-center mb-2 mt-1'>
+                    <h3 className='text-lg font-bold'>ログインしてください</h3>
                   </div>
 
                   <p className='text-sm text-gray-600 mb-4'>
