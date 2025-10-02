@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [
     laravel({
       input: 'resources/js/app.jsx',
-      refresh: !isProduction, 
+      refresh: !isProduction,
     }),
     react(),
   ],
@@ -18,5 +18,12 @@ export default defineConfig({
       host: 'localhost', // 開発用ホスト
     },
   } : undefined,
-  base: '/', // 本番でも開発でも同じ
+  base: '/',
+  build: {
+    manifest: true,
+  },
+  // 本番環境で HTTPS を強制
+  define: isProduction ? {
+    'process.env.VITE_APP_URL': JSON.stringify('https://mytripost.com')
+  } : {},
 });
