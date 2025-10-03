@@ -18,9 +18,15 @@ export default defineConfig({
       host: 'localhost', // 開発用ホスト
     },
   } : undefined,
-  base: '/',
+  base: isProduction ? '/build/' : '/', // ← 本番では /build/ に変更
   build: {
+    outDir: 'public/build', // Laravel が参照するビルド先
+    emptyOutDir: true,      // ビルド前にディレクトリを空にする
     manifest: true,
+    rollupOptions: {
+        input: 'resources/js/app.jsx', // メイン JS
+    },
+    assetsDir: 'assets', 
   },
   // 本番環境で HTTPS を強制
   define: isProduction ? {
