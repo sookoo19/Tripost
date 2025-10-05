@@ -17,6 +17,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Dockerサービスを起動
+        run: sudo systemctl start docker
+
+      - name: Docker情報を表示
+        run: docker info
+
       - name: AWS CLI install
         run: |
           curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
