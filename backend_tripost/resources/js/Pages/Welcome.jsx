@@ -6,12 +6,6 @@ export default function Welcome() {
       <Head title='Tripost' />
       <div className='min-h-screen relative bg-yellow-400'>
         {/* 背景画像 /images/main_tripost.png */}
-        <img
-          src=''
-          alt='welcome'
-          className='absolute inset-0 w-full h-full object-cover'
-          draggable={false}
-        />
 
         {/* 中央のキャッチ */}
         <div className='relative z-10 flex flex-col items-center justify-center min-h-screen px-5 text-center'>
