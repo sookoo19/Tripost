@@ -32,7 +32,7 @@ export default function Welcome() {
             登録 / ログインはこちら
           </Link>
           <Link href={route('posts.index')} className='underline'>
-            ゲストで利用する
+            ゲストログインはこちら
           </Link>
         </div>
       </div>
