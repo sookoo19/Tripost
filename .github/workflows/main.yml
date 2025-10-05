@@ -55,7 +55,7 @@ jobs:
             git fetch --prune || { echo "git fetch失敗"; exit 1; }
             git checkout main || { echo "git checkout失敗"; exit 1; }
             git pull origin main || { echo "git pull失敗"; exit 1; }
-            docker-compose -f docker-compose.production.yml up -d --build || { echo "docker-compose失敗"; exit 1; }
+            docker compose -f docker-compose.production.yml up -d --build || { echo "docker-compose失敗"; exit 1; }
           EOF
 
           # SSHポートを閉じる
