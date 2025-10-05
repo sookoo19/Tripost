@@ -50,13 +50,13 @@ jobs:
           chmod 600 private_key
 
           # SSH接続 → デプロイ処理
-          ssh -o StrictHostKeyChecking=no -i private_key ${{ secrets.USER_NAME }}@${{ secrets.HOST_NAME }} "
-            cd /home/ec2-user/tripost/backend_tripost &&
-            git fetch --prune &&
-            git checkout main &&
-            git pull origin main &&
-            docker-compose -f docker-compose.prod.yml up -d --build
-          "
+          ssh -o StrictHostKeyChecking=no -i private_key ${{ secrets.USER_NAME }}@${{ secrets.HOST_NAME }} << 'EOF'
+            cd /home/ec2-user/tripost/backend_tripost || { echo "ディレクトリ移動失敗"; exit 1; }
+            git fetch --prune || { echo "git fetch失敗"; exit 1; }
+            git checkout main || { echo "git checkout失敗"; exit 1; }
+            git pull origin main || { echo "git pull失敗"; exit 1; }
+            docker-compose -f docker-compose.prod.yml up -d --build || { echo "docker-compose失敗"; exit 1; }
+          EOF
 
           # SSHポートを閉じる
           aws ec2 revoke-security-group-ingress \
