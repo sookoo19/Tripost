@@ -55,7 +55,7 @@ jobs:
             git fetch --prune &&
             git checkout main &&
             git pull origin main &&
-            docker compose -f docker-compose.prod.yml up -d --build
+            docker-compose -f docker-compose.prod.yml up -d --build
           "
 
           # SSHポートを閉じる
