@@ -113,7 +113,7 @@ class ProfileController extends Controller
 
          if ($request->hasFile('profile_image')) {
             // パスだけ保存される
-            $path = $request->file('profile_image')->store('profile_images', 'public');
+            $path = $request->file('profile_image')->store('profile_images', 's3');
 
             // DBには「パス」のみ保存
             $user->profile_image = $path; // ←profile_imageカラムに保存

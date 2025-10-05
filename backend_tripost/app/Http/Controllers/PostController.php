@@ -97,7 +97,7 @@ class PostController extends Controller
         $paths = [];
         foreach ($request->file('photos') as $file) {
             if (!$file) continue;
-            $paths[] = $file->store('posts_photos', 'public');
+            $paths[] = $file->store('posts_photos', 's3');
             if (count($paths) >= 8) break;
         }
         if (!empty($paths)) {
@@ -161,7 +161,7 @@ class PostController extends Controller
         if ($request->hasFile('photos')) {
             foreach ($request->file('photos') as $file) {
                 if (!$file || !$file->isValid()) continue;
-                $newPhotoPaths[] = $file->store('posts_photos', 'public');
+                $newPhotoPaths[] = $file->store('posts_photos', 's3');
                 if (count($newPhotoPaths) >= 8) break;
             }
         }

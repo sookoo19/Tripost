@@ -5,9 +5,9 @@ export default function Welcome() {
     <>
       <Head title='Tripost' />
       <div className='min-h-screen relative bg-yellow-400'>
-        {/* 背景画像 */}
+        {/* 背景画像 /images/main_tripost.png */}
         <img
-          src='/images/main_tripost.png'
+          src=''
           alt='welcome'
           className='absolute inset-0 w-full h-full object-cover'
           draggable={false}
