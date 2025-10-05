@@ -1,0 +1,65 @@
+name: EC2 auto deploy
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [closed]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Public IP Install
+        id: ip
+        uses: haythem/public-ip@v1.3
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Dockerサービスを起動
+        run: sudo systemctl start docker
+
+      - name: Docker情報を表示
+        run: docker info
+
+      - name: AWS CLI install
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install --update
+          aws --version
+
+      - name: AWS set Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-1
+
+      - name: Deploy
+        run: |
+          # SSHポートを一時的に開放
+          aws ec2 authorize-security-group-ingress \
+            --group-id ${{ secrets.EC2_SECURITY_GROUP_ID }} \
+            --protocol tcp --port 22 \
+            --cidr ${{ steps.ip.outputs.ipv4 }}/32
+
+          # 秘密鍵をセットアップ
+          echo "${{ secrets.PRIVATE_KEY }}" > private_key
+          chmod 600 private_key
+
+          # SSH接続 → デプロイ処理
+          ssh -o StrictHostKeyChecking=no -i private_key ${{ secrets.USER_NAME }}@${{ secrets.HOST_NAME }} << 'EOF'
+            cd /home/ec2-user/tripost/backend_tripost || { echo "ディレクトリ移動失敗"; exit 1; }
+            git fetch --prune || { echo "git fetch失敗"; exit 1; }
+            git checkout main || { echo "git checkout失敗"; exit 1; }
+            git pull origin main || { echo "git pull失敗"; exit 1; }
+            docker compose -f docker-compose.production.yml up -d --build || { echo "docker-compose失敗"; exit 1; }
+          EOF
+
+          # SSHポートを閉じる
+          aws ec2 revoke-security-group-ingress \
+            --group-id ${{ secrets.EC2_SECURITY_GROUP_ID }} \
+            --protocol tcp --port 22 \
+            --cidr ${{ steps.ip.outputs.ipv4 }}/32
