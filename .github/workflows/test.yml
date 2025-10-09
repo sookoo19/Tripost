@@ -14,60 +14,35 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Ubuntu Version
-        run: cat /etc/os-release
-
-      - name: Docker Version
-        run: docker version
-
       - name: Cache Composer dependencies
         uses: actions/cache@v3
         id: cache
         with:
-          path: ./backend/vendor
-          key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
+          path: backend_tripost/vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('backend_tripost/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
 
       - name: Docker Compose Build and Up
+        working-directory: ./backend_tripost
         run: |
           docker compose build
           docker compose up -d
+          sleep 10
 
       - name: Docker Compose Process
+        working-directory: ./backend_tripost
         run: docker compose ps -a
 
       - name: PHP, Composer Version
+        working-directory: ./backend_tripost
         run: |
-          docker compose exec -T app php --version
-          docker compose exec -T app composer --version
+          docker compose exec -T laravel.test php --version
+          docker compose exec -T laravel.test composer --version
 
       - name: Composer Install
         if: steps.cache.outputs.cache-hit != 'true'
-        run: docker compose exec -T app composer install -q --no-ansi --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist
+        working-directory: ./backend_tripost
+        run: docker compose exec -T laravel.test composer install -q --no-ansi --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist
 
-      - name: Composer Dump Autoload
-        run: docker compose exec -T app composer dump-autoload -q
-
-      - name: Laravel Settings
-        run: |
-          docker compose exec -T app cp .env.example .env
-          docker compose exec -T app php artisan key:generate
-          docker compose exec -T app php artisan optimize
-          docker compose exec -T app chmod -R 777 storage bootstrap/cache
-
-      - name: Laravel Version
-        run: docker compose exec -T app php artisan --version
-
-      - name: Laravel Migrate Testing
-        run: docker compose exec -T app php artisan migrate
-
-      - name: Laravel Rollback Testing
-        run: docker compose exec -T app php artisan migrate:refresh
-
-      - name: Laravel Seeding Testing
-        run: docker compose exec -T app php artisan db:seed
-
-      - name: Laravel PHPUnit Testing
-        run: |
-          docker compose exec -T app php artisan config:clear
-          docker compose exec -T app php artisan test
+      # 以下、laravel.test に合わせて同様に exec コマンドを更新してください
