@@ -1,4 +1,3 @@
-
 name: Docker Laravel Test CI
 
 on:
@@ -11,6 +10,7 @@ on:
 jobs:
   laravel-testing:
     runs-on: ubuntu-latest
+
 
     timeout-minutes: 30
     
