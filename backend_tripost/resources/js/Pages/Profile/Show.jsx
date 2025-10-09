@@ -149,16 +149,26 @@ export default function Show({ user, countries, posts }) {
               </div>
               {/*モーダル*/}
               {showModal && (
-                <button
-                  className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-10'
-                  onClick={() => setShowModal(false)}
-                >
-                  <div className='bg-white rounded-lg p-6 shadow-lg min-w-[250px]'>
+                <div className='fixed inset-0 z-50 flex items-center justify-center'>
+                  <button
+                    type='button'
+                    className='absolute inset-0 bg-black bg-opacity-10'
+                    onClick={() => setShowModal(false)}
+                    aria-label='閉じる'
+                  />
+                  <div
+                    className='bg-white rounded-lg p-6 shadow-lg min-w-[250px] relative'
+                    role='dialog'
+                    aria-modal='true'
+                    aria-labelledby='profile-modal-title'
+                    onClick={e => e.stopPropagation()}
+                  >
                     <div className='flex flex-row'>
                       <button
                         type='button'
                         className='flex ml-auto rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none'
                         onClick={() => setShowModal(false)}
+                        aria-label='閉じる'
                       >
                         <span className='sr-only'>閉じる</span>
                         <svg
@@ -177,6 +187,9 @@ export default function Show({ user, countries, posts }) {
                         </svg>
                       </button>
                     </div>
+                    <h2 id='profile-modal-title' className='sr-only'>
+                      設定
+                    </h2>
                     <Link href={route('posts.mylikes')}>
                       <div className='mb-4 text-lg text-gray-700 font-semibold w-full text-left'>
                         いいねしたタビ
@@ -207,7 +220,7 @@ export default function Show({ user, countries, posts }) {
                       </div>
                     </Link>
                   </div>
-                </button>
+                </div>
               )}
               {/*ユーザー名*/}
               <div className='text-2xl font-bold'>{user.name}</div>
@@ -319,6 +332,8 @@ export default function Show({ user, countries, posts }) {
                           console.error(err);
                         });
                     }}
+                    aria-label='公開範囲を非公開にする'
+                    title='公開範囲を非公開にする'
                   >
                     <svg
                       xmlns='http://www.w3.org/2000/svg'
@@ -389,6 +404,8 @@ export default function Show({ user, countries, posts }) {
                         });
                     }}
                     className='ml-auto text-gray-500 text-sm hover:text-red-500 transition-colors duration-150 self-end'
+                    aria-label='投稿を削除'
+                    title='投稿を削除'
                   >
                     <svg
                       xmlns='http://www.w3.org/2000/svg'

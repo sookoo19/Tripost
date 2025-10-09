@@ -103,6 +103,8 @@ export default function Index({ posts, filter }) {
       {/* 通知アイコンを追加 */}
       <div className='relative ml-auto mr-5 mt-4'>
         <button
+          aria-label='通知'
+          title='通知'
           onClick={() => setNotificationModalOpen(true)}
           className='flex items-center text-gray-500 hover:text-gray-700 focus:outline-none transition duration-150 ease-in-out'
         >

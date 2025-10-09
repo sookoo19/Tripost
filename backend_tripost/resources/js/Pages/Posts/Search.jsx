@@ -147,6 +147,8 @@ export default function Search({ countries, styles, purposes, budgets }) {
                 value='国'
               />
               <Select
+                inputId='country_id'
+                aria-label='国'
                 name='country_id'
                 options={countryOptions}
                 className='ml-auto w-3/5 h-auto text-sm'
@@ -201,6 +203,8 @@ export default function Search({ countries, styles, purposes, budgets }) {
             <div className='inline-flex items-center w-full mt-4'>
               <InputLabel className='font-bold' htmlFor='days' value='日数' />
               <Select
+                inputId='days'
+                aria-label='日数'
                 name='days'
                 className='ml-auto w-3/5 h-auto text-sm'
                 classNamePrefix='react-select'
@@ -224,6 +228,8 @@ export default function Search({ countries, styles, purposes, budgets }) {
               />
 
               <Select
+                inputId='style_id'
+                aria-label='スタイル'
                 name='style_id'
                 className='ml-auto w-3/5 h-auto text-sm'
                 classNamePrefix='react-select'
@@ -250,6 +256,8 @@ export default function Search({ countries, styles, purposes, budgets }) {
                 value='目的'
               />
               <Select
+                inputId='purpose_id'
+                aria-label='目的'
                 name='purpose_id'
                 className='ml-auto w-3/5 h-auto text-sm'
                 classNamePrefix='react-select'
@@ -277,6 +285,8 @@ export default function Search({ countries, styles, purposes, budgets }) {
                 value='予算'
               />
               <Select
+                inputId='budget_min'
+                aria-label='予算（最小）'
                 name='budget_min'
                 className='ml-auto w-3/5 h-auto text-sm'
                 classNamePrefix='react-select'
@@ -303,6 +313,8 @@ export default function Search({ countries, styles, purposes, budgets }) {
               <p className='ml-auto'>〜</p>
               <InputLabel className='font-bold' htmlFor='budget_max' />
               <Select
+                inputId='budget_max'
+                aria-label='予算（最大）'
                 name='budget_max'
                 className='ml-2 w-3/5 h-auto text-sm'
                 classNamePrefix='react-select'
@@ -356,6 +368,8 @@ export default function Search({ countries, styles, purposes, budgets }) {
         </div>
         <div className='flex items-center justify-end mt-4 pb-24'>
           <PrimaryButton
+            aria-label='検索'
+            title='検索'
             className='w-full h-12 mt-2 flex justify-center items-center inline-flex items-center rounded-md border border-transparent bg-gray-200 px-4 py-2 text-lg font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out hover:bg-gray-300 focus:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
             disabled={processing}
           >
