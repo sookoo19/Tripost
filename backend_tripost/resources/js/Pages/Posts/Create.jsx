@@ -331,7 +331,9 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
                 value='国'
               />
               <Select
+                inputId='country_id'
                 name='country_id'
+                aria-label='国'
                 options={countryOptions}
                 className='ml-auto w-3/5 h-auto text-sm'
                 classNamePrefix='react-select'
@@ -360,7 +362,6 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
                 name='region'
                 value={data.region}
                 className='ml-auto block w-3/5 h-auto text-sm'
-                autoComplete='region'
                 onChange={e => setData('region', e.target.value)}
                 placeholder='例：東京'
               />
@@ -388,7 +389,9 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
             <div className='inline-flex items-center w-full mt-2'>
               <InputLabel className='font-bold' htmlFor='days' value='日数' />
               <Select
+                inputId='days'
                 name='days'
+                aria-label='日数'
                 className='ml-auto w-3/5 h-auto text-sm'
                 classNamePrefix='react-select'
                 options={daysOptions}
@@ -412,7 +415,9 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
               />
 
               <Select
+                inputId='style_id'
                 name='style_id'
+                aria-label='スタイル'
                 className='ml-auto w-3/5 h-auto text-sm'
                 classNamePrefix='react-select'
                 options={styleOptions}
@@ -438,7 +443,9 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
                 value='目的'
               />
               <Select
+                inputId='purpose_id'
                 name='purpose_id'
+                aria-label='目的'
                 className='ml-auto w-3/5 h-auto text-sm'
                 classNamePrefix='react-select'
                 options={purposeOptions}
@@ -465,7 +472,9 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
                 value='予算'
               />
               <Select
+                inputId='budget_id'
                 name='budget_id'
+                aria-label='予算'
                 className='ml-auto w-3/5 h-auto text-sm'
                 classNamePrefix='react-select'
                 options={budgetOptions}
@@ -505,6 +514,7 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
               multiple
               className='hidden'
               onChange={onPhotosChange}
+              aria-label='写真ファイルを選択'
             />
 
             {/* カウンタ */}
@@ -544,8 +554,11 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
                       type='button'
                       onClick={openFileDialog}
                       className='w-full h-full flex items-center justify-center text-gray-400'
+                      aria-label={`写真を追加（スロット ${i + 1}）`}
                     >
-                      <span className='text-2xl'>＋</span>
+                      <span className='text-2xl' aria-hidden>
+                        ＋
+                      </span>
                     </button>
                   )}
                 </div>
@@ -559,6 +572,7 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
               type='button'
               onClick={openFileDialog}
               className='inline-flex items-center px-2 py-2 bg-indigo-500 text-sm text-white rounded-md'
+              aria-label='写真をまとめて追加'
             >
               まとめて追加
             </button>
@@ -572,7 +586,6 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
             name='title'
             value={data.title}
             className='mt-1 block w-full bg-gray-50'
-            autoComplete='title'
             onChange={e => setData('title', e.target.value)}
             required
           />
@@ -593,7 +606,6 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
             name='subtitle'
             value={data.subtitle}
             className='mt-1 block w-full bg-gray-50'
-            autoComplete='subtitle'
             onChange={e => setData('subtitle', e.target.value)}
           />
 
@@ -613,7 +625,6 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
             name='description'
             className='rounded-md bg-gray-50 border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 mt-1 block w-full h-32'
             value={data.description}
-            autoComplete='description'
             onChange={e => setData('description', e.target.value)}
           />
 
@@ -651,6 +662,8 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
               value='タビ状況'
             />
             <Select
+              inputId='post_status'
+              aria-label='旅行ステータス'
               name='post_status'
               className='ml-auto w-3/5 h-auto text-sm'
               classNamePrefix='react-select'
@@ -690,6 +703,8 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
               value='公開設定'
             />
             <Select
+              inputId='share_scope'
+              aria-label='公開設定'
               name='share_scope'
               className='ml-auto w-3/5 h-auto text-sm'
               classNamePrefix='react-select'
