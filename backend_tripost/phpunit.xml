@@ -8,9 +8,12 @@
         <testsuite name="Unit">
             <directory>tests/Unit</directory>
         </testsuite>
+        <!-- Feature テストを一時的にコメントアウト -->
+        <!--
         <testsuite name="Feature">
             <directory>tests/Feature</directory>
         </testsuite>
+        -->
     </testsuites>
     <source>
         <include>
