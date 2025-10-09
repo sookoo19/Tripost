@@ -1,4 +1,4 @@
-name: Docker Laravel Test CI
+name: Laravel Test CI
 
 on:
   push:
@@ -7,93 +7,100 @@ on:
     branches: [ production ]
   workflow_dispatch:
 
+env:
+  DB_CONNECTION: mysql
+  DB_HOST: 127.0.0.1
+  DB_PORT: 3306
+  DB_DATABASE: testing
+  DB_USERNAME: sail
+  DB_PASSWORD: password
+
 jobs:
   laravel-testing:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    defaults:
+      run:
+        working-directory: ./backend_tripost
+
+    services:
+      mysql:
+        image: mysql:8.0
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_DATABASE: testing
+          MYSQL_USER: sail
+          MYSQL_PASSWORD: password
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_ALLOW_EMPTY_PASSWORD: 1
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-start-period=30s
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
-          extensions: mbstring, dom, fileinfo, mysql
+          extensions: mbstring, dom, fileinfo, mysql, pdo_mysql
+          tools: composer:v2
           coverage: none
 
       - name: Cache Composer dependencies
-        uses: actions/cache@v3
-        id: cache
+        uses: actions/cache@v4
+        id: cache-vendor
         with:
           path: backend_tripost/vendor
           key: ${{ runner.os }}-composer-${{ hashFiles('backend_tripost/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-
 
-      # Composer の依存関係を先にインストール（Sail を含む）
       - name: Install Composer dependencies
-        working-directory: ./backend_tripost
+        if: steps.cache-vendor.outputs.cache-hit != 'true'
         run: composer install --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
-      # 環境変数の設定
-      - name: Setup environment variables
-        working-directory: ./backend_tripost
+      - name: Laravel Settings
         run: |
           cp .env.example .env
-          sed -i 's/DB_CONNECTION=.*/DB_CONNECTION=mysql/' .env
-          sed -i 's/DB_HOST=.*/DB_HOST=mysql/' .env
-          sed -i 's/DB_PORT=.*/DB_PORT=3306/' .env
-          sed -i 's/DB_DATABASE=.*/DB_DATABASE=testing/' .env
-          sed -i 's/DB_USERNAME=.*/DB_USERNAME=sail/' .env
-          sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=password/' .env
+          php artisan key:generate
+          php artisan optimize
+          chmod -R 777 storage bootstrap/cache
 
-      - name: Docker Compose Build and Up
-        working-directory: ./backend_tripost
+      - name: Display versions
         run: |
-          docker compose build
-          docker compose up -d
-          sleep 20
+          php --version
+          composer --version
+          php artisan --version
 
-      - name: Docker Compose Process
-        working-directory: ./backend_tripost
-        run: docker compose ps -a
+      - name: Run migrations
+        run: php artisan migrate --force
 
-      - name: PHP, Composer Version
-        working-directory: ./backend_tripost
-        run: |
-          docker compose exec -T laravel.test php --version
-          docker compose exec -T laravel.test composer --version
+      - name: Test migration rollback
+        run: php artisan migrate:refresh --force
 
-      - name: Laravel Settings
-        working-directory: ./backend_tripost
-        run: |
-          docker compose exec -T laravel.test php artisan key:generate --force
-          docker compose exec -T laravel.test php artisan optimize
-          docker compose exec -T laravel.test chmod -R 777 storage bootstrap/cache
+      - name: Seed database
+        run: php artisan db:seed --force
 
-      - name: Laravel Version
-        working-directory: ./backend_tripost
-        run: docker compose exec -T laravel.test php artisan --version
+      - name: Run PHPUnit tests
+        run: php artisan test
 
-      - name: Laravel Migrate Testing
-        working-directory: ./backend_tripost
-        run: docker compose exec -T laravel.test php artisan migrate --force
+      # フロントエンドのビルドテスト（必要に応じて）
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend_tripost/package-lock.json
 
-      - name: Laravel Rollback Testing
-        working-directory: ./backend_tripost
-        run: docker compose exec -T laravel.test php artisan migrate:refresh --force
+      - name: Install NPM dependencies
+        run: npm ci
 
-      - name: Laravel Seeding Testing
-        working-directory: ./backend_tripost
-        run: docker compose exec -T laravel.test php artisan db:seed --force
-
-      - name: Laravel PHPUnit Testing
-        working-directory: ./backend_tripost
-        run: |
-          docker compose exec -T laravel.test php artisan config:clear
-          docker compose exec -T laravel.test php artisan test
-
-      - name: Cleanup
-        if: always()
-        working-directory: ./backend_tripost
-        run: docker compose down -v
+      - name: Build frontend
+        run: npm run build
