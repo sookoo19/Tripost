@@ -8,150 +8,66 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  laravel-testing:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v2
 
-      # リポジトリ構造の詳細確認
-      - name: Debug repository structure
+      - name: Ubuntu Version
+        run: cat /etc/os-release
+
+      - name: Docker Version
+        run: docker version
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: ./backend/vendor
+          key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Docker Compose Build and Up
         run: |
-          echo "=== Current directory ==="
-          pwd
-          echo "=== Root files ==="
-          ls -la
-          echo "=== Looking for Laravel files recursively ==="
-          find . -name ".env.example" -type f
-          find . -name "docker-compose*.yml" -type f
-          find . -name "composer.json" -type f
+          docker-compose build
+          docker-compose up -d
 
-      # .env.example の場所に応じた環境設定
-      - name: Setup environment
+      - name: Docker Compose Process
+        run: docker-compose ps -a
+
+      - name: PHP, Composer Version
         run: |
-          ENV_EXAMPLE_PATH=$(find . -name ".env.example" -type f | head -n 1)
-          if [ -z "$ENV_EXAMPLE_PATH" ]; then
-            echo ".env.example not found anywhere!"
-            exit 1
-          fi
-          echo "Found .env.example at: $ENV_EXAMPLE_PATH"
-          DIR=$(dirname "$ENV_EXAMPLE_PATH")
-          cd "$DIR"
-          cp .env.example .env
+          docker-compose exec -T app php --version
+          docker-compose exec -T app composer --version
 
-          # .env.testing がなければ .env からコピー
-          if [ ! -f .env.testing ]; then
-            cp .env .env.testing
-          fi
+      - name: Composer Install
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: docker-compose exec -T app composer install -q --no-ansi --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist
 
-          sed -i 's/DB_HOST=.*/DB_HOST=mysql/' .env.testing
-          sed -i 's/DB_DATABASE=.*/DB_DATABASE=testing/' .env.testing
-          sed -i 's/DB_USERNAME=.*/DB_USERNAME=sail/' .env.testing
-          sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=password/' .env.testing
-          echo "Environment file created at: $(pwd)/.env.testing"
+      - name: Composer Dump Autoload
+        run: docker-compose exec -T app composer dump-autoload -q
 
-      # Docker Compose ファイルの確認と起動
-      - name: Setup and start Docker containers
+      - name: Laravel Settings
         run: |
-          COMPOSE_PATH=$(find . -name "docker-compose*.yml" -type f | head -n 1)
-          if [ -z "$COMPOSE_PATH" ]; then
-            echo "No docker-compose file found!"
-            exit 1
-          fi
-          echo "Found docker-compose file at: $COMPOSE_PATH"
-          DIR=$(dirname "$COMPOSE_PATH")
-          cd "$DIR"
-          docker compose -f "$(basename "$COMPOSE_PATH")" build
-          docker compose -f "$(basename "$COMPOSE_PATH")" up -d
-          echo "Waiting for containers..."
-          sleep 20
-          docker ps -a
+          docker-compose exec -T app cp .env.example .env
+          docker-compose exec -T app php artisan key:generate
+          docker-compose exec -T app php artisan optimize
+          docker-compose exec -T app chmod -R 777 storage bootstrap/cache
 
-      # Laravel プロジェクトのディレクトリを環境変数として設定
-      - name: Set Laravel directory
-        id: laravel-dir
+      - name: Laravel Version
+        run: docker-compose exec -T app php artisan --version
+
+      - name: Laravel Migrate Testing
+        run: docker-compose exec -T app php artisan migrate
+
+      - name: Laravel Rollback Testing
+        run: docker-compose exec -T app php artisan migrate:refresh
+
+      - name: Laravel Seeding Testing
+        run: docker-compose exec -T app php artisan db:seed
+
+      - name: Laravel PHPUnit Testing
         run: |
-          COMPOSER_PATH=$(find . -name "composer.json" -type f | head -n 1)
-          if [ -z "$COMPOSER_PATH" ]; then
-            echo "composer.json not found!"
-            exit 1
-          fi
-          LARAVEL_DIR=$(dirname "$COMPOSER_PATH")
-          echo "laravel_dir=$LARAVEL_DIR" >> $GITHUB_OUTPUT
-          echo "Laravel directory: $LARAVEL_DIR"
-
-      # Laravelコンテナ名の確認
-      - name: Detect Laravel container name
-        id: container
-        run: |
-          CONTAINER=$(docker ps --format '{{.Names}}' | grep -E 'laravel|app|php|web' | head -n 1)
-          if [ -z "$CONTAINER" ]; then
-            echo "Laravel container not found!"
-            echo "Available containers:"
-            docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}'
-            # フォールバック: 最初のコンテナを使用
-            CONTAINER=$(docker ps --format '{{.Names}}' | head -n 1)
-            echo "Using fallback container: $CONTAINER"
-          fi
-          echo "container=$CONTAINER" >> $GITHUB_OUTPUT
-          echo "Using container: $CONTAINER"
-
-      # Composer パッケージのインストール
-      - name: Install Composer dependencies
-        run: |
-          docker exec ${{ steps.container.outputs.container }} composer install --no-progress --no-interaction --prefer-dist --no-dev
-
-      # アプリケーションのセットアップ
-      - name: Prepare Laravel application
-        run: |
-          docker exec ${{ steps.container.outputs.container }} cp .env.testing .env || docker exec ${{ steps.container.outputs.container }} cp .env.example .env
-          docker exec ${{ steps.container.outputs.container }} php artisan key:generate
-          docker exec ${{ steps.container.outputs.container }} chmod -R 777 storage bootstrap/cache || true
-
-          # データベースの準備
-          docker exec ${{ steps.container.outputs.container }} php artisan migrate:fresh --force || echo "Migration failed, continuing..."
-
-      # 基本テストの実行
-      - name: Run basic tests
-        continue-on-error: true
-        run: |
-          # PHPUnit テスト
-          docker exec ${{ steps.container.outputs.container }} php artisan test || echo "Tests failed"
-
-          # フロントエンドビルド
-          docker exec ${{ steps.container.outputs.container }} npm ci || echo "npm ci failed"
-          docker exec ${{ steps.container.outputs.container }} npm run build || echo "npm build failed"
-
-      # 詳細なログ出力（失敗時）
-      - name: Display detailed logs on failure
-        if: failure()
-        run: |
-          echo "=== Container logs ==="
-          docker logs ${{ steps.container.outputs.container }} || echo "No container logs available"
-
-          echo "=== All container status ==="
-          docker ps -a
-
-          echo "=== Compose logs (if available) ==="
-          COMPOSE_PATH=$(find . -name "docker-compose*.yml" -type f | head -n 1)
-          if [ -n "$COMPOSE_PATH" ]; then
-            DIR=$(dirname "$COMPOSE_PATH")
-            COMPOSE_FILE=$(basename "$COMPOSE_PATH")
-            cd "$DIR"
-            docker compose -f "$COMPOSE_FILE" logs || echo "Compose logs not available"
-          fi
-
-      # コンテナの停止・削除
-      - name: Stop and remove containers
-        if: always()
-        run: |
-          COMPOSE_PATH=$(find . -name "docker-compose*.yml" -type f | head -n 1)
-          if [ -n "$COMPOSE_PATH" ]; then
-            DIR=$(dirname "$COMPOSE_PATH")
-            COMPOSE_FILE=$(basename "$COMPOSE_PATH")
-            cd "$DIR"
-            docker compose -f "$COMPOSE_FILE" down -v || echo "Compose down failed"
-          else
-            echo "Stopping containers manually..."
-            docker stop $(docker ps -q) || echo "No containers to stop"
+          docker-compose exec -T app php artisan config:clear
+          docker-compose exec -T app php artisan test
