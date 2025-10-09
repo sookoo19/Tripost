@@ -7,7 +7,7 @@ export default function Welcome() {
       <div className='min-h-screen relative bg-yellow-400'>
         {/* 背景画像 */}
         <img
-          src=''
+          src='/images/main_tripost.png'
           alt='welcome'
           className='absolute inset-0 w-full h-full object-cover'
           draggable={false}
