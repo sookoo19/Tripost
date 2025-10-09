@@ -1,0 +1,85 @@
+name: Docker Laravel Test CI
+
+on:
+  # develop ブランチへの push 時に実行
+  push:
+    branches: [ develop ]
+  # production ブランチへの PR 時に実行
+  pull_request:
+    branches: [ production ]
+  # 手動実行も可能に
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Docker キャッシュの設定
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      # .env.testing ファイルのセットアップ
+      - name: Setup environment
+        run: |
+          cp .env.example .env.testing
+          sed -i 's/DB_HOST=.*/DB_HOST=mysql/' .env.testing
+          sed -i 's/DB_DATABASE=.*/DB_DATABASE=testing/' .env.testing
+          sed -i 's/DB_USERNAME=.*/DB_USERNAME=sail/' .env.testing
+          sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=password/' .env.testing
+          cat .env.testing
+
+      # Docker Compose を使ってコンテナをビルド・起動
+      - name: Build and start Docker containers
+        run: |
+          docker compose -f docker-compose.yml build
+          docker compose -f docker-compose.yml up -d
+
+      # コンテナの状態確認
+      - name: Check running containers
+        run: docker ps -a
+
+      # Composer パッケージのインストール
+      - name: Install Composer dependencies
+        run: docker compose exec -T laravel composer install --no-progress --no-interaction
+
+      # アプリケーションのセットアップ
+      - name: Prepare Laravel application
+        run: |
+          docker compose exec -T laravel php artisan key:generate --env=testing
+          docker compose exec -T laravel php artisan migrate:fresh --seed --env=testing
+
+      # コード品質チェック
+      - name: Check code quality
+        run: docker compose exec -T laravel ./vendor/bin/pint --test
+
+      # PHPUnit テストの実行
+      - name: Run tests
+        run: docker compose exec -T laravel php artisan test --env=testing
+
+      # フロントエンド関連のセットアップとテスト
+      - name: Frontend setup and tests
+        run: |
+          docker compose exec -T laravel npm ci
+          docker compose exec -T laravel npm run build
+
+      # コンテナのログ確認（テスト失敗時のデバッグ用）
+      - name: Display container logs on failure
+        if: failure()
+        run: |
+          docker compose logs
+
+      # コンテナの停止・削除
+      - name: Stop and remove containers
+        if: always()
+        run: docker compose down -v
