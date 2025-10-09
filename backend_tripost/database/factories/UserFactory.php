@@ -28,14 +28,18 @@ class UserFactory extends Factory
         $strongPassword = defined('Tests\TestCase::TEST_PASSWORD') 
             ? TestCase::TEST_PASSWORD 
             : 'Password123!';
-            
+
+        // 5〜12文字の英数字を生成
+        $len = $this->faker->numberBetween(5, 12);
+
         return [
             'name' => $this->faker->name(),
             'email' => $this->faker->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make($strongPassword),
             'remember_token' => Str::random(10),
-            'displayid' => $this->faker->unique()->userName(),
+            // displayid: 英数字のみ、長さは 5〜12
+            'displayid' => $this->faker->unique()->regexify('[A-Za-z0-9]{' . $len . '}'),
         ];
     }
 
