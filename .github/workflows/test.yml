@@ -10,11 +10,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
-    # 作業ディレクトリを明示的に指定
-    defaults:
-      run:
-        working-directory: ./backend_tripost
 
     steps:
       - name: Checkout code
@@ -33,14 +28,17 @@ jobs:
             ${{ runner.os }}-buildx-
 
       # ファイル確認（デバッグ用）
-      - name: List files
+      - name: List files in repository
         run: |
-          pwd
+          echo "=== Root directory ==="
           ls -la
+          echo "=== backend_tripost directory ==="
+          ls -la backend_tripost/
 
       # .env.testing ファイルのセットアップ
       - name: Setup environment
         run: |
+          cd backend_tripost
           if [ ! -f .env.example ]; then
             echo ".env.example not found!"
             exit 1
@@ -54,11 +52,15 @@ jobs:
       # Docker Compose ファイルの確認
       - name: Check Docker Compose files
         run: |
+          cd backend_tripost
+          echo "Looking for docker-compose files..."
           ls -la docker-compose*.yml || echo "No docker-compose files found"
 
       # Docker Compose を使ってコンテナをビルド・起動
       - name: Build and start Docker containers
         run: |
+          cd backend_tripost
+          
           # docker-compose.yml または docker-compose.dev.yml を使用
           if [ -f docker-compose.yml ]; then
             COMPOSE_FILE="docker-compose.yml"
@@ -69,6 +71,7 @@ jobs:
             exit 1
           fi
           
+          echo "Using compose file: $COMPOSE_FILE"
           docker compose -f $COMPOSE_FILE build
           docker compose -f $COMPOSE_FILE up -d
 
@@ -76,7 +79,7 @@ jobs:
       - name: Wait for containers to be ready
         run: |
           echo "Waiting for containers to be ready..."
-          sleep 10
+          sleep 15
           docker ps -a
 
       # Laravelコンテナ名の確認
@@ -86,6 +89,7 @@ jobs:
           CONTAINER=$(docker ps --format '{{.Names}}' | grep -E 'laravel|app|php' | head -n 1)
           if [ -z "$CONTAINER" ]; then
             echo "Laravel container not found!"
+            echo "Available containers:"
             docker ps -a
             exit 1
           fi
@@ -94,39 +98,43 @@ jobs:
 
       # Composer パッケージのインストール
       - name: Install Composer dependencies
-        run: docker exec -t ${{ steps.container.outputs.container }} composer install --no-progress --no-interaction
+        run: |
+          docker exec ${{ steps.container.outputs.container }} composer install --no-progress --no-interaction --prefer-dist
 
       # アプリケーションのセットアップ
       - name: Prepare Laravel application
         run: |
-          docker exec -t ${{ steps.container.outputs.container }} cp .env.testing .env
-          docker exec -t ${{ steps.container.outputs.container }} php artisan key:generate
-          docker exec -t ${{ steps.container.outputs.container }} php artisan migrate:fresh --seed --force
+          docker exec ${{ steps.container.outputs.container }} cp .env.testing .env
+          docker exec ${{ steps.container.outputs.container }} php artisan key:generate
+          docker exec ${{ steps.container.outputs.container }} chmod -R 777 storage bootstrap/cache
+          docker exec ${{ steps.container.outputs.container }} php artisan migrate:fresh --seed --force
 
       # コード品質チェック（Pint がインストールされている場合）
       - name: Check code quality
         continue-on-error: true
         run: |
-          if docker exec -t ${{ steps.container.outputs.container }} test -f ./vendor/bin/pint; then
-            docker exec -t ${{ steps.container.outputs.container }} ./vendor/bin/pint --test
+          if docker exec ${{ steps.container.outputs.container }} test -f ./vendor/bin/pint; then
+            docker exec ${{ steps.container.outputs.container }} ./vendor/bin/pint --test
           else
             echo "Pint not installed, skipping..."
           fi
 
       # PHPUnit テストの実行
       - name: Run tests
-        run: docker exec -t ${{ steps.container.outputs.container }} php artisan test
+        run: |
+          docker exec ${{ steps.container.outputs.container }} php artisan test
 
       # フロントエンド関連のセットアップとテスト
       - name: Frontend setup and build
         run: |
-          docker exec -t ${{ steps.container.outputs.container }} npm ci
-          docker exec -t ${{ steps.container.outputs.container }} npm run build
+          docker exec ${{ steps.container.outputs.container }} npm ci
+          docker exec ${{ steps.container.outputs.container }} npm run build
 
       # コンテナのログ確認（テスト失敗時のデバッグ用）
       - name: Display container logs on failure
         if: failure()
         run: |
+          cd backend_tripost
           if [ -f docker-compose.yml ]; then
             docker compose -f docker-compose.yml logs
           elif [ -f docker-compose.dev.yml ]; then
@@ -137,6 +145,7 @@ jobs:
       - name: Stop and remove containers
         if: always()
         run: |
+          cd backend_tripost
           if [ -f docker-compose.yml ]; then
             docker compose -f docker-compose.yml down -v
           elif [ -f docker-compose.dev.yml ]; then
