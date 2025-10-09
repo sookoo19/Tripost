@@ -1,0 +1,43 @@
+services:
+  laravel:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tripost-laravel
+    env_file:
+      - .env.production
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "9000:9000"
+    depends_on:
+      - redis
+    networks:
+      - tripost
+
+  nginx:
+    image: nginx:1.25
+    container_name: tripost-nginx
+    ports:                  # ← 追加
+      - "80:80"
+      - "443:443"
+    volumes:
+      - .:/var/www/html
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    depends_on:
+      - laravel
+    networks:
+      - tripost
+
+  redis:
+    image: redis:7
+    container_name: tripost-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - tripost
+
+networks:
+  tripost:
+    driver: bridge

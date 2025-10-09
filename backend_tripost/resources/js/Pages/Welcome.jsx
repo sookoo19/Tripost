@@ -7,7 +7,7 @@ export default function Welcome() {
       <div className='min-h-screen relative bg-yellow-400'>
         {/* 背景画像 */}
         <img
-          src='/images/main_tripost.png'
+          src=''
           alt='welcome'
           className='absolute inset-0 w-full h-full object-cover'
           draggable={false}
@@ -32,7 +32,7 @@ export default function Welcome() {
             登録 / ログインはこちら
           </Link>
           <Link href={route('posts.index')} className='underline'>
-            ゲストで利用する
+            ゲストログイン
           </Link>
         </div>
       </div>

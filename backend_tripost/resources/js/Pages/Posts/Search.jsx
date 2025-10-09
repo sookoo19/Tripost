@@ -40,14 +40,6 @@ export default function Search({ countries, styles, purposes, budgets }) {
     }));
   }, [purposes]);
 
-  // React Budget用のstyleデータ整形（useMemoでメモ化）
-  const budgetOptions = useMemo(() => {
-    return budgets.map(budget => ({
-      ...budget,
-      value: budget.id,
-    }));
-  }, [budgets]);
-
   // 予算の選択肢（表示は日本円フォーマット、値は文字列）
   const budgetMinOptions = useMemo(() => {
     const vals = [0, 50000, 100000, 200000, 300000, 500000];
