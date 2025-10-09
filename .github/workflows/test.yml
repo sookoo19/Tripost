@@ -14,6 +14,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Ubuntu Version
+        run: cat /etc/os-release
+
+      - name: Docker Version
+        run: docker version
+
       - name: Cache Composer dependencies
         uses: actions/cache@v3
         id: cache
@@ -23,24 +29,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-composer-
 
-       # 追加: ここでvendor生成
-      - name: Install Composer dependencies (pre Docker build)
-        working-directory: ./backend_tripost
-        run: composer install --no-dev --prefer-dist --no-interaction --no-progress
-
-      # 追加（Docker compose buildの前にcomposer install）
-      - name: Install Composer dependencies (pre Docker build)
-        working-directory: ./backend_tripost
-        run: composer install --no-dev --prefer-dist --no-interaction --no-progress
-
-
-
       - name: Docker Compose Build and Up
         working-directory: ./backend_tripost
         run: |
           docker compose build
           docker compose up -d
-          sleep 10
+          sleep 15
 
       - name: Docker Compose Process
         working-directory: ./backend_tripost
@@ -55,6 +49,38 @@ jobs:
       - name: Composer Install
         if: steps.cache.outputs.cache-hit != 'true'
         working-directory: ./backend_tripost
-        run: docker compose exec -T laravel.test composer install -q --no-ansi --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist
+        run: docker compose exec -T laravel.test composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
-      # 以下、laravel.test に合わせて同様に exec コマンドを更新してください
+      - name: Composer Dump Autoload
+        working-directory: ./backend_tripost
+        run: docker compose exec -T laravel.test composer dump-autoload -q
+
+      - name: Laravel Settings
+        working-directory: ./backend_tripost
+        run: |
+          docker compose exec -T laravel.test cp .env.example .env
+          docker compose exec -T laravel.test php artisan key:generate --force
+          docker compose exec -T laravel.test php artisan optimize
+          docker compose exec -T laravel.test chmod -R 777 storage bootstrap/cache
+
+      - name: Laravel Version
+        working-directory: ./backend_tripost
+        run: docker compose exec -T laravel.test php artisan --version
+
+      - name: Laravel Migrate Testing
+        working-directory: ./backend_tripost
+        run: docker compose exec -T laravel.test php artisan migrate --force
+
+      - name: Laravel Rollback Testing
+        working-directory: ./backend_tripost
+        run: docker compose exec -T laravel.test php artisan migrate:refresh --force
+
+      - name: Laravel Seeding Testing
+        working-directory: ./backend_tripost
+        run: docker compose exec -T laravel.test php artisan db:seed --force
+
+      - name: Laravel PHPUnit Testing
+        working-directory: ./backend_tripost
+        run: |
+          docker compose exec -T laravel.test php artisan config:clear
+          docker compose exec -T laravel.test php artisan test
