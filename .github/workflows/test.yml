@@ -30,18 +30,21 @@ jobs:
       # .env.example の場所に応じた環境設定
       - name: Setup environment
         run: |
-          # .env.example の場所を特定
           ENV_EXAMPLE_PATH=$(find . -name ".env.example" -type f | head -n 1)
           if [ -z "$ENV_EXAMPLE_PATH" ]; then
             echo ".env.example not found anywhere!"
             exit 1
           fi
-          
           echo "Found .env.example at: $ENV_EXAMPLE_PATH"
           DIR=$(dirname "$ENV_EXAMPLE_PATH")
           cd "$DIR"
-          
-          cp .env.example .env.testing
+          cp .env.example .env
+
+          # .env.testing がなければ .env からコピー
+          if [ ! -f .env.testing ]; then
+            cp .env .env.testing
+          fi
+
           sed -i 's/DB_HOST=.*/DB_HOST=mysql/' .env.testing
           sed -i 's/DB_DATABASE=.*/DB_DATABASE=testing/' .env.testing
           sed -i 's/DB_USERNAME=.*/DB_USERNAME=sail/' .env.testing
@@ -51,26 +54,16 @@ jobs:
       # Docker Compose ファイルの確認と起動
       - name: Setup and start Docker containers
         run: |
-          # docker-compose.yml の場所を特定
           COMPOSE_PATH=$(find . -name "docker-compose*.yml" -type f | head -n 1)
           if [ -z "$COMPOSE_PATH" ]; then
             echo "No docker-compose file found!"
             exit 1
           fi
-          
           echo "Found docker-compose file at: $COMPOSE_PATH"
           DIR=$(dirname "$COMPOSE_PATH")
-          COMPOSE_FILE=$(basename "$COMPOSE_PATH")
-          
           cd "$DIR"
-          echo "Working in directory: $(pwd)"
-          echo "Using compose file: $COMPOSE_FILE"
-          
-          # Docker Compose でコンテナを起動
-          docker compose -f "$COMPOSE_FILE" build
-          docker compose -f "$COMPOSE_FILE" up -d
-          
-          # 起動待機
+          docker compose -f "$(basename "$COMPOSE_PATH")" build
+          docker compose -f "$(basename "$COMPOSE_PATH")" up -d
           echo "Waiting for containers..."
           sleep 20
           docker ps -a
@@ -115,7 +108,7 @@ jobs:
           docker exec ${{ steps.container.outputs.container }} cp .env.testing .env || docker exec ${{ steps.container.outputs.container }} cp .env.example .env
           docker exec ${{ steps.container.outputs.container }} php artisan key:generate
           docker exec ${{ steps.container.outputs.container }} chmod -R 777 storage bootstrap/cache || true
-          
+
           # データベースの準備
           docker exec ${{ steps.container.outputs.container }} php artisan migrate:fresh --force || echo "Migration failed, continuing..."
 
@@ -125,7 +118,7 @@ jobs:
         run: |
           # PHPUnit テスト
           docker exec ${{ steps.container.outputs.container }} php artisan test || echo "Tests failed"
-          
+
           # フロントエンドビルド
           docker exec ${{ steps.container.outputs.container }} npm ci || echo "npm ci failed"
           docker exec ${{ steps.container.outputs.container }} npm run build || echo "npm build failed"
@@ -136,10 +129,10 @@ jobs:
         run: |
           echo "=== Container logs ==="
           docker logs ${{ steps.container.outputs.container }} || echo "No container logs available"
-          
+
           echo "=== All container status ==="
           docker ps -a
-          
+
           echo "=== Compose logs (if available) ==="
           COMPOSE_PATH=$(find . -name "docker-compose*.yml" -type f | head -n 1)
           if [ -n "$COMPOSE_PATH" ]; then
@@ -153,7 +146,6 @@ jobs:
       - name: Stop and remove containers
         if: always()
         run: |
-          # 動的にdocker-composeファイルを見つけて停止
           COMPOSE_PATH=$(find . -name "docker-compose*.yml" -type f | head -n 1)
           if [ -n "$COMPOSE_PATH" ]; then
             DIR=$(dirname "$COMPOSE_PATH")
@@ -163,4 +155,3 @@ jobs:
           else
             echo "Stopping containers manually..."
             docker stop $(docker ps -q) || echo "No containers to stop"
-          fi
