@@ -23,6 +23,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-composer-
 
+       # 追加: ここでvendor生成
+      - name: Install Composer dependencies (pre Docker build)
+        working-directory: ./backend_tripost
+        run: composer install --no-dev --prefer-dist --no-interaction --no-progress
+
+
       - name: Docker Compose Build and Up
         working-directory: ./backend_tripost
         run: |
