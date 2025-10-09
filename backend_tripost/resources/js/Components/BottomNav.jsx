@@ -28,6 +28,8 @@ export default function BottomNav() {
       </Link>
 
       <button
+        aria-label='タビ新規作成'
+        title='タビ新規作成'
         onClick={
           user ? () => setShowModal(true) : () => setToLoginModalOpen(true)
         }

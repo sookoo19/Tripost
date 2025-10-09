@@ -1,0 +1,19 @@
+rules:
+  heading-order: false
+  color-contrast: true   # 有効にする（以前は "error" としていた）
+  aria-roles: true       # 有効にする（以前は "warn" としていた）
+
+exclude:
+  - 'public/**'
+  - 'node_modules/**'
+  - 'tests/**'
+
+global-components:
+  AxeButton: button
+
+global-libraries:
+  - 'react-native'
+  - '@mui/material'
+
+options:
+  failOnError: false

@@ -148,7 +148,6 @@ export default function Edit({ user, countries = [] }) {
             name='displayid'
             value={data.displayid}
             className='bg-gray-50 mt-1 block w-full'
-            autoComplete='displayid'
             isFocused={true}
             onChange={e => setData('displayid', e.target.value)}
             required
@@ -187,7 +186,6 @@ export default function Edit({ user, countries = [] }) {
             name='bio'
             className='rounded-md bg-gray-50 border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 mt-1 block w-full h-32'
             value={data.bio}
-            autoComplete='bio'
             onChange={e => setData('bio', e.target.value)}
           />
 
