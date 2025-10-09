@@ -28,6 +28,12 @@ jobs:
         working-directory: ./backend_tripost
         run: composer install --no-dev --prefer-dist --no-interaction --no-progress
 
+      # 追加（Docker compose buildの前にcomposer install）
+      - name: Install Composer dependencies (pre Docker build)
+        working-directory: ./backend_tripost
+        run: composer install --no-dev --prefer-dist --no-interaction --no-progress
+
+
 
       - name: Docker Compose Build and Up
         working-directory: ./backend_tripost
