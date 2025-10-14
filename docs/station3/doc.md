@@ -4,15 +4,10 @@
 最速でのリリースを求めるために、学習した技術をメインで使用。リリース後モバイルアプリ展開に適した言語を選定。
 
 1. フロントエンド
-node.js 22.16.0
-・React.js
-Google Maps JavaScript APIとの統合が豊富
-・SPA（Single Page Application）
-ページ遷移なしでの地図とコンテンツ表示切り替え
+React.js + Inertia.js
 
 2. バックエンド
-PHP 8.3.22
-・Laravel
+Laravel (PHP Framework)
 
 3. データベース
 ・MySQL
@@ -29,13 +24,10 @@ Directions API: ルート表示機能
 
 
 6. 状態管理
-React Context + useReducer
+React Hooks / Context API / Inertia共有Props
 
 7.ホスティング
-Vercel(フロント)
-Railway(バック、データベース)
-無料
-(Googleでもデプロイできるか試してみる)
+AWS EC2 (アプリ), RDS (MySQL), S3 (画像), Route53 (DNS)
 
 ## 画面設計図
 https://www.figma.com/design/JkcWsCKqWOFi29hsUtHpKd/%E5%80%8B%E4%BA%BA%E9%96%8B%E7%99%BA%E3%80%8ETripost%E3%80%8F?node-id=0-1&t=rquA2HitHrGef66S-1
@@ -47,25 +39,9 @@ https://www.figma.com/design/JkcWsCKqWOFi29hsUtHpKd/%E5%80%8B%E4%BA%BA%E9%96%8B%
 https://www.figma.com/design/JkcWsCKqWOFi29hsUtHpKd/%E5%80%8B%E4%BA%BA%E9%96%8B%E7%99%BA%E3%80%8ETripost%E3%80%8F?node-id=25-513&t=rquA2HitHrGef66S-1
 
 
-## ER図
-https://www.figma.com/design/JkcWsCKqWOFi29hsUtHpKd/%E5%80%8B%E4%BA%BA%E9%96%8B%E7%99%BA%E3%80%8ETripost%E3%80%8F?node-id=34-1740&t=rquA2HitHrGef66S-1
-
 ## API仕様書
 OpenAPI 3.0仕様書
 - **ファイル場所**: `openapi:yml '3.0.`
 - **内容**: REST API の詳細仕様
 - **オンライン確認**: Swagger UI で閲覧可能
-
-## テーブル定義書
-・users
-・posts
-・likes
-・comments
-・follows
-・itineraries
-・photos
-・countries
-・styles
-・purposes
-・budgets
 
