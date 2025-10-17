@@ -16,7 +16,7 @@ class DisplayIdFormat implements ValidationRule
     {
         // 英数字とアンダースコアのみチェック
         if (!preg_match('/^[a-zA-Z0-9_]+$/', $value)) {
-            $fail('ディスプレイIDは半角英数字とアンダースコア（_）のみ使用できます。');
+            $fail('ユーザーIDは半角英数字とアンダースコア（_）のみ使用できます。');
         }
     }
 }
