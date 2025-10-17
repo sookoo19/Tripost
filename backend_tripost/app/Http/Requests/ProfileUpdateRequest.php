@@ -3,6 +3,9 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Rules\DisplayIdFormat;
+use App\Models\User;                
+use Illuminate\Validation\Rule; 
 
 class ProfileUpdateRequest extends FormRequest
 {
@@ -14,7 +17,7 @@ class ProfileUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'displayid' => ['required', 'string', 'min:5'],
+            'displayid' => ['required', 'string', 'min:5', 'max:50', Rule::unique(User::class, 'displayid')->ignore(optional($this->user())->id), new DisplayIdFormat()],
             'profile_image' => [
                 'nullable',
                 function ($attribute, $value, $fail) {
@@ -29,7 +32,7 @@ class ProfileUpdateRequest extends FormRequest
                     }
                 }
             ],
-            'name' => ['nullable', 'string', 'max:255'],
+            'name' => ['nullable', 'string', 'max:50'],
             'bio' => ['nullable', 'string', 'max:1000'],
             'visited_countries' => ['array'],
             'visited_countries.*' => ['string'],

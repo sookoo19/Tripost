@@ -149,7 +149,7 @@ return [
     'starts_with' => ':attributeには、:valuesのどれかで始まる値を指定してください。',
     'string' => ':attributeは文字列を指定してください。',
     'timezone' => ':attributeには、有効なゾーンを指定してください。',
-    'unique' => ':attributeは既に使用されています。',
+    'unique' => ':attributeは既に他のユーザーに使用されています。',
     'uploaded' => ':attributeのアップロードに失敗しました。',
     'uppercase' => ':attributeは、大文字のみで指定してください。',
     'url' => ':attributeに正しい形式を指定してください。',
@@ -225,7 +225,7 @@ return [
         'minute' => '分',
         'mobile' => '携帯',
         'month' => '月',
-        'name' => '名前',
+        'name' => 'ユーザー名',
         'national_code' => '国コード',
         'number' => '番号',
         'password' => 'パスワード',
@@ -261,6 +261,9 @@ return [
         'username' => 'ユーザー名',
         'year' => '年',
         'displayid' => 'ユーザーID',
+        'subtitle' => 'サブタイトル',
+        'description' => 'タビ概要',
+        'region' => '地域'
     ],
 
 ];
