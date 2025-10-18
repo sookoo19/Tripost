@@ -76,5 +76,6 @@ Route::middleware('auth')->group(function () {
 
 // 他ユーザーのプロフィール（最後に配置）
 Route::get('/profile/{user}', [ProfileController::class, 'showPublic'])->name('users.profile'); 
+Route::get('/terms', fn() => inertia('TermsAndPrivacy'));
 
 require __DIR__.'/auth.php';

@@ -141,26 +141,6 @@ export default function Edit({ user, countries = [] }) {
         <div className='mt-8'></div>
 
         <div>
-          <InputLabel htmlFor='displayid' value='ユーザーID（5文字以上）' />
-
-          <TextInput
-            id='displayid'
-            name='displayid'
-            value={data.displayid}
-            className='bg-gray-50 mt-1 block w-full'
-            isFocused={true}
-            onChange={e => setData('displayid', e.target.value)}
-            required
-          />
-
-          {errors.displayid && (
-            <InputError message={errors.displayid} className='mt-2' />
-          )}
-        </div>
-
-        <div className='mt-8'></div>
-
-        <div>
           <InputLabel htmlFor='name' value='ユーザー名' />
 
           <TextInput
