@@ -200,12 +200,17 @@ export default function Show({ user, countries, posts }) {
                         非公開タビ
                       </div>
                     </Link>
-                    <div className='text-left mb-4 text-lg text-gray-700 font-semibold'>
+                    <a
+                      href='/terms'
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='text-left mb-4 text-lg text-gray-700 font-semibold'
+                    >
                       このアプリについて
-                    </div>
+                    </a>
                     <button
                       type='button'
-                      className='mb-4 text-lg text-red-500 font-semibold w-full text-left'
+                      className='my-4 text-lg text-red-500 font-semibold w-full text-left'
                       onClick={() => {
                         if (window.confirm('本当にログアウトしますか？')) {
                           router.post('/auth/logout');

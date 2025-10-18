@@ -12,6 +12,7 @@ export default function Register() {
     email: '',
     password: '',
     password_confirmation: '',
+    terms_agreed: false,
   });
 
   const handleSubmit = e => {
@@ -109,9 +110,37 @@ export default function Register() {
           )}
         </div>
 
+        <div className='mt-6'>
+          <label className='flex items-start'>
+            <input
+              type='checkbox'
+              name='terms_agreed'
+              checked={data.terms_agreed}
+              onChange={e => setData('terms_agreed', e.target.checked)}
+              className='rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 mt-0.5'
+              required
+            />
+            <span className='ml-2 text-sm text-gray-600'>
+              <a
+                href='/terms'
+                target='_blank'
+                rel='noopener noreferrer'
+                className='text-indigo-600 hover:text-indigo-800 underline'
+              >
+                利用規約・プライバシーポリシー
+              </a>
+              に同意します
+            </span>
+          </label>
+
+          {errors.terms_agreed && (
+            <InputError message={errors.terms_agreed} className='mt-2' />
+          )}
+        </div>
+
         <PrimaryButton
           className='w-full h-12 mt-10 mb-4 flex justify-center items-center'
-          disabled={processing}
+          disabled={processing || !data.terms_agreed}
         >
           登録
         </PrimaryButton>
@@ -120,7 +149,7 @@ export default function Register() {
           href={route('login')}
           className='rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
         >
-          すでにアカウントをお持ちですか？
+          すでにアカウントをお持ちですか?
         </Link>
       </form>
     </GuestLayout>
