@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Rules\DisplayIdFormat;
 use App\Models\User;                
 use Illuminate\Validation\Rule; 
 
@@ -17,7 +16,6 @@ class ProfileUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'displayid' => ['required', 'string', 'min:5', 'max:50', Rule::unique(User::class, 'displayid')->ignore(optional($this->user())->id), new DisplayIdFormat()],
             'profile_image' => [
                 'nullable',
                 function ($attribute, $value, $fail) {
@@ -29,6 +27,11 @@ class ProfileUpdateRequest extends FormRequest
                     }
                     if (!$value->isValid() || !in_array($value->extension(), ['jpg', 'jpeg', 'png', 'webp'])) {
                         $fail('画像ファイル（jpg, jpeg, png, webp）を指定してください。');
+                    }
+                    // 10MB 上限（バイトで比較）
+                    if ($value->getSize() !== null && $value->getSize() > 10 * 1024 * 1024) {
+                        $fail('画像は10MB以下にしてください。');
+                        return;
                     }
                 }
             ],

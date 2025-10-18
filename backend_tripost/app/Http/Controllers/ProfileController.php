@@ -83,7 +83,6 @@ class ProfileController extends Controller
     return Inertia::render('Profile/Edit', [
         'user' => [
             'id' => $user->id,
-            'displayid' => $user->displayid,
             'name' => $user->name,
             'email' => $user->email,
             'profile_image' => $user->profile_image,
@@ -99,7 +98,6 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-      
         //バリデーションはProfileUpdateRequest内
         $user = $request->user();
         $user->fill($request->validated());
