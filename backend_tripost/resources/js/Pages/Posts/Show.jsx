@@ -344,13 +344,11 @@ export default function Show({ post, user }) {
               }
             >
               <img
-                src={
-                  post?.user?.profile_image_url ||
-                  (post?.user?.profile_image
-                    ? `/storage/${post?.user?.profile_image}`
-                    : '/images/defalt_profile.jpg')
-                }
-                alt='avatar'
+    src={
+        post?.user?.profile_image_url ||
+        '/images/defalt_profile.jpg'
+    }
+    alt='profile'
                 className='w-6 h-6 rounded-full object-cover'
               />
             </Link>
