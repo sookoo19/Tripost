@@ -61,6 +61,7 @@ class ProfileController extends Controller
                 'displayid' => $user->displayid,
                 'name' => $user->name,
                 'profile_image' => $user->profile_image,
+                'profile_image_url' => $user->profile_image ? Storage::url($user->profile_image) : null, // 追加
                 'bio' => $user->bio,
                 // ここで国コード配列を渡す
                 'visited_countries' => $user->visitedCountries->pluck('code')->toArray(),
@@ -68,7 +69,7 @@ class ProfileController extends Controller
                 // フォロー数・フォロワー数を追加
                 'followers_count' => $user->followers_count,
                 'following_count' => $user->following_count,
-    
+
             ],
             'countries' => Country::all(['id', 'code', 'name', 'image']),
             'posts' => $posts,
