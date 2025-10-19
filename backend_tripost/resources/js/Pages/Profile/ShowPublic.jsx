@@ -154,7 +154,7 @@ export default function Show({ user, countries, posts }) {
             <div className='w-16 xs:w-20 h-16 xs:h-20 rounded-full overflow-hidden bg-gray-100 mb-4 flex items-center justify-center'>
               {user.profile_image ? (
                 <img
-                  src={`/storage/${user.profile_image}`}
+                  src={user.profile_image_url || `/storage/${user.profile_image}`}
                   alt='プロフィール画像'
                   className='object-cover w-full h-full'
                   draggable={false}

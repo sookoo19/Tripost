@@ -21,14 +21,12 @@ export default function Edit({ user, countries = [] }) {
     visited_countries: user.visited_countries || [],
   });
 
-  // プレビュー用URL
+  // プレビュー用URL（S3 URL を優先）
   const previewUrl = notPreview
     ? null
     : data.profile_image instanceof File
       ? URL.createObjectURL(data.profile_image)
-      : data.profile_image
-        ? `/storage/${data.profile_image}`
-        : null;
+      : user.profile_image_url || (data.profile_image ? `/storage/${data.profile_image}` : null);
 
   const handleCountryChange = e => {
     const value = e.target.value;
