@@ -99,9 +99,26 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        //バリデーションはProfileUpdateRequest内
         $user = $request->user();
-        $user->fill($request->validated());
+        
+        // プロフィール画像の処理を先に行う
+        if ($request->hasFile('profile_image')) {
+            // 古い画像が存在する場合は削除
+            if ($user->profile_image && Storage::disk('s3')->exists($user->profile_image)) {
+                Storage::disk('s3')->delete($user->profile_image);
+            }
+
+            // 新しい画像を保存
+            $path = $request->file('profile_image')->store('profile_images', 's3');
+
+            // DBには「パス」のみ保存
+            $user->profile_image = $path;
+        }
+        
+        // その他のフィールドを更新（profile_imageは上書きされない）
+        $validated = $request->validated();
+        unset($validated['profile_image']); // profile_imageキーを除外
+        $user->fill($validated);
         $user->save();
 
         // フロントで未選択(キーが無い)でも空配列をデフォルトにして必ず同期する
@@ -109,20 +126,6 @@ class ProfileController extends Controller
         $codes = $request->input('visited_countries', []);
         $countryIds = Country::whereIn('code', $codes)->pluck('id')->toArray();
         $user->visitedCountries()->sync($countryIds);
-
-         if ($request->hasFile('profile_image')) {
-            // 古い画像が存在する場合は削除
-            if ($user->profile_image && Storage::exists($user->profile_image)) {
-                Storage::delete($user->profile_image);
-            }
-
-            // 新しい画像を保存
-            $path = $request->file('profile_image')->store('profile_images');
-
-            // DBには「パス」のみ保存
-            $user->profile_image = $path;
-            $user->save();
-        }
 
         return Redirect::route('profile.show');
     }
