@@ -108,13 +108,24 @@ class ProfileController extends Controller
         if ($request->hasFile('profile_image')) {
             // 旧画像パスを先に取得
             $old = $user->profile_image;
+            \Log::info('Profile update - old image', ['old' => $old]);
             
-            // 新しい画像を保存
-            $path = $request->file('profile_image')->store('profile_images');
+            // S3 に保存（明示的に s3 ディスクを指定）
+            $path = $request->file('profile_image')->store('profile_images', 's3');
+            \Log::info('Profile update - new image saved', ['new' => $path]);
+            
+            // S3 上の存在確認ログ
+            $oldExists = $old ? Storage::disk('s3')->exists($old) : false;
+            $newExists = Storage::disk('s3')->exists($path);
+            \Log::info('Profile update - exists check', ['old_exists' => $oldExists, 'new_exists' => $newExists]);
             
             // 旧画像を削除（S3から即時削除）
-            if ($old && Storage::exists($old)) {
-                Storage::delete($old);
+            if ($old && $oldExists) {
+                \Log::info('Deleting old image from S3', ['old' => $old]);
+                Storage::disk('s3')->delete($old);
+                \Log::info('Old image deleted');
+            } else {
+                \Log::info('Old image not deleted (not found or empty)', ['old' => $old]);
             }
             
             // 新しいパスを設定
