@@ -104,14 +104,14 @@ class ProfileController extends Controller
     {
         $user = $request->user();
         
-        // 画像処理を先に実行（旧画像パスを保持するため）
+        // 画像処理を先に実行
         if ($request->hasFile('profile_image')) {
             // 旧画像パスを先に取得
             $old = $user->profile_image;
             \Log::info('Profile update - old image', ['old' => $old]);
             
-            // S3 に保存（明示的に s3 ディスクを指定）
-            $path = $request->file('profile_image')->store('profile_images', 's3');
+            // S3 に保存（公開アクセス権限を明示的に設定）
+            $path = $request->file('profile_image')->storePublicly('profile_images', 's3');
             \Log::info('Profile update - new image saved', ['new' => $path]);
             
             // S3 上の存在確認ログ
