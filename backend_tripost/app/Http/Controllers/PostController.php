@@ -159,7 +159,7 @@ class PostController extends Controller
         $validated = $request->validated();
         $post->update($validated);
 
-        // 写真は既存を削除して新しい写真のみを保存
+        // 新しい写真を先にアップロードし、アップロード成功時に旧写真を削除して差し替える（即時削除）
         $newPhotoPaths = [];
         if ($request->hasFile('photos')) {
             foreach ($request->file('photos') as $file) {
@@ -167,11 +167,22 @@ class PostController extends Controller
                 $newPhotoPaths[] = $file->store('posts_photos');
                 if (count($newPhotoPaths) >= 8) break;
             }
-        }
 
-        // 新しい写真のみを保存（既存写真は削除）
-        $post->photos = $newPhotoPaths;
-        $post->save();
+            if (!empty($newPhotoPaths)) {
+                // 旧写真を削除（S3）
+                $oldPhotos = $post->photos ?? [];
+                if (!empty($oldPhotos) && is_array($oldPhotos)) {
+                    foreach ($oldPhotos as $path) {
+                        if (Storage::exists($path)) {
+                            Storage::delete($path);
+                        }
+                    }
+                }
+                // 差し替え保存
+                $post->photos = $newPhotoPaths;
+                $post->save();
+            }
+        }
 
         // 「編集した日時で並べたい」場合は created_at を更新する
         // created_at のみを上書きしたいので timestamps を一時的に無効化して保存
