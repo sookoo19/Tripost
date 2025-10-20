@@ -328,42 +328,51 @@ export default function Edit({
   const handleSubmit = e => {
     e.preventDefault();
 
-    // trip_plan の空エントリを削除しておく
-    const cleanedTripPlan = cleanTripPlan(data.trip_plan || {});
+    // trip_plan をクリーンにする
+    const cleanedTripPlan = cleanTripPlan(data.trip_plan);
 
+    // FormDataを作成（既存画像は existing_photos[]、新しい画像は photos[] として送る）
     const formData = new FormData();
 
-    // 基本フィールド（必要なキーだけ列挙）
-    const fields = [
-      'title','subtitle','description','region','period','days',
-      'post_status','share_scope','country_id','style_id','purpose_id','budget_id'
-    ];
-    fields.forEach(key => formData.append(key, data[key] ?? ''));
+    // 通常のフィールドを追加
+    Object.keys(data).forEach(key => {
+      if (key !== 'photos' && key !== 'trip_plan') {
+        formData.append(key, data[key] || '');
+      }
+    });
 
-    // trip_plan を JSON 文字列で追加
+    // trip_planを追加
     formData.append('trip_plan', JSON.stringify(cleanedTripPlan));
 
-    // 既存画像（文字列）は existing_photos[] として追加
+    // 既存の画像（サーバーに保存済みのパス）は existing_photos[] として送る
     (data.photos || []).forEach(item => {
       if (typeof item === 'string') {
         formData.append('existing_photos[]', item);
       }
     });
 
-    // 新規アップロード（File）のみ photos[] として追加
-    (data.photos || []).forEach(item => {
-      if (item instanceof File) {
-        formData.append('photos[]', item);
+    // 新しい写真のみを photos[] として追加（File インスタンスのみ）
+    (data.photos || []).forEach(file => {
+      if (file instanceof File) {
+        formData.append('photos[]', file);
       }
     });
 
-    // Laravel の PUT 用メソッド偽装
+    // _methodフィールドを追加（LaravelのPUTリクエストのため）
     formData.append('_method', 'PUT');
 
-    // Inertia の post に FormData を直接渡す（第2引数）、forceFormData を true にする
-    post(route('posts.update', { post: initialPost.id }), formData, {
+    console.log('FormData contents:');
+    for (const [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
+
+    // Inertiaのpostメソッドを使用してFormDataを送信
+    post(route('posts.update', { post: initialPost.id }), {
+      data: formData,
       forceFormData: true,
-      onError: errs => console.error('Inertia validation errors', errs),
+      onError: errors => {
+        console.error('Inertia onError (validation):', errors);
+      },
     });
   };
 

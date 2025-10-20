@@ -123,25 +123,32 @@ class PostController extends Controller
      */
     public function store(PostRequest $request): RedirectResponse
     {
-        // バリデーション結果を$validatedに代入
+        // バリデーション結果を取得
         $data = $request->validated();
+
+        // バイナリ UploadedFile が誤ってそのまま DB に入るのを防ぐため、
+        // 一旦 photos キーを除去してから作成する
+        if (array_key_exists('photos', $data)) {
+            unset($data['photos']);
+        }
+
         $post = auth()->user()->posts()->create($data);
 
-         if ($request->hasFile('photos')) {
-        $paths = [];
-        foreach ($request->file('photos') as $file) {
-            if (!$file) continue;
-            $paths[] = $file->store('posts_photos');
-            if (count($paths) >= 8) break;
+        // post_status が '旅行済' の場合のみ写真を保存する
+        if (($post->post_status ?? '') === '旅行済' && $request->hasFile('photos')) {
+            $paths = [];
+            foreach ($request->file('photos') as $file) {
+                if (!$file) continue;
+                $paths[] = $file->store('posts_photos');
+                if (count($paths) >= 8) break;
+            }
+            if (!empty($paths)) {
+                $post->photos = $paths;
+                $post->save();
+            }
         }
-        if (!empty($paths)) {
-            $post->photos = $paths;
-            $post->save();
-        }
-    }
 
-
-        return redirect()->route('profile.show', $post);   
+        return redirect()->route('profile.show', $post);
     }
 
     /**
@@ -253,66 +260,72 @@ class PostController extends Controller
         $validated = $request->validated();
         $post->update($validated);
 
-        // --- 既存画像の正規化 ---
-        $oldPhotos = $post->photos;
-        if (is_string($oldPhotos)) {
-            $decoded = json_decode($oldPhotos, true);
-            $oldPhotos = is_array($decoded) ? $decoded : [];
-        } elseif (!is_array($oldPhotos)) {
-            $oldPhotos = [];
-        }
-
-        // フロントから送られてくる「保持する既存画像」
-        $kept = $request->input('existing_photos', []);
-        if (!is_array($kept)) {
-            $kept = [];
-        }
-
-        // 削除すべき古いファイルを算出して削除
-        $removed = array_values(array_diff($oldPhotos, $kept));
-        foreach ($removed as $rawPath) {
-            if (!is_string($rawPath)) continue;
-            $path = trim($rawPath);
-            if ($path === '') continue;
-
-            // フルURLなら S3 キー抽出が必要（ここでは単純試行）
-            if (preg_match('/^https?:\\/\\//', $path)) {
-                // 可能なら URL から Strage key を抽出する実装を入れる
-                // 今回はスキップして continue する（要件に応じて改善）
-                continue;
+        // post_status が '旅行済' の場合のみ写真を処理する
+        if ($post->post_status === '旅行済') {
+            // --- 既存画像の正規化 ---
+            $oldPhotos = $post->photos;
+            if (is_string($oldPhotos)) {
+                $decoded = json_decode($oldPhotos, true);
+                $oldPhotos = is_array($decoded) ? $decoded : [];
+            } elseif (!is_array($oldPhotos)) {
+                $oldPhotos = [];
             }
 
-            try {
-                if (Storage::disk('s3')->exists($path)) {
-                    Storage::disk('s3')->delete($path);
+            // フロントから送られてくる「保持する既存画像」
+            $kept = $request->input('existing_photos', []);
+            if (!is_array($kept)) {
+                $kept = [];
+            }
+
+            // 削除すべき古いファイルを算出して削除
+            $removed = array_values(array_diff($oldPhotos, $kept));
+            foreach ($removed as $rawPath) {
+                if (!is_string($rawPath)) continue;
+                $path = trim($rawPath);
+                if ($path === '') continue;
+
+                // フルURLなら S3 キー抽出が必要（ここでは単純試行）
+                if (preg_match('/^https?:\\/\\//', $path)) {
+                    // 可能なら URL から Storage key を抽出する実装を入れる
+                    continue;
                 }
-            } catch (\Throwable $e) {
-                \Log::warning('S3 delete failed', ['path' => $path, 'error' => $e->getMessage()]);
-            }
 
-            try {
-                if (Storage::exists($path)) {
-                    Storage::delete($path);
+                try {
+                    if (Storage::disk('s3')->exists($path)) {
+                        Storage::disk('s3')->delete($path);
+                    }
+                } catch (\Throwable $e) {
+                    \Log::warning('S3 delete failed', ['path' => $path, 'error' => $e->getMessage()]);
                 }
-            } catch (\Throwable $e) {
-                \Log::warning('Local storage delete failed', ['path' => $path, 'error' => $e->getMessage()]);
-            }
-        }
 
-        // --- 新規アップロードファイルの保存 ---
-        $newPhotoPaths = [];
-        if ($request->hasFile('photos')) {
-            foreach ($request->file('photos') as $file) {
-                if (!$file) continue;
-                $newPhotoPaths[] = $file->store('posts_photos');
-                if (count($newPhotoPaths) >= 8) break;
+                try {
+                    if (Storage::exists($path)) {
+                        Storage::delete($path);
+                    }
+                } catch (\Throwable $e) {
+                    \Log::warning('Local storage delete failed', ['path' => $path, 'error' => $e->getMessage()]);
+                }
             }
-        }
 
-        // kept（既存で保持するパス）と新規アップロードを結合して最大8件にする
-        $merged = array_values(array_slice(array_merge($kept, $newPhotoPaths), 0, 8));
-        $post->photos = $merged;
-        $post->save();
+            // --- 新規アップロードファイルの保存 ---
+            $newPhotoPaths = [];
+            if ($request->hasFile('photos')) {
+                foreach ($request->file('photos') as $file) {
+                    if (!$file) continue;
+                    $newPhotoPaths[] = $file->store('posts_photos');
+                    if (count($newPhotoPaths) >= 8) break;
+                }
+            }
+
+            // kept（既存で保持するパス）と新規アップロードを結合して最大8件にする
+            $merged = array_values(array_slice(array_merge($kept, $newPhotoPaths), 0, 8));
+            $post->photos = $merged;
+            $post->save();
+        } else {
+            // 準備中・旅行中の場合は写真を保存しない（空の配列にリセット）
+            $post->photos = [];
+            $post->save();
+        }
 
         // 「編集した日時で並べたい」場合は created_at を更新する
         $post->timestamps = false;
