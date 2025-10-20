@@ -45,18 +45,31 @@ class PostController extends Controller
         // ページネーション（例：8件／ページ） + クエリパラメータを維持
         $posts = $query->paginate(8)->appends($request->query())->through(function (Post $post) {
             $user = $post->user;
+            // ユーザーがnullの場合に対応
+            $userData = $user ? [
+                'id' => $user->id,
+                'displayid' => $user->displayid,
+                'profile_image_url' => $user->profile_image ? Storage::url($user->profile_image) : null,
+            ] : null;
+            
+            // 写真URLの安全な生成 (falseやnullがStorage::urlに渡らないように)
+            $photos = $post->photos ?? [];
+            $photos_urls = collect(is_array($photos) ? $photos : [])
+                ->map(function($p) {
+                    return !empty($p) && is_string($p) ? Storage::url($p) : null;
+                })
+                ->filter()
+                ->values()
+                ->all();
+            
             return [
                 'id' => $post->id,
                 'title' => $post->title,
                 'subtitle' => $post->subtitle,
                 'created_at' => $post->created_at->toDateTimeString(),
-                'user' => [
-                    'id' => $user->id,
-                    'displayid' => $user->displayid,
-                    'profile_image_url' => $user->profile_image ? Storage::url($user->profile_image) : null,
-                ],
-                'photos' => $post->photos ?? [],
-                'photos_urls' => collect($post->photos ?? [])->map(fn($p) => Storage::url($p))->all(),
+                'user' => $userData,
+                'photos' => $photos,
+                'photos_urls' => $photos_urls,
                 'likes_count' => $post->likes_count,
             ];
         });
@@ -303,36 +316,58 @@ class PostController extends Controller
         // データ変換ロジック
         $postsLatestProcessed = $postsLatest->through(function (Post $post) {
             $user = $post->user;
+            $userData = $user ? [
+                'id' => $user->id,
+                'displayid' => $user->displayid,
+                'profile_image_url' => $user->profile_image ? Storage::url($user->profile_image) : null,
+            ] : null;
+            
+            $photos = $post->photos ?? [];
+            $photos_urls = collect(is_array($photos) ? $photos : [])
+                ->map(function($p) {
+                    return !empty($p) && is_string($p) ? Storage::url($p) : null;
+                })
+                ->filter()
+                ->values()
+                ->all();
+            
             return [
                 'id' => $post->id,
                 'title' => $post->title,
                 'subtitle' => $post->subtitle,
                 'created_at' => $post->created_at->toDateTimeString(),
-                'user' => [
-                    'id' => $user->id,
-                    'displayid' => $user->displayid,
-                    'profile_image_url' => $user->profile_image ? Storage::url($user->profile_image) : null,
-                ],
-                'photos' => $post->photos ?? [],
-                'photos_urls' => collect($post->photos ?? [])->map(fn($p) => Storage::url($p))->all(),
+                'user' => $userData,
+                'photos' => $photos,
+                'photos_urls' => $photos_urls,
                 'likes_count' => $post->likes_count,
             ];
         });
 
         $postsLikesProcessed = $postsLikes->through(function (Post $post) {
             $user = $post->user;
+            $userData = $user ? [
+                'id' => $user->id,
+                'displayid' => $user->displayid,
+                'profile_image_url' => $user->profile_image ? Storage::url($user->profile_image) : null,
+            ] : null;
+            
+            $photos = $post->photos ?? [];
+            $photos_urls = collect(is_array($photos) ? $photos : [])
+                ->map(function($p) {
+                    return !empty($p) && is_string($p) ? Storage::url($p) : null;
+                })
+                ->filter()
+                ->values()
+                ->all();
+            
             return [
                 'id' => $post->id,
                 'title' => $post->title,
                 'subtitle' => $post->subtitle,
                 'created_at' => $post->created_at->toDateTimeString(),
-                'user' => [
-                    'id' => $user->id,
-                    'displayid' => $user->displayid,
-                    'profile_image_url' => $user->profile_image ? Storage::url($user->profile_image) : null,
-                ],
-                'photos' => $post->photos ?? [],
-                'photos_urls' => collect($post->photos ?? [])->map(fn($p) => Storage::url($p))->all(),
+                'user' => $userData,
+                'photos' => $photos,
+                'photos_urls' => $photos_urls,
                 'likes_count' => $post->likes_count,
             ];
         });
@@ -362,16 +397,18 @@ class PostController extends Controller
         // ページネーション（例：8件／ページ）
         $posts = $query->paginate(8)->through(function (Post $post) {
             $user = $post->user;
+            $userData = $user ? [
+                'id' => $user->id,
+                'displayid' => $user->displayid,
+                'profile_image_url' => $user->profile_image ? Storage::url($user->profile_image) : null,
+            ] : null;
+            
             return [
                 'id' => $post->id,
                 'title' => $post->title,
                 'subtitle' => $post->subtitle,
                 'created_at' => $post->created_at->toDateTimeString(),
-                'user' => [
-                    'id' => $user->id,
-                    'displayid' => $user->displayid,
-                    'profile_image_url' => $user->profile_image ? Storage::url($user->profile_image) : null,
-                ],
+                'user' => $userData,
                 'post_status' => $post->post_status,
             ];
         });
@@ -392,18 +429,29 @@ class PostController extends Controller
         // ページネーション（例：8件／ページ）
         $posts = $query->paginate(8)->through(function (Post $post) {
             $user = $post->user;
+            $userData = $user ? [
+                'id' => $user->id,
+                'displayid' => $user->displayid,
+                'profile_image_url' => $user->profile_image ? Storage::url($user->profile_image) : null,
+            ] : null;
+            
+            $photos = $post->photos ?? [];
+            $photos_urls = collect(is_array($photos) ? $photos : [])
+                ->map(function($p) {
+                    return !empty($p) && is_string($p) ? Storage::url($p) : null;
+                })
+                ->filter()
+                ->values()
+                ->all();
+            
             return [
                 'id' => $post->id,
                 'title' => $post->title,
                 'subtitle' => $post->subtitle,
                 'created_at' => $post->created_at->toDateTimeString(),
-                'user' => [
-                    'id' => $user->id,
-                    'displayid' => $user->displayid,
-                    'profile_image_url' => $user->profile_image ? Storage::url($user->profile_image) : null,
-                ],
-                'photos' => $post->photos ?? [],
-                'photos_urls' => collect($post->photos ?? [])->map(fn($p) => Storage::url($p))->all(),
+                'user' => $userData,
+                'photos' => $photos,
+                'photos_urls' => $photos_urls,
                 'likes_count' => $post->likes_count,
             ];
         });
@@ -426,18 +474,31 @@ class PostController extends Controller
         $posts = $likes->through(function ($like) {
             $post = $like->post;
             if (! $post) return null;
+            
+            $user = $post->user;
+            $userData = $user ? [
+                'id' => $user->id,
+                'displayid' => $user->displayid,
+                'profile_image_url' => $user->profile_image ? Storage::url($user->profile_image) : null,
+            ] : null;
+            
+            $photos = $post->photos ?? [];
+            $photos_urls = collect(is_array($photos) ? $photos : [])
+                ->map(function($p) {
+                    return !empty($p) && is_string($p) ? Storage::url($p) : null;
+                })
+                ->filter()
+                ->values()
+                ->all();
+            
             return [
                 'id' => $post->id,
                 'title' => $post->title,
                 'subtitle' => $post->subtitle,
                 'created_at' => $post->created_at->toDateTimeString(),
                 'liked_at' => $like->created_at->toDateTimeString(),
-                'user' => [
-                    'id' => $post->user->id,
-                    'displayid' => $post->user->displayid,
-                    'profile_image_url' => $post->user->profile_image ? Storage::url($post->user->profile_image) : null,
-                ],
-                'photos_urls' => collect($post->photos ?? [])->map(fn($p) => Storage::url($p))->all(),
+                'user' => $userData,
+                'photos_urls' => $photos_urls,
                 'likes_count' => $post->likes()->count(),
             ];
         });
