@@ -102,46 +102,59 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $user = $request->user();
-        
-        // 画像処理を先に実行
-        if ($request->hasFile('profile_image')) {
-            // 旧画像パスを先に取得
-            $old = $user->profile_image;
-            \Log::info('Profile update - old image', ['old' => $old]);
+        try {
+            $user = $request->user();
             
-            // S3 に保存（公開アクセス権限を明示的に設定）
-            $path = $request->file('profile_image')->storePublicly('profile_images', 's3');
-            \Log::info('Profile update - new image saved', ['new' => $path]);
-            
-            // S3 上の存在確認ログ
-            $oldExists = $old ? Storage::disk('s3')->exists($old) : false;
-            $newExists = Storage::disk('s3')->exists($path);
-            \Log::info('Profile update - exists check', ['old_exists' => $oldExists, 'new_exists' => $newExists]);
-            
-            // 旧画像を削除（S3から即時削除）
-            if ($old && $oldExists) {
-                \Log::info('Deleting old image from S3', ['old' => $old]);
-                Storage::disk('s3')->delete($old);
-                \Log::info('Old image deleted');
-            } else {
-                \Log::info('Old image not deleted (not found or empty)', ['old' => $old]);
+            // 画像処理を先に実行
+            if ($request->hasFile('profile_image')) {
+                // 旧画像パスを先に取得
+                $old = $user->profile_image;
+                \Log::info('Profile update - old image', ['old' => $old]);
+                
+                // S3 に保存（公開アクセス権限を明示的に設定）
+                $path = $request->file('profile_image')->storePublicly('profile_images', 's3');
+                \Log::info('Profile update - new image saved', ['new' => $path]);
+                
+                // 空の文字列や無効な値をチェックするように修正
+                if ($old && is_string($old) && strlen($old) > 0) {
+                    $oldExists = Storage::disk('s3')->exists($old);
+                    \Log::info('Profile update - exists check', ['old_exists' => $oldExists]);
+                    
+                    // 旧画像を削除（S3から即時削除）
+                    if ($oldExists) {
+                        \Log::info('Deleting old image from S3', ['old' => $old]);
+                        Storage::disk('s3')->delete($old);
+                        \Log::info('Old image deleted');
+                    }
+                } else {
+                    \Log::info('Old image path is invalid', ['old' => $old]);
+                }
+                
+                // 新しいパスを設定
+                $user->profile_image = $path;
             }
             
-            // 新しいパスを設定
-            $user->profile_image = $path;
+            // その他のフィールドを更新
+            $user->fill($request->validated());
+            $user->save();
+
+            // 訪問国の同期
+            $codes = $request->input('visited_countries', []);
+            $countryIds = Country::whereIn('code', $codes)->pluck('id')->toArray();
+            $user->visitedCountries()->sync($countryIds);
+
+            return Redirect::route('profile.show');
+        } catch (\Exception $e) {
+            \Log::error('Profile update error: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return Redirect::back()->withErrors([
+                'error' => 'プロフィールの更新中にエラーが発生しました。'
+            ]);
         }
-        
-        // その他のフィールドを更新
-        $user->fill($request->validated());
-        $user->save();
-
-        // 訪問国の同期
-        $codes = $request->input('visited_countries', []);
-        $countryIds = Country::whereIn('code', $codes)->pluck('id')->toArray();
-        $user->visitedCountries()->sync($countryIds);
-
-        return Redirect::route('profile.show');
     }
 
     public function destroy_confirm (Request $request): Response
