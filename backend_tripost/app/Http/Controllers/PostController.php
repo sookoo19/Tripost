@@ -49,16 +49,19 @@ class PostController extends Controller
             $userData = $user ? [
                 'id' => $user->id,
                 'displayid' => $user->displayid,
-                'profile_image_url' => (!empty($user->profile_image) && is_string($user->profile_image))
-                    ? Storage::url($user->profile_image)
-                    : null,
+                'profile_image_url' => (
+                    !empty($user->profile_image) &&
+                    is_string($user->profile_image) &&
+                    Storage::disk('s3')->exists($user->profile_image)
+                ) ? Storage::disk('s3')->url($user->profile_image) : null,
             ] : null;
             
             // 写真URLの安全な生成 (falseやnullがStorage::urlに渡らないように)
             $photos = $post->photos ?? [];
             $photos_urls = collect(is_array($photos) ? $photos : [])
                 ->map(function($p) {
-                    return (!empty($p) && is_string($p)) ? Storage::url($p) : null;
+                    if (empty($p) || !is_string($p)) return null;
+                    return Storage::disk('s3')->exists($p) ? Storage::disk('s3')->url($p) : null;
                 })
                 ->filter()
                 ->values()
@@ -106,21 +109,22 @@ class PostController extends Controller
     {
         // バリデーション結果を$validatedに代入
         $data = $request->validated();
+        // FILESYSTEM_DISK=s3 が設定済みなので store() の既定は s3
         $post = auth()->user()->posts()->create($data);
 
-         if ($request->hasFile('photos')) {
-        $paths = [];
-        foreach ($request->file('photos') as $file) {
-            if (!$file) continue;
-            $paths[] = $file->store('posts_photos');
-            if (count($paths) >= 8) break;
+        if ($request->hasFile('photos')) {
+            $paths = [];
+            foreach ($request->file('photos') as $file) {
+                if (!$file) continue;
+                // 第2引数に 's3' を明示しても良いが .env の設定に従うので既定のまま
+                $paths[] = $file->store('posts_photos');
+                if (count($paths) >= 8) break;
+            }
+            if (!empty($paths)) {
+                $post->photos = $paths;
+                $post->save();
+            }
         }
-        if (!empty($paths)) {
-            $post->photos = $paths;
-            $post->save();
-        }
-    }
-
 
         return redirect()->route('profile.show', $post);   
     }
@@ -181,12 +185,13 @@ class PostController extends Controller
             }
 
             if (!empty($newPhotoPaths)) {
-                // 旧写真を削除（S3）
+                // 旧写真を削除（S3 を前提）
                 $oldPhotos = $post->photos ?? [];
                 if (!empty($oldPhotos) && is_array($oldPhotos)) {
                     foreach ($oldPhotos as $path) {
-                        if (Storage::exists($path)) {
-                            Storage::delete($path);
+                        if (empty($path) || !is_string($path)) continue;
+                        if (Storage::disk('s3')->exists($path)) {
+                            Storage::disk('s3')->delete($path);
                         }
                     }
                 }
@@ -213,8 +218,7 @@ class PostController extends Controller
             'styles' => Style::all(['id', 'name']),
             'purposes' => Purpose::all(['id', 'name']),
             'budgets' => Budget::all(['id', 'min','max','label']),
-            ]
-        );
+        ]);
     }
 
     public function searchIndex(Request $request)
@@ -321,15 +325,18 @@ class PostController extends Controller
             $userData = $user ? [
                 'id' => $user->id,
                 'displayid' => $user->displayid,
-                'profile_image_url' => (!empty($user->profile_image) && is_string($user->profile_image))
-                    ? Storage::url($user->profile_image)
-                    : null,
+                'profile_image_url' => (
+                    !empty($user->profile_image) &&
+                    is_string($user->profile_image) &&
+                    Storage::disk('s3')->exists($user->profile_image)
+                ) ? Storage::disk('s3')->url($user->profile_image) : null,
             ] : null;
             
             $photos = $post->photos ?? [];
             $photos_urls = collect(is_array($photos) ? $photos : [])
                 ->map(function($p) {
-                    return (!empty($p) && is_string($p)) ? Storage::url($p) : null;
+                    if (empty($p) || !is_string($p)) return null;
+                    return Storage::disk('s3')->exists($p) ? Storage::disk('s3')->url($p) : null;
                 })
                 ->filter()
                 ->values()
@@ -352,15 +359,18 @@ class PostController extends Controller
             $userData = $user ? [
                 'id' => $user->id,
                 'displayid' => $user->displayid,
-                'profile_image_url' => (!empty($user->profile_image) && is_string($user->profile_image))
-                    ? Storage::url($user->profile_image)
-                    : null,
+                'profile_image_url' => (
+                    !empty($user->profile_image) &&
+                    is_string($user->profile_image) &&
+                    Storage::disk('s3')->exists($user->profile_image)
+                ) ? Storage::disk('s3')->url($user->profile_image) : null,
             ] : null;
             
             $photos = $post->photos ?? [];
             $photos_urls = collect(is_array($photos) ? $photos : [])
                 ->map(function($p) {
-                    return (!empty($p) && is_string($p)) ? Storage::url($p) : null;
+                    if (empty($p) || !is_string($p)) return null;
+                    return Storage::disk('s3')->exists($p) ? Storage::disk('s3')->url($p) : null;
                 })
                 ->filter()
                 ->values()
@@ -406,9 +416,11 @@ class PostController extends Controller
             $userData = $user ? [
                 'id' => $user->id,
                 'displayid' => $user->displayid,
-                'profile_image_url' => (!empty($user->profile_image) && is_string($user->profile_image))
-                    ? Storage::url($user->profile_image)
-                    : null,
+                'profile_image_url' => (
+                    !empty($user->profile_image) &&
+                    is_string($user->profile_image) &&
+                    Storage::disk('s3')->exists($user->profile_image)
+                ) ? Storage::disk('s3')->url($user->profile_image) : null,
             ] : null;
             
             return [
@@ -440,15 +452,18 @@ class PostController extends Controller
             $userData = $user ? [
                 'id' => $user->id,
                 'displayid' => $user->displayid,
-                'profile_image_url' => (!empty($user->profile_image) && is_string($user->profile_image))
-                    ? Storage::url($user->profile_image)
-                    : null,
+                'profile_image_url' => (
+                    !empty($user->profile_image) &&
+                    is_string($user->profile_image) &&
+                    Storage::disk('s3')->exists($user->profile_image)
+                ) ? Storage::disk('s3')->url($user->profile_image) : null,
             ] : null;
             
             $photos = $post->photos ?? [];
             $photos_urls = collect(is_array($photos) ? $photos : [])
                 ->map(function($p) {
-                    return (!empty($p) && is_string($p)) ? Storage::url($p) : null;
+                    if (empty($p) || !is_string($p)) return null;
+                    return Storage::disk('s3')->exists($p) ? Storage::disk('s3')->url($p) : null;
                 })
                 ->filter()
                 ->values()
@@ -489,15 +504,18 @@ class PostController extends Controller
             $userData = $user ? [
                 'id' => $user->id,
                 'displayid' => $user->displayid,
-                'profile_image_url' => (!empty($user->profile_image) && is_string($user->profile_image))
-                    ? Storage::url($user->profile_image)
-                    : null,
+                'profile_image_url' => (
+                    !empty($user->profile_image) &&
+                    is_string($user->profile_image) &&
+                    Storage::disk('s3')->exists($user->profile_image)
+                ) ? Storage::disk('s3')->url($user->profile_image) : null,
             ] : null;
             
             $photos = $post->photos ?? [];
             $photos_urls = collect(is_array($photos) ? $photos : [])
                 ->map(function($p) {
-                    return (!empty($p) && is_string($p)) ? Storage::url($p) : null;
+                    if (empty($p) || !is_string($p)) return null;
+                    return Storage::disk('s3')->exists($p) ? Storage::disk('s3')->url($p) : null;
                 })
                 ->filter()
                 ->values()
@@ -537,9 +555,10 @@ class PostController extends Controller
         // 画像ファイルがあれば削除
         if (!empty($post->photos) && is_array($post->photos)) {
             foreach ($post->photos as $path) {
-                // public ディスクに保存している前提
-                if (Storage::disk('public')->exists($path)) {
-                    Storage::disk('public')->delete($path);
+                if (empty($path) || !is_string($path)) continue;
+                // s3 に保存している前提で削除
+                if (Storage::disk('s3')->exists($path)) {
+                    Storage::disk('s3')->delete($path);
                 }
             }
         }
