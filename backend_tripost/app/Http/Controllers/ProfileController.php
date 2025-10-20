@@ -47,15 +47,12 @@ class ProfileController extends Controller
                 'user' => [
                     'id' => $p->user->id,
                     'displayid' => $p->user->displayid,
-                    'profile_image_url' => (
-                        !empty($p->user->profile_image) &&
-                        is_string($p->user->profile_image) &&
-                        Storage::disk('s3')->exists($p->user->profile_image)
-                    ) ? Storage::disk('s3')->url($p->user->profile_image) : null,
+                    'profile_image_url' => (!empty($p->user->profile_image) && is_string($p->user->profile_image))
+                        ? Storage::url($p->user->profile_image)
+                        : null,
                 ],
                 'photos_urls' => collect($p->photos ?? [])->map(function($q){
-                        if (empty($q) || !is_string($q)) return null;
-                        return Storage::disk('s3')->exists($q) ? Storage::disk('s3')->url($q) : null;
+                        return (!empty($q) && is_string($q)) ? Storage::url($q) : null;
                     })->filter()->values()->all(),
                  'likes_count' => $p->likes_count,
              ];
@@ -68,11 +65,9 @@ class ProfileController extends Controller
                 'displayid' => $user->displayid,
                 'name' => $user->name,
                 'profile_image' => $user->profile_image,
-                'profile_image_url' => (
-                    !empty($user->profile_image) &&
-                    is_string($user->profile_image) &&
-                    Storage::disk('s3')->exists($user->profile_image)
-                ) ? Storage::disk('s3')->url($user->profile_image) : null,
+                'profile_image_url' => (!empty($user->profile_image) && is_string($user->profile_image))
+                    ? Storage::url($user->profile_image)
+                    : null, // 追加
                 'bio' => $user->bio,
                 // ここで国コード配列を渡す
                 'visited_countries' => $user->visitedCountries->pluck('code')->toArray(),
@@ -90,7 +85,13 @@ class ProfileController extends Controller
     public function edit(Request $request): Response
 {
     $user = auth()->user()->load('visitedCountries');
-    
+
+    // 追加: profile_image_url を付与
+    $profileImageUrl = null;
+    if (!empty($user->profile_image) && is_string($user->profile_image) && Storage::disk('s3')->exists($user->profile_image)) {
+        $profileImageUrl = Storage::disk('s3')->url($user->profile_image);
+    }
+
     // 必要なユーザー情報をすべて含める
     return Inertia::render('Profile/Edit', [
         'user' => [
@@ -98,6 +99,7 @@ class ProfileController extends Controller
             'name' => $user->name,
             'email' => $user->email,
             'profile_image' => $user->profile_image,
+            'profile_image_url' => $profileImageUrl,
             'bio' => $user->bio,
             'visited_countries' => $user->visitedCountries->pluck('code')->toArray(),
         ],
@@ -114,12 +116,12 @@ class ProfileController extends Controller
         
         // プロフィール画像の処理を先に行う
         if ($request->hasFile('profile_image')) {
-            // 古い画像が存在する場合は削除 (s3)
-            if ($user->profile_image && is_string($user->profile_image) && Storage::disk('s3')->exists($user->profile_image)) {
+            // 古い画像が存在する場合は削除
+            if ($user->profile_image && Storage::disk('s3')->exists($user->profile_image)) {
                 Storage::disk('s3')->delete($user->profile_image);
             }
 
-            // 新しい画像を保存（s3）
+            // 新しい画像を保存
             $path = $request->file('profile_image')->store('profile_images', 's3');
 
             // DBには「パス」のみ保存
@@ -217,15 +219,12 @@ class ProfileController extends Controller
                 'user' => [
                     'id' => $p->user->id,
                     'displayid' => $p->user->displayid,
-                    'profile_image_url' => (
-                        !empty($p->user->profile_image) &&
-                        is_string($p->user->profile_image) &&
-                        Storage::disk('s3')->exists($p->user->profile_image)
-                    ) ? Storage::disk('s3')->url($p->user->profile_image) : null,
+                    'profile_image_url' => (!empty($p->user->profile_image) && is_string($p->user->profile_image))
+                        ? Storage::url($p->user->profile_image)
+                        : null,
                 ],
                 'photos_urls' => collect($p->photos ?? [])->map(function($q){
-                        if (empty($q) || !is_string($q)) return null;
-                        return Storage::disk('s3')->exists($q) ? Storage::disk('s3')->url($q) : null;
+                        return (!empty($q) && is_string($q)) ? Storage::url($q) : null;
                     })->filter()->values()->all(),
                 'likes_count' => $p->likes_count,
             ];
