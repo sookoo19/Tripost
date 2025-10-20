@@ -114,11 +114,13 @@ class ProfileController extends Controller
         $user->visitedCountries()->sync($countryIds);
 
          if ($request->hasFile('profile_image')) {
-            // パスだけ保存される
+            // 新しい画像を保存してから旧画像を削除（即時）
             $path = $request->file('profile_image')->store('profile_images');
-
-            // DBには「パス」のみ保存
-            $user->profile_image = $path; // ←profile_imageカラムに保存
+            $old = $user->profile_image;
+            if ($old && Storage::exists($old)) {
+                Storage::delete($old);
+            }
+            $user->profile_image = $path;
             $user->save();
         }
 
