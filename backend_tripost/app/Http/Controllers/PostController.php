@@ -551,8 +551,8 @@ class PostController extends Controller
         if (!empty($post->photos) && is_array($post->photos)) {
             foreach ($post->photos as $path) {
                 // public ディスクに保存している前提
-                if (Storage::disk('public')->exists($path)) {
-                    Storage::disk('public')->delete($path);
+                if (Storage::disk('s3')->exists($path)) {
+                    Storage::disk('s3')->delete($path);
                 }
             }
         }
