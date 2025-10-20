@@ -102,27 +102,33 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        //バリデーションはProfileUpdateRequest内
         $user = $request->user();
-        $user->fill($request->validated());
-        $user->save();
-
-        // フロントで未選択（キーが無い）でも空配列をデフォルトにして必ず同期する
-        // これにより未選択時は既存データをクリアできます
-        $codes = $request->input('visited_countries', []);
-        $countryIds = Country::whereIn('code', $codes)->pluck('id')->toArray();
-        $user->visitedCountries()->sync($countryIds);
-
-         if ($request->hasFile('profile_image')) {
-            // 新しい画像を保存してから旧画像を削除（即時）
-            $path = $request->file('profile_image')->store('profile_images');
+        
+        // 画像処理を先に実行（旧画像パスを保持するため）
+        if ($request->hasFile('profile_image')) {
+            // 旧画像パスを先に取得
             $old = $user->profile_image;
+            
+            // 新しい画像を保存
+            $path = $request->file('profile_image')->store('profile_images');
+            
+            // 旧画像を削除（S3から即時削除）
             if ($old && Storage::exists($old)) {
                 Storage::delete($old);
             }
+            
+            // 新しいパスを設定
             $user->profile_image = $path;
-            $user->save();
         }
+        
+        // その他のフィールドを更新
+        $user->fill($request->validated());
+        $user->save();
+
+        // 訪問国の同期
+        $codes = $request->input('visited_countries', []);
+        $countryIds = Country::whereIn('code', $codes)->pluck('id')->toArray();
+        $user->visitedCountries()->sync($countryIds);
 
         return Redirect::route('profile.show');
     }
