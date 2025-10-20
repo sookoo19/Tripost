@@ -331,7 +331,7 @@ export default function Edit({
     // trip_plan をクリーンにする
     const cleanedTripPlan = cleanTripPlan(data.trip_plan);
 
-    // FormDataを作成（既存画像は削除、新しい画像のみ送信）
+    // FormDataを作成（既存画像は existing_photos[]、新しい画像は photos[] として送る）
     const formData = new FormData();
 
     // 通常のフィールドを追加
@@ -344,10 +344,17 @@ export default function Edit({
     // trip_planを追加
     formData.append('trip_plan', JSON.stringify(cleanedTripPlan));
 
-    // 新しい写真のみを追加
-    (data.photos || []).forEach((file, index) => {
+    // 既存の画像（サーバーに保存済みのパス）は existing_photos[] として送る
+    (data.photos || []).forEach(item => {
+      if (typeof item === 'string') {
+        formData.append('existing_photos[]', item);
+      }
+    });
+
+    // 新しい写真のみを photos[] として追加（File インスタンスのみ）
+    (data.photos || []).forEach(file => {
       if (file instanceof File) {
-        formData.append(`photos[${index}]`, file);
+        formData.append('photos[]', file);
       }
     });
 
