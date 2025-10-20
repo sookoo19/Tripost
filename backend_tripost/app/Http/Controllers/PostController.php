@@ -17,7 +17,7 @@ use App\Models\Style;
 use App\Models\Purpose;
 use App\Models\Budget;
 use App\Models\Follow;
-use App\Models\Like; // 追加
+use App\Models\Like; 
 
 class PostController extends Controller
 {
@@ -133,6 +133,9 @@ class PostController extends Controller
             $post->is_liked = false;
             $user->is_followed = false;
         }
+
+        // 追加: S3 の公開 URL を配列で生成して渡す
+        $post->photos_urls = collect($post->photos ?? [])->map(fn($p) => Storage::url($p))->all();
 
         return Inertia::render('Posts/Show', [
             'post' => $post,
@@ -453,9 +456,9 @@ class PostController extends Controller
         // 画像ファイルがあれば削除
         if (!empty($post->photos) && is_array($post->photos)) {
             foreach ($post->photos as $path) {
-                // public ディスクに保存している前提
-                if (Storage::disk('public')->exists($path)) {
-                    Storage::disk('public')->delete($path);
+                // S3 ディスクから削除（.env で FILESYSTEM_DISK=s3 設定済み前提）
+                if (Storage::exists($path)) {
+                    Storage::delete($path);
                 }
             }
         }
