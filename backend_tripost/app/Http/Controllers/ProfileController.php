@@ -47,13 +47,17 @@ class ProfileController extends Controller
                 'user' => [
                     'id' => $p->user->id,
                     'displayid' => $p->user->displayid,
-                    'profile_image_url' => $p->user->profile_image ? Storage::url($p->user->profile_image) : null,
+                    'profile_image_url' => (!empty($p->user->profile_image) && is_string($p->user->profile_image))
+                        ? Storage::url($p->user->profile_image)
+                        : null,
                 ],
-                'photos_urls' => collect($p->photos ?? [])->map(fn($q) => Storage::url($q))->all(),
-                'likes_count' => $p->likes_count,
-            ];
-        });
-        $posts->setCollection($transformed);
+                'photos_urls' => collect($p->photos ?? [])->map(function($q){
+                        return (!empty($q) && is_string($q)) ? Storage::url($q) : null;
+                    })->filter()->values()->all(),
+                 'likes_count' => $p->likes_count,
+             ];
+         });
+         $posts->setCollection($transformed);
 
         return Inertia::render('Profile/Show', [
             'user' => [
@@ -61,7 +65,9 @@ class ProfileController extends Controller
                 'displayid' => $user->displayid,
                 'name' => $user->name,
                 'profile_image' => $user->profile_image,
-                'profile_image_url' => $user->profile_image ? Storage::url($user->profile_image) : null, // 追加
+                'profile_image_url' => (!empty($user->profile_image) && is_string($user->profile_image))
+                    ? Storage::url($user->profile_image)
+                    : null, // 追加
                 'bio' => $user->bio,
                 // ここで国コード配列を渡す
                 'visited_countries' => $user->visitedCountries->pluck('code')->toArray(),
@@ -206,9 +212,13 @@ class ProfileController extends Controller
                 'user' => [
                     'id' => $p->user->id,
                     'displayid' => $p->user->displayid,
-                    'profile_image_url' => $p->user->profile_image ? Storage::url($p->user->profile_image) : null,
+                    'profile_image_url' => (!empty($p->user->profile_image) && is_string($p->user->profile_image))
+                        ? Storage::url($p->user->profile_image)
+                        : null,
                 ],
-                'photos_urls' => collect($p->photos ?? [])->map(fn($q) => Storage::url($q))->all(),
+                'photos_urls' => collect($p->photos ?? [])->map(function($q){
+                        return (!empty($q) && is_string($q)) ? Storage::url($q) : null;
+                    })->filter()->values()->all(),
                 'likes_count' => $p->likes_count,
             ];
         });

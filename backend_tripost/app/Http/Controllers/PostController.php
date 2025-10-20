@@ -49,14 +49,16 @@ class PostController extends Controller
             $userData = $user ? [
                 'id' => $user->id,
                 'displayid' => $user->displayid,
-                'profile_image_url' => $user->profile_image ? Storage::url($user->profile_image) : null,
+                'profile_image_url' => (!empty($user->profile_image) && is_string($user->profile_image))
+                    ? Storage::url($user->profile_image)
+                    : null,
             ] : null;
             
             // 写真URLの安全な生成 (falseやnullがStorage::urlに渡らないように)
             $photos = $post->photos ?? [];
             $photos_urls = collect(is_array($photos) ? $photos : [])
                 ->map(function($p) {
-                    return !empty($p) && is_string($p) ? Storage::url($p) : null;
+                    return (!empty($p) && is_string($p)) ? Storage::url($p) : null;
                 })
                 ->filter()
                 ->values()
@@ -319,13 +321,15 @@ class PostController extends Controller
             $userData = $user ? [
                 'id' => $user->id,
                 'displayid' => $user->displayid,
-                'profile_image_url' => $user->profile_image ? Storage::url($user->profile_image) : null,
+                'profile_image_url' => (!empty($user->profile_image) && is_string($user->profile_image))
+                    ? Storage::url($user->profile_image)
+                    : null,
             ] : null;
             
             $photos = $post->photos ?? [];
             $photos_urls = collect(is_array($photos) ? $photos : [])
                 ->map(function($p) {
-                    return !empty($p) && is_string($p) ? Storage::url($p) : null;
+                    return (!empty($p) && is_string($p)) ? Storage::url($p) : null;
                 })
                 ->filter()
                 ->values()
@@ -348,13 +352,15 @@ class PostController extends Controller
             $userData = $user ? [
                 'id' => $user->id,
                 'displayid' => $user->displayid,
-                'profile_image_url' => $user->profile_image ? Storage::url($user->profile_image) : null,
+                'profile_image_url' => (!empty($user->profile_image) && is_string($user->profile_image))
+                    ? Storage::url($user->profile_image)
+                    : null,
             ] : null;
             
             $photos = $post->photos ?? [];
             $photos_urls = collect(is_array($photos) ? $photos : [])
                 ->map(function($p) {
-                    return !empty($p) && is_string($p) ? Storage::url($p) : null;
+                    return (!empty($p) && is_string($p)) ? Storage::url($p) : null;
                 })
                 ->filter()
                 ->values()
@@ -400,7 +406,9 @@ class PostController extends Controller
             $userData = $user ? [
                 'id' => $user->id,
                 'displayid' => $user->displayid,
-                'profile_image_url' => $user->profile_image ? Storage::url($user->profile_image) : null,
+                'profile_image_url' => (!empty($user->profile_image) && is_string($user->profile_image))
+                    ? Storage::url($user->profile_image)
+                    : null,
             ] : null;
             
             return [
@@ -432,13 +440,15 @@ class PostController extends Controller
             $userData = $user ? [
                 'id' => $user->id,
                 'displayid' => $user->displayid,
-                'profile_image_url' => $user->profile_image ? Storage::url($user->profile_image) : null,
+                'profile_image_url' => (!empty($user->profile_image) && is_string($user->profile_image))
+                    ? Storage::url($user->profile_image)
+                    : null,
             ] : null;
             
             $photos = $post->photos ?? [];
             $photos_urls = collect(is_array($photos) ? $photos : [])
                 ->map(function($p) {
-                    return !empty($p) && is_string($p) ? Storage::url($p) : null;
+                    return (!empty($p) && is_string($p)) ? Storage::url($p) : null;
                 })
                 ->filter()
                 ->values()
@@ -479,13 +489,15 @@ class PostController extends Controller
             $userData = $user ? [
                 'id' => $user->id,
                 'displayid' => $user->displayid,
-                'profile_image_url' => $user->profile_image ? Storage::url($user->profile_image) : null,
+                'profile_image_url' => (!empty($user->profile_image) && is_string($user->profile_image))
+                    ? Storage::url($user->profile_image)
+                    : null,
             ] : null;
             
             $photos = $post->photos ?? [];
             $photos_urls = collect(is_array($photos) ? $photos : [])
                 ->map(function($p) {
-                    return !empty($p) && is_string($p) ? Storage::url($p) : null;
+                    return (!empty($p) && is_string($p)) ? Storage::url($p) : null;
                 })
                 ->filter()
                 ->values()
