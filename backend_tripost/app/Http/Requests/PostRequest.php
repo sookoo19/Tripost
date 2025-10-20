@@ -46,8 +46,6 @@ class PostRequest extends FormRequest
 
             'photos' => 'nullable|array|max:8',
             'photos.*' => 'file|image|max:10240',
-            'existing_photos' => 'sometimes|array',
-            'existing_photos.*' => 'string',
         ];
         
     }
