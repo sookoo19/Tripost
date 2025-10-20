@@ -211,12 +211,40 @@ class PostController extends Controller
 
     public function edit(Post $post): Response
     {
+        // S3 優先で公開 URL を安全に解決するヘルパー
+        $resolveUrl = function ($p) {
+            if (!is_string($p)) return null;
+            $p = trim($p);
+            if ($p === '') return null;
+            if (preg_match('/^https?:\\/\\//', $p)) return $p;
+            try {
+                if (Storage::disk('s3')->exists($p)) {
+                    return Storage::disk('s3')->url($p);
+                }
+            } catch (\Throwable $e) {
+                \Log::warning('S3 exists check failed (edit)', ['path' => $p, 'error' => $e->getMessage()]);
+            }
+            try {
+                if (Storage::exists($p)) {
+                    return Storage::url($p);
+                }
+            } catch (\Throwable $e) {
+                \Log::warning('Storage exists check failed (edit)', ['path' => $p, 'error' => $e->getMessage()]);
+            }
+            return null;
+        };
+
+        $post = $post->load(['user', 'country', 'style', 'purpose', 'budget']);
+        $post->photos_urls = collect($post->photos ?? [])->map(function($p) use ($resolveUrl) {
+            return $resolveUrl($p);
+        })->filter()->values()->all();
+
         return Inertia::render('Posts/Edit', [
             'countries' => Country::all(['id', 'code', 'name']),
             'styles' => Style::all(['id', 'name']),
             'purposes' => Purpose::all(['id', 'name']),
             'budgets' => Budget::all(['id', 'min','max','label']),
-            'post' => $post->load(['user', 'country', 'style', 'purpose', 'budget']),
+            'post' => $post,
         ]);
     }
 
