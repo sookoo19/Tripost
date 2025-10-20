@@ -87,6 +87,7 @@ class ProfileController extends Controller
             'name' => $user->name,
             'email' => $user->email,
             'profile_image' => $user->profile_image,
+            'profile_image_url' => $user->profile_image ? Storage::url($user->profile_image) : null, // 追加
             'bio' => $user->bio,
             'visited_countries' => $user->visitedCountries->pluck('code')->toArray(),
         ],

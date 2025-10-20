@@ -26,7 +26,8 @@ export default function Edit({ user, countries = [] }) {
     ? null
     : data.profile_image instanceof File
       ? URL.createObjectURL(data.profile_image)
-      : user.profile_image_url || (data.profile_image ? `/storage/${data.profile_image}` : null);
+      : user.profile_image_url ||
+        (data.profile_image ? `/storage/${data.profile_image}` : null);
 
   const handleCountryChange = e => {
     const value = e.target.value;
