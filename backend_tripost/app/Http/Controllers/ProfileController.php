@@ -23,9 +23,7 @@ class ProfileController extends Controller
      */
     public function show(Request $request): Response
     {
-        $user = auth()->user()->loadCount([
-            'posts as posts_count' => fn($q) => $q->where('share_scope', '公開'),
-        ]);
+        $user = auth()->user()->loadCount('posts');
         
         // フォロー数・フォロワー数を取得
         $user->followers_count = $user->followerRelations()->count();
@@ -89,7 +87,6 @@ class ProfileController extends Controller
             'name' => $user->name,
             'email' => $user->email,
             'profile_image' => $user->profile_image,
-            'profile_image_url' => $user->profile_image ? Storage::url($user->profile_image) : null, // 追加
             'bio' => $user->bio,
             'visited_countries' => $user->visitedCountries->pluck('code')->toArray(),
         ],
@@ -102,59 +99,32 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        try {
-            $user = $request->user();
-            
-            // 画像処理を先に実行
-            if ($request->hasFile('profile_image')) {
-                // 旧画像パスを先に取得
-                $old = $user->profile_image;
-                \Log::info('Profile update - old image', ['old' => $old]);
-                
-                // S3 に保存（公開アクセス権限を明示的に設定）
-                $path = $request->file('profile_image')->storePublicly('profile_images', 's3');
-                \Log::info('Profile update - new image saved', ['new' => $path]);
-                
-                // 空の文字列や無効な値をチェックするように修正
-                if ($old && is_string($old) && strlen($old) > 0) {
-                    $oldExists = Storage::disk('s3')->exists($old);
-                    \Log::info('Profile update - exists check', ['old_exists' => $oldExists]);
-                    
-                    // 旧画像を削除（S3から即時削除）
-                    if ($oldExists) {
-                        \Log::info('Deleting old image from S3', ['old' => $old]);
-                        Storage::disk('s3')->delete($old);
-                        \Log::info('Old image deleted');
-                    }
-                } else {
-                    \Log::info('Old image path is invalid', ['old' => $old]);
-                }
-                
-                // 新しいパスを設定
-                $user->profile_image = $path;
+        //バリデーションはProfileUpdateRequest内
+        $user = $request->user();
+        $user->fill($request->validated());
+        $user->save();
+
+        // フロントで未選択(キーが無い)でも空配列をデフォルトにして必ず同期する
+        // これにより未選択時は既存データをクリアできます
+        $codes = $request->input('visited_countries', []);
+        $countryIds = Country::whereIn('code', $codes)->pluck('id')->toArray();
+        $user->visitedCountries()->sync($countryIds);
+
+         if ($request->hasFile('profile_image')) {
+            // 古い画像が存在する場合は削除
+            if ($user->profile_image && Storage::exists($user->profile_image)) {
+                Storage::delete($user->profile_image);
             }
-            
-            // その他のフィールドを更新
-            $user->fill($request->validated());
+
+            // 新しい画像を保存
+            $path = $request->file('profile_image')->store('profile_images');
+
+            // DBには「パス」のみ保存
+            $user->profile_image = $path;
             $user->save();
-
-            // 訪問国の同期
-            $codes = $request->input('visited_countries', []);
-            $countryIds = Country::whereIn('code', $codes)->pluck('id')->toArray();
-            $user->visitedCountries()->sync($countryIds);
-
-            return Redirect::route('profile.show');
-        } catch (\Exception $e) {
-            \Log::error('Profile update error: ' . $e->getMessage(), [
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            
-            return Redirect::back()->withErrors([
-                'error' => 'プロフィールの更新中にエラーが発生しました。'
-            ]);
         }
+
+        return Redirect::route('profile.show');
     }
 
     public function destroy_confirm (Request $request): Response
@@ -195,10 +165,8 @@ class ProfileController extends Controller
     public function showPublic(User $user)
     {
         // 必要なリレーションをロードして渡す
-        // 公開（share_scope = '公開'）の投稿のみをカウントして posts_count を取得
-        $user->loadCount([
-            'posts as posts_count' => fn($q) => $q->where('share_scope', '公開'),
-        ])->load('visitedCountries');
+        // 投稿数を DB 側で取得しておく（$user->posts_count が使えるようになる）
+        $user->loadCount('posts')->load('visitedCountries');
 
         // フォロー数・フォロワー数を取得
         $user->followers_count = $user->followerRelations()->count();
