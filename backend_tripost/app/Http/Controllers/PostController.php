@@ -257,83 +257,111 @@ class PostController extends Controller
 
     public function update(PostRequest $request, Post $post): RedirectResponse
     {
-        $validated = $request->validated();
-        $post->update($validated);
-
-        // post_status が '旅行済' の場合のみ写真を処理する
-        if ($post->post_status === '旅行済') {
-            // --- 既存画像の正規化 ---
-            $oldPhotos = $post->photos;
-            if (is_string($oldPhotos)) {
-                $decoded = json_decode($oldPhotos, true);
-                $oldPhotos = is_array($decoded) ? $decoded : [];
-            } elseif (!is_array($oldPhotos)) {
-                $oldPhotos = [];
+        try {
+            $validated = $request->validated();
+            
+            // photos はバリデーション済みだが DB に直接入れないよう除外
+            if (array_key_exists('photos', $validated)) {
+                unset($validated['photos']);
             }
-
-            // フロントから送られてくる「保持する既存画像」
-            $kept = $request->input('existing_photos', []);
-            if (!is_array($kept)) {
-                $kept = [];
-            }
-
-            // 削除すべき古いファイルを算出して削除
-            $removed = array_values(array_diff($oldPhotos, $kept));
-            foreach ($removed as $rawPath) {
-                if (!is_string($rawPath)) continue;
-                $path = trim($rawPath);
-                if ($path === '') continue;
-
-                // フルURLなら S3 キー抽出が必要（ここでは単純試行）
-                if (preg_match('/^https?:\\/\\//', $path)) {
-                    // 可能なら URL から Storage key を抽出する実装を入れる
-                    continue;
+            
+            // status を先に取得して判定に使用（update 後の値ではなく request の値）
+            $postStatus = $request->input('post_status', '準備中');
+            
+            // 基本データ更新
+            $post->update($validated);
+            
+            // post_status が '旅行済' の場合のみ写真を処理
+            if ($postStatus === '旅行済') {
+                // --- 既存画像の正規化 ---
+                $oldPhotos = $post->photos;
+                if (is_string($oldPhotos)) {
+                    $decoded = json_decode($oldPhotos, true);
+                    $oldPhotos = is_array($decoded) ? $decoded : [];
+                } elseif (!is_array($oldPhotos)) {
+                    $oldPhotos = [];
                 }
 
-                try {
-                    if (Storage::disk('s3')->exists($path)) {
-                        Storage::disk('s3')->delete($path);
+                // フロントから送られてくる「保持する既存画像」
+                $kept = $request->input('existing_photos', []);
+                if (!is_array($kept)) {
+                    $kept = [];
+                }
+
+                // 削除すべき古いファイルを算出して削除
+                // ここで配列と文字列の比較でエラーが発生していたため、型を統一
+                $oldPhotoArray = array_values(array_filter($oldPhotos, 'is_string'));
+                $keptArray = array_values(array_filter($kept, 'is_string'));
+                $removed = array_values(array_diff($oldPhotoArray, $keptArray));
+                
+                foreach ($removed as $rawPath) {
+                    if (!is_string($rawPath)) continue;
+                    $path = trim($rawPath);
+                    if ($path === '') continue;
+
+                    // フルURLなら S3 キー抽出が必要（ここでは単純試行）
+                    if (preg_match('/^https?:\\/\\//', $path)) {
+                        continue;
                     }
-                } catch (\Throwable $e) {
-                    \Log::warning('S3 delete failed', ['path' => $path, 'error' => $e->getMessage()]);
-                }
 
-                try {
-                    if (Storage::exists($path)) {
-                        Storage::delete($path);
+                    try {
+                        if (Storage::disk('s3')->exists($path)) {
+                            Storage::disk('s3')->delete($path);
+                        }
+                    } catch (\Throwable $e) {
+                        \Log::warning('S3 delete failed', ['path' => $path, 'error' => $e->getMessage()]);
                     }
-                } catch (\Throwable $e) {
-                    \Log::warning('Local storage delete failed', ['path' => $path, 'error' => $e->getMessage()]);
+
+                    try {
+                        if (Storage::exists($path)) {
+                            Storage::delete($path);
+                        }
+                    } catch (\Throwable $e) {
+                        \Log::warning('Local storage delete failed', ['path' => $path, 'error' => $e->getMessage()]);
+                    }
                 }
+
+                // --- 新規アップロードファイルの保存 ---
+                $newPhotoPaths = [];
+                if ($request->hasFile('photos')) {
+                    foreach ($request->file('photos') as $file) {
+                        if (!$file) continue;
+                        try {
+                            $newPhotoPaths[] = $file->store('posts_photos');
+                            if (count($newPhotoPaths) >= 8) break;
+                        } catch (\Throwable $e) {
+                            \Log::warning('Failed to store uploaded file', ['error' => $e->getMessage()]);
+                        }
+                    }
+                }
+
+                // kept（既存で保持するパス）と新規アップロードを結合して最大8件にする
+                $merged = array_values(array_slice(array_merge($keptArray, $newPhotoPaths), 0, 8));
+                $post->photos = $merged;
+                $post->save();
+            } else {
+                // 準備中・旅行中の場合は写真を保存しない（空の配列にリセット）
+                $post->photos = [];
+                $post->save();
             }
 
-            // --- 新規アップロードファイルの保存 ---
-            $newPhotoPaths = [];
-            if ($request->hasFile('photos')) {
-                foreach ($request->file('photos') as $file) {
-                    if (!$file) continue;
-                    $newPhotoPaths[] = $file->store('posts_photos');
-                    if (count($newPhotoPaths) >= 8) break;
-                }
-            }
+            // 「編集した日時で並べたい」場合は created_at を更新する
+            $post->timestamps = false;
+            $post->created_at = now();
+            $post->save();
+            $post->timestamps = true;
 
-            // kept（既存で保持するパス）と新規アップロードを結合して最大8件にする
-            $merged = array_values(array_slice(array_merge($kept, $newPhotoPaths), 0, 8));
-            $post->photos = $merged;
-            $post->save();
-        } else {
-            // 準備中・旅行中の場合は写真を保存しない（空の配列にリセット）
-            $post->photos = [];
-            $post->save();
+            return redirect()->route('posts.draft', $post)->with('success', '投稿を更新しました');
+        } catch (\Throwable $e) {
+            // エラーログ記録
+            \Log::error('Post update failed', [
+                'post_id' => $post->id, 
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return back()->withErrors(['error' => '投稿の更新に失敗しました。システム管理者にお問い合わせください。']);
         }
-
-        // 「編集した日時で並べたい」場合は created_at を更新する
-        $post->timestamps = false;
-        $post->created_at = now();
-        $post->save();
-        $post->timestamps = true;
-
-        return redirect()->route('posts.draft', $post)->with('success', '投稿を更新しました');
     }
 
     public function searchPosts(): Response
@@ -698,71 +726,87 @@ class PostController extends Controller
 
     public function destroy(Request $request, Post $post)
     {
-        // photos カラムの正規化：文字列(JSON) / 配列 / null を扱う
-        $photos = $post->photos;
-        if (is_string($photos)) {
-            $decoded = json_decode($photos, true);
-            if (is_array($decoded)) {
-                $photos = $decoded;
-            } else {
-                $photos = [$photos];
+        try {
+            // photos カラムの正規化：文字列(JSON) / 配列 / null を扱う
+            $photos = $post->photos;
+            if (is_string($photos)) {
+                $decoded = json_decode($photos, true);
+                if (is_array($decoded)) {
+                    $photos = $decoded;
+                } else {
+                    $photos = [$photos];
+                }
+            } elseif (!is_array($photos)) {
+                $photos = [];
             }
-        } elseif (!is_array($photos)) {
-            $photos = [];
-        }
 
-        foreach ($photos as $rawPath) {
-            // 文字列でないものは無視
-            if (!is_string($rawPath)) continue;
-            $path = trim($rawPath);
-            if ($path === '') continue;
+            foreach ($photos as $rawPath) {
+                // 文字列でないものは無視
+                if (!is_string($rawPath)) continue;
+                $path = trim($rawPath);
+                if ($path === '') continue;
 
-            // フル URL の場合、S3 key を抽出する試み（失敗したらスキップ）
-            if (preg_match('/^https?:\\/\\//', $path)) {
+                // フル URL の場合、S3 key を抽出する試み（失敗したらスキップ）
+                if (preg_match('/^https?:\\/\\//', $path)) {
+                    try {
+                        $parts = parse_url($path);
+                        $candidate = $parts['path'] ?? null;
+                        if ($candidate) {
+                            // /bucket/key など先頭スラッシュを除去
+                            $candidate = ltrim($candidate, '/');
+                            $pathToCheck = $candidate;
+                        } else {
+                            continue;
+                        }
+                    } catch (\Throwable $e) {
+                        \Log::warning('Failed to parse URL for deletion', ['path' => $path, 'error' => $e->getMessage()]);
+                        continue;
+                    }
+                } else {
+                    $pathToCheck = $path;
+                }
+
                 try {
-                    $parts = parse_url($path);
-                    $candidate = $parts['path'] ?? null;
-                    if ($candidate) {
-                        // /bucket/key など先頭スラッシュを除去
-                        $candidate = ltrim($candidate, '/');
-                        $pathToCheck = $candidate;
-                    } else {
+                    // Storage::exists に配列が渡らないよう確認
+                    if (!is_string($pathToCheck)) {
+                        \Log::warning('Non-string path encountered', ['path' => var_export($pathToCheck, true)]);
+                        continue;
+                    }
+
+                    // S3 優先で存在確認・削除、失敗はログだけ
+                    if (Storage::disk('s3')->exists($pathToCheck)) {
+                        Storage::disk('s3')->delete($pathToCheck);
                         continue;
                     }
                 } catch (\Throwable $e) {
-                    \Log::warning('Failed to parse URL for deletion', ['path' => $path, 'error' => $e->getMessage()]);
-                    continue;
+                    \Log::warning('S3 delete check failed', ['post_id' => $post->id, 'path' => $pathToCheck, 'error' => $e->getMessage()]);
                 }
-            } else {
-                $pathToCheck = $path;
+
+                try {
+                    if (is_string($pathToCheck) && Storage::exists($pathToCheck)) {
+                        Storage::delete($pathToCheck);
+                    }
+                } catch (\Throwable $e) {
+                    \Log::warning('Local storage delete failed', ['post_id' => $post->id, 'path' => $pathToCheck, 'error' => $e->getMessage()]);
+                }
             }
 
             try {
-                // S3 優先で存在確認・削除、失敗はログだけ
-                if (Storage::disk('s3')->exists($pathToCheck)) {
-                    Storage::disk('s3')->delete($pathToCheck);
-                    continue;
-                }
+                $post->delete();
             } catch (\Throwable $e) {
-                \Log::warning('S3 delete check failed', ['post_id' => $post->id, 'path' => $pathToCheck, 'error' => $e->getMessage()]);
+                \Log::error('Post delete failed', ['post_id' => $post->id, 'error' => $e->getMessage()]);
+                return response()->json(['ok' => false, 'message' => '投稿の削除に失敗しました'], 500);
             }
 
-            try {
-                if (Storage::exists($pathToCheck)) {
-                    Storage::delete($pathToCheck);
-                }
-            } catch (\Throwable $e) {
-                \Log::warning('Local storage delete failed', ['post_id' => $post->id, 'path' => $pathToCheck, 'error' => $e->getMessage()]);
-            }
-        }
-
-        try {
-            $post->delete();
+            return response()->json(['ok' => true]);
         } catch (\Throwable $e) {
-            \Log::error('Post delete failed', ['post_id' => $post->id, 'error' => $e->getMessage()]);
-            return response()->json(['ok' => false, 'message' => '投稿の削除に失敗しました'], 500);
+            \Log::error('Post destruction failed', [
+                'post_id' => $post->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json(['ok' => false, 'message' => '予期せぬエラーが発生しました'], 500);
         }
-
-        return response()->json(['ok' => true]);
     }
 }
