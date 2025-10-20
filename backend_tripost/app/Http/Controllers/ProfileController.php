@@ -23,7 +23,9 @@ class ProfileController extends Controller
      */
     public function show(Request $request): Response
     {
-        $user = auth()->user()->loadCount('posts');
+        $user = auth()->user()->loadCount([
+            'posts as posts_count' => fn($q) => $q->where('share_scope', '公開'),
+        ]);
         
         // フォロー数・フォロワー数を取得
         $user->followers_count = $user->followerRelations()->count();
@@ -161,8 +163,10 @@ class ProfileController extends Controller
     public function showPublic(User $user)
     {
         // 必要なリレーションをロードして渡す
-        // 投稿数を DB 側で取得しておく（$user->posts_count が使えるようになる）
-        $user->loadCount('posts')->load('visitedCountries');
+        // 公開（share_scope = '公開'）の投稿のみをカウントして posts_count を取得
+        $user->loadCount([
+            'posts as posts_count' => fn($q) => $q->where('share_scope', '公開'),
+        ])->load('visitedCountries');
 
         // フォロー数・フォロワー数を取得
         $user->followers_count = $user->followerRelations()->count();

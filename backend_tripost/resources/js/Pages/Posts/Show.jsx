@@ -141,7 +141,11 @@ export default function Show({ post, user }) {
   }, [sortedTripLocations]);
 
   // 写真配列を取得
-  const photos = post?.photos || [];
+  // S3 URL があればそれを優先、なければ photos（キー）を使う（可能ならバックエンドで生成済み）
+  const photos =
+    post?.photos_urls && post.photos_urls.length
+      ? post.photos_urls
+      : post?.photos || [];
 
   // Show側で徒歩ルートを計算し、正確な道路距離を routeInfo にセットする
   useEffect(() => {
