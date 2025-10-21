@@ -735,7 +735,7 @@ export default function PostCreate({ countries, styles, purposes, budgets }) {
             className='w-full h-12 mt-2 flex justify-center items-center inline-flex items-center rounded-md border border-transparent bg-gray-200 px-4 py-2 text-lg font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out hover:bg-gray-300 focus:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
             disabled={processing}
           >
-            タビを作成
+            {data.post_status === '旅行済' ? 'タビを作成' : '下書きを作成'}
           </PrimaryButton>
         </div>
       </form>
