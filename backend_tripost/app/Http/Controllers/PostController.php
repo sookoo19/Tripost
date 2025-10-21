@@ -17,7 +17,7 @@ use App\Models\Style;
 use App\Models\Purpose;
 use App\Models\Budget;
 use App\Models\Follow;
-use App\Models\Like; // 追加
+use App\Models\Like; 
 
 class PostController extends Controller
 {
