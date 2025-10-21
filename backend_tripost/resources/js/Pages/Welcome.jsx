@@ -3,7 +3,7 @@ import { Head, Link } from '@inertiajs/react';
 export default function Welcome() {
   return (
     <>
-      <Head title='Tripost' />
+      <Head title='Welcome' />
       <div className='min-h-screen relative bg-yellow-400'>
         {/* 背景画像 */}
         <img
