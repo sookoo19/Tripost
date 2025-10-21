@@ -129,7 +129,7 @@ export default function Show({ user, countries, posts }) {
             <div className='flex flex-col ml-3'>
               <div className='flex flex-row items-center'>
                 {/*ユーザーID*/}
-                <div className='text-lg font-bold xs:mt-3'>
+                <div className='text-lg font-bold xs:mt-3 max-w-[10rem] xs:max-w-[12rem] sm:max-w-[18rem] whitespace-normal break-words break-all'>
                   @{user.displayid}
                 </div>
                 {/*設定アイコン*/}
@@ -228,7 +228,9 @@ export default function Show({ user, countries, posts }) {
                 </div>
               )}
               {/*ユーザー名*/}
-              <div className='text-2xl font-bold'>{user.name}</div>
+              <div className='text-xl sm:text-2xl font-bold max-w-[10rem] xs:max-w-[12rem] sm:max-w-[18rem] whitespace-normal break-words break-all'>
+                {user.name}
+              </div>
             </div>
             <div className='mt-1 w-full'>
               {/*フォロー数、フォロワー数、投稿数*/}
