@@ -37,7 +37,8 @@ export default function Edit({
     purpose_id: initialPost.purpose_id ?? '',
     budget_id: initialPost.budget_id ?? '',
     trip_plan: initialPost.trip_plan ?? {},
-    photos: [], // 常に空の配列で開始
+    // 既存アップロード画像は文字列パスで渡されるので初期化で入れておく
+    photos: initialPost.photos ?? [],
   });
 
   // React Select用のstyleデータ整形（useMemoでメモ化）
@@ -265,14 +266,33 @@ export default function Edit({
 
   // ファイルプレビュー URL を管理（initialPhotoUrlsを削除）
   useEffect(() => {
+    const createdObjectUrls = [];
     const urls = (data.photos || [])
-      .map(f => (f instanceof File ? URL.createObjectURL(f) : null))
-      .filter(Boolean); // nullを除外
+      .map((f, idx) => {
+        if (f instanceof File) {
+          const u = URL.createObjectURL(f);
+          createdObjectUrls.push(u);
+          return u;
+        }
+        if (typeof f === 'string') {
+          // サーバー側で渡した photos_urls があれば優先して使用
+          if (initialPost.photos && Array.isArray(initialPost.photos)) {
+            const pos = initialPost.photos.indexOf(f);
+            if (initialPost.photos_urls && initialPost.photos_urls[pos]) {
+              return initialPost.photos_urls[pos];
+            }
+          }
+          // 直接 URL が含まれているケースのためのフォールバック
+          return /^https?:\/\//.test(f) ? f : null;
+        }
+        return null;
+      })
+      .filter(Boolean);
 
     setPreviewUrls(urls);
-
-    return () => urls.forEach(u => URL.revokeObjectURL(u));
-  }, [data.photos]);
+    // File から作った objectURL のみ revoke
+    return () => createdObjectUrls.forEach(u => URL.revokeObjectURL(u));
+  }, [data.photos, initialPost.photos, initialPost.photos_urls]);
 
   const openFileDialog = () =>
     fileInputRef.current && fileInputRef.current.click();
@@ -311,7 +331,7 @@ export default function Edit({
     // trip_plan をクリーンにする
     const cleanedTripPlan = cleanTripPlan(data.trip_plan);
 
-    // FormDataを作成（既存画像は削除、新しい画像のみ送信）
+    // FormDataを作成（既存画像は existing_photos[]、新しい画像は photos[] として送る）
     const formData = new FormData();
 
     // 通常のフィールドを追加
@@ -324,10 +344,17 @@ export default function Edit({
     // trip_planを追加
     formData.append('trip_plan', JSON.stringify(cleanedTripPlan));
 
-    // 新しい写真のみを追加
-    (data.photos || []).forEach((file, index) => {
+    // 既存の画像（サーバーに保存済みのパス）は existing_photos[] として送る
+    (data.photos || []).forEach(item => {
+      if (typeof item === 'string') {
+        formData.append('existing_photos[]', item);
+      }
+    });
+
+    // 新しい写真のみを photos[] として追加（File インスタンスのみ）
+    (data.photos || []).forEach(file => {
       if (file instanceof File) {
-        formData.append(`photos[${index}]`, file);
+        formData.append('photos[]', file);
       }
     });
 

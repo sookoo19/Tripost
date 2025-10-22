@@ -32,6 +32,11 @@ class User extends Authenticatable implements MustVerifyEmailContract
     ];
 
     /**
+     * JSON に自動追加する属性
+     */
+    protected $appends = ['profile_image_url'];
+
+    /**
      * The attributes that should be hidden for serialization.
      *
      * @var list<string>
@@ -149,5 +154,18 @@ class User extends Authenticatable implements MustVerifyEmailContract
     public function unreadNotificationsCount()
     {
         return $this->notifications()->where('read', false)->count();
+    }
+
+    /**
+     * S3 の公開 URL を取得するアクセサ
+     */
+    public function getProfileImageUrlAttribute(): ?string
+    {
+        if (!$this->profile_image) {
+            return null;
+        }
+        
+        // S3 の公開 URL を返す
+        return \Storage::disk('s3')->url($this->profile_image);
     }
 }
