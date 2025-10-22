@@ -98,4 +98,4 @@ Mailgun
 Github Actions
 
 ### インフラ構成図
-![インフラ構成図-Tripost](docs/インフラ構成_tripost.jpg)
+![インフラ構成図-Tripost](docs/インフラ構成_tripost.drawio.svg)
