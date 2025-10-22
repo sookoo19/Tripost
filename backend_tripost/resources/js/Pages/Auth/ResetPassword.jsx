@@ -23,7 +23,7 @@ export default function ResetPassword({ token, email }) {
 
   return (
     <GuestLayout title='パスワード再設定'>
-      <Head title='Reset Password' />
+      <Head title='パスワード再設定' />
 
       <form onSubmit={submit}>
         <div>

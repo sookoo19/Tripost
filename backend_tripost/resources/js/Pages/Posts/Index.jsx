@@ -93,11 +93,14 @@ export default function Index({ posts, filter }) {
       <div className='w-full'>
         {/*ヘッダー*/}
         <Link href={route('posts.index')}>
-          <img
-            src='/images/header.svg'
-            alt='header'
-            className='w-full h-auto block object-cover'
-          />
+          <picture>
+            <source media='(min-width:1024px)' srcSet='/images/header_lg.svg' />
+            <img
+              src='/images/header.svg'
+              alt='header'
+              className='w-full h-auto block object-cover'
+            />
+          </picture>
         </Link>
       </div>
       {/* 通知アイコンを追加 */}
@@ -110,7 +113,7 @@ export default function Index({ posts, filter }) {
         >
           <svg
             xmlns='http://www.w3.org/2000/svg'
-            className='h-8 w-8'
+            className='h-8 w-8 lg:h-12 lg:w-12'
             fill='none'
             viewBox='0 0 24 24'
             stroke='currentColor'
@@ -129,7 +132,7 @@ export default function Index({ posts, filter }) {
           )}
         </button>
       </div>
-      <div className='flex gap-6 justify-center'>
+      <div className='flex gap-6 justify-center lg:text-2xl'>
         <Link
           href={route('posts.index')}
           className={
@@ -181,7 +184,7 @@ export default function Index({ posts, filter }) {
                       '/images/defalt_profile.jpg'
                     }
                     alt='avatar'
-                    className='w-5 h-5 rounded-full object-cover'
+                    className='w-5 h-5 lg:w-8 lg:h-8 rounded-full object-cover'
                   />
                 </Link>
                 <div className='ml-1'>
@@ -191,12 +194,12 @@ export default function Index({ posts, filter }) {
                         ? route('profile.show')
                         : route('users.profile', post.user.id)
                     }
-                    className='font-semibold text-sm'
+                    className='font-semibold text-sm lg:text-lg'
                   >
                     @{post.user.displayid}
                   </Link>
                 </div>
-                <div className='text-sm font-bold ml-auto flex flex-row items-center'>
+                <div className='text-sm lg:text-lg font-bold ml-auto flex flex-row items-center'>
                   <svg
                     xmlns='http://www.w3.org/2000/svg'
                     width={28}

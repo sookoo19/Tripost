@@ -13,7 +13,7 @@ export default function VerifyEmail({ status }) {
 
   return (
     <GuestLayout title='メールアドレス認証'>
-      <Head title='Email Verification' />
+      <Head title='メールアドレス認証' />
 
       <div className='mb-4 text-sm text-gray-600'>
         ご登録ありがとうございます。

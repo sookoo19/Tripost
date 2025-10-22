@@ -20,7 +20,7 @@ export default function ConfirmPassword() {
 
   return (
     <GuestLayout title='パスワード再設定'>
-      <Head title='Confirm Password' />
+      <Head title='パスワード再設定' />
 
       <div className='mb-4 text-sm text-gray-600'>
         続けるにはパスワードの再入力が必要です。

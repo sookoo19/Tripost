@@ -130,7 +130,7 @@ export default function Search({ countries, styles, purposes, budgets }) {
   return (
     <AuthenticatedLayout
       header={
-        <h2 className='text-2xl font-semibold leading-tight text-gray-800 text-center'>
+        <h2 className='text-2xl lg:text-3xl font-semibold leading-tight text-gray-800 text-center'>
           タビ検索
         </h2>
       }
@@ -142,7 +142,7 @@ export default function Search({ countries, styles, purposes, budgets }) {
           <div className='mt-2 flex flex-col p-2'>
             <div className='mt-2 inline-flex items-center w-full'>
               <InputLabel
-                className='font-bold'
+                className='font-bold lg:text-lg'
                 htmlFor='country_id'
                 value='国'
               />
@@ -151,7 +151,7 @@ export default function Search({ countries, styles, purposes, budgets }) {
                 aria-label='国'
                 name='country_id'
                 options={countryOptions}
-                className='ml-auto w-3/5 h-auto text-sm'
+                className='ml-auto w-3/5 h-auto text-sm lg:text-lg'
                 classNamePrefix='react-select'
                 value={
                   countryOptions.find(opt => opt.value === data.country_id) ||
@@ -170,7 +170,7 @@ export default function Search({ countries, styles, purposes, budgets }) {
             )}
             <div className='inline-flex items-center w-full mt-4'>
               <InputLabel
-                className='font-bold'
+                className='font-bold lg:text-lg'
                 htmlFor='period_from'
                 value='時期'
               />
@@ -179,20 +179,20 @@ export default function Search({ countries, styles, purposes, budgets }) {
                 id='period_from'
                 name='period_from'
                 value={data.period_from}
-                className='ml-auto w-3/5 h-auto text-sm block rounded border border-gray-300'
+                className='ml-auto w-3/5 h-auto text-sm lg:text-lg block rounded border border-gray-300'
                 style={{ color: data.period_from ? '#000000' : '#7b7e85ff' }}
                 onChange={e => setData('period_from', e.target.value)}
               />
             </div>
             <div className='inline-flex items-center w-full mt-1'>
-              <p className='ml-auto'>〜</p>
+              <p className='ml-auto lg:text-lg'>〜</p>
               <InputLabel className='font-bold' htmlFor='period_to' />
               <input
                 type='month'
                 id='period_to'
                 name='period_to'
                 value={data.period_to}
-                className='ml-2 w-3/5 h-auto text-sm block rounded border border-gray-300'
+                className='ml-2 w-3/5 h-auto text-sm lg:text-lg block rounded border border-gray-300'
                 style={{ color: data.period_to ? '#000000' : '#7b7e85ff' }}
                 onChange={e => setData('period_to', e.target.value)}
               />
@@ -201,12 +201,16 @@ export default function Search({ countries, styles, purposes, budgets }) {
               <InputError message={errors.period} className='mt-2' />
             )}
             <div className='inline-flex items-center w-full mt-4'>
-              <InputLabel className='font-bold' htmlFor='days' value='日数' />
+              <InputLabel
+                className='font-bold lg:text-lg'
+                htmlFor='days'
+                value='日数'
+              />
               <Select
                 inputId='days'
                 aria-label='日数'
                 name='days'
-                className='ml-auto w-3/5 h-auto text-sm'
+                className='ml-auto w-3/5 h-auto text-sm lg:text-lg'
                 classNamePrefix='react-select'
                 placeholder='例：1日間'
                 options={daysOptions}
@@ -222,7 +226,7 @@ export default function Search({ countries, styles, purposes, budgets }) {
             )}
             <div className='inline-flex items-center w-full mt-4'>
               <InputLabel
-                className='font-bold'
+                className='font-bold lg:text-lg'
                 htmlFor='style_id'
                 value='スタイル'
               />
@@ -231,7 +235,7 @@ export default function Search({ countries, styles, purposes, budgets }) {
                 inputId='style_id'
                 aria-label='スタイル'
                 name='style_id'
-                className='ml-auto w-3/5 h-auto text-sm'
+                className='ml-auto w-3/5 h-auto text-sm lg:text-lg'
                 classNamePrefix='react-select'
                 options={styleOptions}
                 value={
@@ -251,7 +255,7 @@ export default function Search({ countries, styles, purposes, budgets }) {
             )}
             <div className='inline-flex items-center w-full mt-4'>
               <InputLabel
-                className='font-bold'
+                className='font-bold lg:text-lg'
                 htmlFor='purpose_id'
                 value='目的'
               />
@@ -259,7 +263,7 @@ export default function Search({ countries, styles, purposes, budgets }) {
                 inputId='purpose_id'
                 aria-label='目的'
                 name='purpose_id'
-                className='ml-auto w-3/5 h-auto text-sm'
+                className='ml-auto w-3/5 h-auto text-sm lg:text-lg'
                 classNamePrefix='react-select'
                 options={purposeOptions}
                 value={
@@ -280,7 +284,7 @@ export default function Search({ countries, styles, purposes, budgets }) {
             )}
             <div className='inline-flex items-center w-full mt-4'>
               <InputLabel
-                className='font-bold'
+                className='font-bold lg:text-lg'
                 htmlFor='budget_min'
                 value='予算'
               />
@@ -288,7 +292,7 @@ export default function Search({ countries, styles, purposes, budgets }) {
                 inputId='budget_min'
                 aria-label='予算（最小）'
                 name='budget_min'
-                className='ml-auto w-3/5 h-auto text-sm'
+                className='ml-auto w-3/5 h-auto text-sm lg:text-lg'
                 classNamePrefix='react-select'
                 options={budgetMinOptions}
                 value={
@@ -310,13 +314,13 @@ export default function Search({ countries, styles, purposes, budgets }) {
               />
             </div>
             <div className='inline-flex items-center w-full mt-1'>
-              <p className='ml-auto'>〜</p>
+              <p className='ml-auto lg:text-lg'>〜</p>
               <InputLabel className='font-bold' htmlFor='budget_max' />
               <Select
                 inputId='budget_max'
                 aria-label='予算（最大）'
                 name='budget_max'
-                className='ml-2 w-3/5 h-auto text-sm'
+                className='ml-2 w-3/5 h-auto text-sm lg:text-lg'
                 classNamePrefix='react-select'
                 options={budgetMaxOptions}
                 value={
@@ -345,7 +349,7 @@ export default function Search({ countries, styles, purposes, budgets }) {
             )}
             <div className='inline-flex items-center f-full mt-12'>
               <InputLabel
-                className='font-bold'
+                className='font-bold lg:text-lg'
                 htmlFor='keyword'
                 value='フリーワード'
               />
@@ -354,7 +358,7 @@ export default function Search({ countries, styles, purposes, budgets }) {
                 id='keyword'
                 name='keyword'
                 value={data.keyword}
-                className='ml-auto block w-3/5 h-auto text-sm'
+                className='ml-auto block w-3/5 h-auto text-sm lg:text-lg'
                 autoComplete='keyword'
                 isFocused={true}
                 onChange={e => setData('keyword', e.target.value)}
@@ -370,7 +374,7 @@ export default function Search({ countries, styles, purposes, budgets }) {
           <PrimaryButton
             aria-label='検索'
             title='検索'
-            className='w-full h-12 mt-2 flex justify-center items-center inline-flex items-center rounded-md border border-transparent bg-gray-200 px-4 py-2 text-lg font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out hover:bg-gray-300 focus:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
+            className='w-full h-12 mt-2 flex justify-center items-center inline-flex items-center rounded-md border border-transparent bg-gray-200 px-4 py-2 text-lg lg:text-xl font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out hover:bg-gray-300 focus:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
             disabled={processing}
           >
             検索

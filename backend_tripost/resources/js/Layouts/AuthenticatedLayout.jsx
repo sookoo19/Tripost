@@ -5,11 +5,14 @@ export default function AuthenticatedLayout({ header, children }) {
     <div className='flex min-h-screen flex-col items-center bg-white'>
       <div className='w-full'>
         <Link href={route('posts.index')}>
-          <img
-            src='/images/header.svg'
-            alt='header'
-            className='w-full h-auto block object-cover'
-          />
+          <picture>
+            <source media='(min-width:1024px)' srcSet='/images/header_lg.svg' />
+            <img
+              src='/images/header.svg'
+              alt='header'
+              className='w-full h-auto block object-cover'
+            />
+          </picture>
         </Link>
       </div>
       <div>
