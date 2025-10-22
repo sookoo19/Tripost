@@ -6,12 +6,14 @@ export default function Welcome() {
       <Head title='Welcome' />
       <div className='min-h-screen relative bg-yellow-400'>
         {/* 背景画像 */}
-        <img
-          src=''
-          alt='welcome'
-          className='absolute inset-0 w-full h-full object-cover'
-          draggable={false}
-        />
+        <div className='absolute inset-0 flex items-center justify-center z-0'>
+          <img
+            src='/images/welcome.svg'
+            alt='welcome'
+            className='max-w-full max-h-full w-auto h-auto object-contain'
+            draggable={false}
+          />
+        </div>
 
         {/* 中央のキャッチ */}
         <div className='relative z-10 flex flex-col items-center justify-center min-h-screen px-5 text-center'>
