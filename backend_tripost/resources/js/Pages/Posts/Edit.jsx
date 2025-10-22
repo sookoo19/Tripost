@@ -366,7 +366,7 @@ export default function Edit({
   return (
     <AuthenticatedLayout
       header={
-        <h2 className='text-2xl font-semibold leading-tight text-gray-800 text-center'>
+        <h2 className='text-2xl lg:text-3xl font-semibold leading-tight text-gray-800 text-center'>
           タビを編集
         </h2>
       }
@@ -375,20 +375,20 @@ export default function Edit({
 
       <form onSubmit={handleSubmit}>
         <div>
-          <div className='block font-bold text-base text-gray-700'>
+          <div className='block font-bold text-base lg:text-lg text-gray-700'>
             タビ情報
           </div>
           <div className='mt-2 flex flex-col border-t border-b border-gray-300 p-2'>
             <div className='mt-2 inline-flex items-center w-full'>
               <InputLabel
-                className='font-bold'
+                className='font-bold lg:text-lg'
                 htmlFor='country_id'
                 value='国'
               />
               <Select
                 name='country_id'
                 options={countryOptions}
-                className='ml-auto w-3/5 h-auto text-sm'
+                className='ml-auto w-3/5 h-auto text-sm lg:text-lg'
                 classNamePrefix='react-select'
                 value={
                   countryOptions.find(opt => opt.value === data.country_id) ||
@@ -408,13 +408,17 @@ export default function Edit({
               <InputError message={errors.country_id} className='mt-2' />
             )}
             <div className='inline-flex items-center f-full mt-2'>
-              <InputLabel className='font-bold' htmlFor='region' value='地域' />
+              <InputLabel
+                className='font-bold lg:text-lg'
+                htmlFor='region'
+                value='地域'
+              />
 
               <TextInput
                 id='region'
                 name='region'
                 value={data.region}
-                className='ml-auto block w-3/5 h-auto text-sm'
+                className='ml-auto block w-3/5 h-auto text-sm lg:text-lg'
                 autoComplete='region'
                 onChange={e => setData('region', e.target.value)}
                 placeholder='例：東京'
@@ -424,14 +428,18 @@ export default function Edit({
               <InputError message={errors.region} className='mt-2' />
             )}
             <div className='inline-flex items-center w-full mt-2'>
-              <InputLabel className='font-bold' htmlFor='period' value='時期' />
+              <InputLabel
+                className='font-bold lg:text-lg'
+                htmlFor='period'
+                value='時期'
+              />
 
               <input
                 type='month'
                 id='period'
                 name='period'
                 value={data.period}
-                className='ml-auto w-3/5 h-auto text-sm block rounded border border-gray-300'
+                className='ml-auto w-3/5 h-auto text-sm lg:text-lg block rounded border border-gray-300'
                 style={{ color: data.period ? '#000000' : '#7b7e85ff' }}
                 onChange={e => setData('period', e.target.value)}
                 required
@@ -441,10 +449,14 @@ export default function Edit({
               <InputError message={errors.period} className='mt-2' />
             )}
             <div className='inline-flex items-center w-full mt-2'>
-              <InputLabel className='font-bold' htmlFor='days' value='日数' />
+              <InputLabel
+                className='font-bold lg:text-lg'
+                htmlFor='days'
+                value='日数'
+              />
               <Select
                 name='days'
-                className='ml-auto w-3/5 h-auto text-sm'
+                className='ml-auto w-3/5 h-auto text-sm lg:text-lg'
                 classNamePrefix='react-select'
                 options={daysOptions}
                 value={daysOptions.find(opt => opt.value === data.days) || null}
@@ -461,14 +473,14 @@ export default function Edit({
             )}
             <div className='inline-flex items-center w-full mt-2'>
               <InputLabel
-                className='font-bold'
+                className='font-bold lg:text-lg'
                 htmlFor='style_id'
                 value='スタイル'
               />
 
               <Select
                 name='style_id'
-                className='ml-auto w-3/5 h-auto text-sm'
+                className='ml-auto w-3/5 h-auto text-sm lg:text-lg'
                 classNamePrefix='react-select'
                 options={styleOptions}
                 value={
@@ -488,13 +500,13 @@ export default function Edit({
             )}
             <div className='inline-flex items-center w-full mt-2'>
               <InputLabel
-                className='font-bold'
+                className='font-bold lg:text-lg'
                 htmlFor='purpose_id'
                 value='目的'
               />
               <Select
                 name='purpose_id'
-                className='ml-auto w-3/5 h-auto text-sm'
+                className='ml-auto w-3/5 h-auto text-sm lg:text-lg'
                 classNamePrefix='react-select'
                 options={purposeOptions}
                 value={
@@ -515,13 +527,13 @@ export default function Edit({
             )}
             <div className='inline-flex items-center w-full mt-2 mb-2'>
               <InputLabel
-                className='font-bold'
+                className='font-bold lg:text-lg'
                 htmlFor='budget_id'
                 value='予算'
               />
               <Select
                 name='budget_id'
-                className='ml-auto w-3/5 h-auto text-sm'
+                className='ml-auto w-3/5 h-auto text-sm lg:text-lg'
                 classNamePrefix='react-select'
                 options={budgetOptions}
                 value={
@@ -545,7 +557,7 @@ export default function Edit({
         <div className='mt-12'>
           <div className='flex flex-row'>
             <InputLabel
-              className='font-bold'
+              className='font-bold lg:text-lg'
               htmlFor='photos'
               value='タビ写真'
             />
@@ -563,7 +575,7 @@ export default function Edit({
             />
 
             {/* カウンタ */}
-            <div className='text-sm text-gray-500 mb-2 ml-auto'>
+            <div className='text-sm lg:text-lg text-gray-500 mb-2 ml-auto'>
               {(data.photos || []).length}/8枚
             </div>
           </div>
@@ -576,7 +588,7 @@ export default function Edit({
               return (
                 <div
                   key={i}
-                  className='w-16 h-16 xs:w-20 xs:h-20 rounded bg-gray-100 flex items-center justify-center relative'
+                  className='w-16 h-16 xs:w-20 xs:h-20 lg:h-40 lg:w-40 rounded bg-gray-100 flex items-center justify-center relative'
                 >
                   {file ? (
                     <>
@@ -588,7 +600,7 @@ export default function Edit({
                       <button
                         type='button'
                         onClick={() => removePhoto(i)}
-                        className='absolute top-0 right-0 m-1 bg-black bg-opacity-50 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center'
+                        className='absolute top-0 right-0 m-1 bg-black bg-opacity-50 text-white rounded-full w-5 h-5 lg:w-8 lg:h-8 text-xs lg:text-lg flex items-center justify-center'
                         aria-label='削除'
                       >
                         ×
@@ -599,6 +611,7 @@ export default function Edit({
                       type='button'
                       onClick={openFileDialog}
                       className='w-full h-full flex items-center justify-center text-gray-400'
+                      aria-label={`写真を追加（スロット ${i + 1}）`}
                     >
                       <span className='text-2xl'>＋</span>
                     </button>
@@ -613,7 +626,7 @@ export default function Edit({
             <button
               type='button'
               onClick={openFileDialog}
-              className='inline-flex items-center px-2 py-2 bg-indigo-500 text-sm text-white rounded-md'
+              className='inline-flex items-center px-2 py-2 bg-indigo-500 text-sm lg:text-lg text-white rounded-md'
             >
               まとめて追加
             </button>
@@ -621,12 +634,16 @@ export default function Edit({
         </div>
 
         <div className='mt-12'>
-          <InputLabel className='font-bold' htmlFor='title' value='タイトル' />
+          <InputLabel
+            className='font-bold lg:text-lg'
+            htmlFor='title'
+            value='タイトル'
+          />
           <TextInput
             id='title'
             name='title'
             value={data.title}
-            className='mt-1 block w-full bg-gray-50'
+            className='mt-1 block w-full bg-gray-50 lg:text-lg'
             autoComplete='title'
             onChange={e => setData('title', e.target.value)}
             required
@@ -638,16 +655,15 @@ export default function Edit({
         </div>
         <div className='mt-8'>
           <InputLabel
-            className='font-bold'
+            className='font-bold lg:text-lg'
             htmlFor='subtitle'
             value='サブタイトル'
           />
-
           <TextInput
             id='subtitle'
             name='subtitle'
             value={data.subtitle}
-            className='mt-1 block w-full bg-gray-50'
+            className='mt-1 block w-full bg-gray-50 lg:text-lg'
             autoComplete='subtitle'
             onChange={e => setData('subtitle', e.target.value)}
           />
@@ -658,15 +674,14 @@ export default function Edit({
         </div>
         <div className='mt-8'>
           <InputLabel
-            className='font-bold'
+            className='font-bold lg:text-lg'
             htmlFor='description'
             value='タビ概要'
           />
-
           <textarea
             id='description'
             name='description'
-            className='rounded-md bg-gray-50 border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 mt-1 block w-full h-32'
+            className='rounded-md bg-gray-50 border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 mt-1 block w-full h-32 lg:text-lg'
             value={data.description}
             autoComplete='description'
             onChange={e => setData('description', e.target.value)}
@@ -701,13 +716,13 @@ export default function Edit({
         <div className='mt-8 border-t border-b border-gray-300'>
           <div className='inline-flex items-center w-full mt-4'>
             <InputLabel
-              className='font-bold'
+              className='font-bold lg:text-lg'
               htmlFor='post_status'
               value='タビ状況'
             />
             <Select
               name='post_status'
-              className='ml-auto w-3/5 h-auto text-sm'
+              className='ml-auto w-3/5 h-auto text-sm lg:text-lg'
               classNamePrefix='react-select'
               options={[
                 { value: '準備中', label: '準備中' },
@@ -724,7 +739,6 @@ export default function Edit({
               onChange={option => {
                 const newStatus = option ? option.value : '準備中';
                 setData('post_status', newStatus);
-                // 旅行済以外になったら公開が選ばれていれば非公開に戻す
                 if (newStatus !== '旅行済' && data.share_scope === '公開') {
                   setData('share_scope', '非公開');
                 }
@@ -734,28 +748,23 @@ export default function Edit({
               isSearchable={false}
               maxMenuHeight={200}
             />
-            {errors.post_status && (
-              <InputError message={errors.post_status} className='mt-2' />
-            )}
           </div>
           <div className='inline-flex items-center w-full mt-4 mb-4'>
             <InputLabel
-              className='font-bold'
+              className='font-bold lg:text-lg'
               htmlFor='share_scope'
               value='公開設定'
             />
             <Select
               name='share_scope'
-              className='ml-auto w-3/5 h-auto text-sm'
+              className='ml-auto w-3/5 h-auto text-sm lg:text-lg'
               classNamePrefix='react-select'
               options={shareScopeOptions}
-              // disabled オプションを含めた options 配列から value を解決
               value={
                 shareScopeOptions.find(opt => opt.value === data.share_scope) ||
                 shareScopeOptions[0]
               }
               onChange={option => {
-                // isDisabled が true の option は react-select 側で選択不可なので追加チェックは冗長だが安全策として
                 if (option && option.isDisabled) return;
                 setData('share_scope', option ? option.value : '非公開');
               }}
@@ -764,15 +773,12 @@ export default function Edit({
               isSearchable={false}
               maxMenuHeight={200}
             />
-            {errors.share_scope && (
-              <InputError message={errors.share_scope} className='mt-2' />
-            )}
           </div>
         </div>
 
         <div className='flex items-center justify-end mt-4'>
           <PrimaryButton
-            className='w-full h-12 mt-2 flex justify-center items-center inline-flex items-center rounded-md border border-transparent bg-gray-200 px-4 py-2 text-lg font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out hover:bg-gray-300 focus:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
+            className='w-full h-12 mt-2 flex justify-center items-center inline-flex items-center rounded-md border border-transparent bg-gray-200 px-4 py-2 text-lg lg:text-xl font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out hover:bg-gray-300 focus:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
             disabled={processing}
           >
             タビを更新
@@ -780,7 +786,7 @@ export default function Edit({
         </div>
       </form>
       <button
-        className='w-full h-12 mt-2 flex justify-center items-center inline-flex items-center rounded-md border border-transparent bg-gray-200 px-4 py-2 text-lg font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out hover:bg-gray-300 focus:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
+        className='w-full h-12 mt-2 flex justify-center items-center inline-flex items-center rounded-md border border-transparent bg-gray-200 px-4 py-2 text-lg lg:text-xl font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out hover:bg-gray-300 focus:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
         disabled={false}
         onClick={() => {
           if (!confirm('入力内容が破棄されます。本当にキャンセルしますか？'))

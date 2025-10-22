@@ -327,13 +327,13 @@ export default function Show({ post, user }) {
               }
             }
           }}
-          className='shadow-md inline-flex items-center rounded-xl border border-transparent bg-white px-3 text-[10px] font-semibold uppercase tracking-widest text-gray-800 transition duration-150 ease-in-out hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
+          className='shadow-md inline-flex items-center rounded-xl border border-transparent bg-white px-3 text-[10px] lg:text-[14px] font-semibold uppercase tracking-widest text-gray-800 transition duration-150 ease-in-out hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
           type='button'
         >
           戻る
         </button>
       </div>
-      <div className='w-full overflow-hidden bg-white px-6 pb-4'>
+      <div className='w-full overflow-hidden bg-white px-6 lg:px-48 xl:px-80 pb-4'>
         <div className='mt-4 flex items-center'>
           <div className='flex items-center'>
             <Link
@@ -351,7 +351,7 @@ export default function Show({ post, user }) {
                     : '/images/defalt_profile.jpg')
                 }
                 alt='avatar'
-                className='w-6 h-6 rounded-full object-cover'
+                className='w-6 h-6 lg:w-10 lg:h-10 rounded-full object-cover'
               />
             </Link>
             <div className='flex flex-row'>
@@ -362,20 +362,20 @@ export default function Show({ post, user }) {
                     : route('users.profile', post.user.id)
                 }
               >
-                <div className='ml-1 font-semibold text-sm'>
+                <div className='ml-1 font-semibold text-sm lg:text-lg'>
                   @{post?.user?.displayid}
                 </div>
               </Link>
               {currentUserId !== post.user.id && (
                 <>
                   {followStatus && (
-                    <div className='ml-1 mt-1 text-xs text-gray-500'>
+                    <div className='ml-1 mt-1 text-xs lg:text-md text-gray-500'>
                       フォロー中
                     </div>
                   )}
                   {!followStatus && (
                     <button
-                      className='ml-1 mt-0.5 text-xs font-bold text-gray-600 border rounded px-1 border-gray-300'
+                      className='ml-1 mt-0.5 text-xs lg:text-md font-bold text-gray-600 border rounded px-1 border-gray-300'
                       disabled={loadingFollow}
                       onClick={handleAddFollow}
                     >
@@ -404,21 +404,27 @@ export default function Show({ post, user }) {
         />
 
         {/* タイトル・メタ */}
-        <h1 className='text-2xl font-bold mt-2'>{post.title}</h1>
-        <h2 className='text-normal font-bold mt-1'>{post?.subtitle || ''}</h2>
-        <div className='text-sm text-gray-500 mt-1'>{metaParts}</div>
+        <h1 className='text-2xl lg:text-3xl font-bold mt-2'>{post.title}</h1>
+        <h2 className='text-normal lg:text-xl font-bold mt-1'>
+          {post?.subtitle || ''}
+        </h2>
+        <div className='text-sm lg:text-lg text-gray-500 mt-1'>{metaParts}</div>
 
         {/* 本文（長文） */}
         {post?.description && (
-          <div className='mt-4 whitespace-pre-wrap'>{post.description}</div>
+          <div className='mt-4 lg:text-lg whitespace-pre-wrap'>
+            {post.description}
+          </div>
         )}
 
         {/* 旅程 */}
         <div className='mt-6'>
-          <div className='font-semibold text-lg'>▽旅程</div>
+          <div className='font-semibold text-lg lg:text-xl'>▽旅程</div>
 
           {tripDays.length === 0 && (
-            <div className='text-sm text-gray-500 mt-2'>旅程はありません</div>
+            <div className='text-sm lg:text-normal text-gray-500 mt-2'>
+              旅程はありません
+            </div>
           )}
 
           {tripDays.map(day => (
@@ -433,7 +439,7 @@ export default function Show({ post, user }) {
 
         {/* マップ */}
         <div className='mt-6'>
-          <div className='font-semibold text-lg'>▽マップ</div>
+          <div className='font-semibold text-lg lg:text-xl'>▽マップ</div>
           <div className='mt-3'>
             <div>
               <GoogleMapComponent

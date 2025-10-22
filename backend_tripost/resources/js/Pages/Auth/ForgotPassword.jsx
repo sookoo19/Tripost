@@ -17,7 +17,7 @@ export default function ForgotPassword({ status }) {
 
   return (
     <GuestLayout title='パスワード再設定'>
-      <Head title='Forgot Password' />
+      <Head title='パスワード再設定' />
 
       <div className='mb-4 text-sm text-gray-600'>
         <p>パスワードをお忘れですか？</p>

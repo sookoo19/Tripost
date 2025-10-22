@@ -24,8 +24,8 @@ export default function Register() {
   };
 
   return (
-    <GuestLayout title='アカウント作成'>
-      <Head title='Register' />
+    <GuestLayout title='アカウント作成画面'>
+      <Head title='新規登録' />
 
       <form onSubmit={handleSubmit}>
         <div>

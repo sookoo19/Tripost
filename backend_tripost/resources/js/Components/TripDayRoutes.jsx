@@ -56,12 +56,12 @@ export default function TripDayRoutes({ day, locations, routeInfo }) {
   return (
     <div className='mb-4 p-3 bg-white rounded-lg shadow'>
       <div className='flex justify-between items-center mb-2'>
-        <h4 className='font-bold'>Day {day}</h4>
+        <h4 className='font-bold lg:text-lg'>Day {day}</h4>
         <a
           href={generateDayGoogleMapsUrl()}
           target='_blank'
           rel='noopener noreferrer'
-          className='px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600'
+          className='px-2 py-1 text-xs lg:text-normal bg-blue-500 text-white rounded hover:bg-blue-600'
         >
           Google Mapsで見る
         </a>
@@ -76,8 +76,12 @@ export default function TripDayRoutes({ day, locations, routeInfo }) {
               <div className='p-2 border-b last:border-0'>
                 <div className='flex items-center'>
                   <div className='flex-1'>
-                    <p className='font-medium text-sm'>{location.place}</p>
-                    <p className='text-xs text-gray-600'>{location.time}</p>
+                    <p className='font-medium text-sm lg:text-lg'>
+                      {location.place}
+                    </p>
+                    <p className='text-xs lg:text-normal text-gray-600'>
+                      {location.time}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -85,7 +89,7 @@ export default function TripDayRoutes({ day, locations, routeInfo }) {
               {/* 次の地点への距離情報 */}
               {legInfo && index < dayLocations.length - 1 && (
                 <div className='px-8 py-2 bg-gray-50'>
-                  <div className='flex items-center text-xs text-gray-600'>
+                  <div className='flex items-center text-xs lg:text-normal text-gray-600'>
                     <span className='mr-2'>🚶</span>
                     <span>距離: {legInfo.distance}</span>
                   </div>

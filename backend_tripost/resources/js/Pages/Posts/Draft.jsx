@@ -62,20 +62,23 @@ export default function Draft({ posts }) {
       <div className='w-full'>
         {/*ヘッダー*/}
         <Link href={route('posts.index')}>
-          <img
-            src='/images/header.svg'
-            alt='header'
-            className='w-full h-auto block object-cover'
-          />
+          <picture>
+            <source media='(min-width:1024px)' srcSet='/images/header_lg.svg' />
+            <img
+              src='/images/header.svg'
+              alt='header'
+              className='w-full h-auto block object-cover'
+            />
+          </picture>
         </Link>
       </div>
-      <h2 className='mt-5 text-xl font-semibold leading-tight text-gray-800 text-center'>
+      <h2 className='mt-5 text-2xl lg:text-3xl font-semibold leading-tight text-gray-800 text-center'>
         下書き一覧
       </h2>
       <div className='w-full overflow-hidden bg-white'>
         <div className='max-w-xl mx-auto p-4 pb-24'>
           {items.length === 0 ? (
-            <div className='text-center text-gray-500 py-12'>
+            <div className='text-center text-gray-500 py-12 lg:text-lg'>
               下書きはまだありません。新しい投稿を作成してみましょう。
             </div>
           ) : (
@@ -86,7 +89,7 @@ export default function Draft({ posts }) {
               >
                 <div className='flex flex-row'>
                   <div
-                    className={`inline-block ml-1 mt-1 px-3 py-1 text-xs rounded-2xl border ${statusClass(post.post_status)}`}
+                    className={`inline-block ml-1 mt-1 px-3 py-1 text-xs lg:text-normal rounded-2xl border ${statusClass(post.post_status)}`}
                   >
                     {post.post_status}
                   </div>
@@ -127,7 +130,7 @@ export default function Draft({ posts }) {
                     <h2 className='text-xl font-bold text-gray-700'>
                       {post.title}
                     </h2>
-                    <p className='text-sm text-gray-700 line-clamp-2'>
+                    <p className='text-sm lg:text-normal text-gray-700 line-clamp-2'>
                       {post.subtitle || ''}
                     </p>
                     <div className='text-xs text-gray-500'>

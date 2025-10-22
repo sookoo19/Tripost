@@ -30,11 +30,14 @@ export default function Destroy() {
       <div className='w-full'>
         {/*ヘッダー*/}
         <Link href={route('posts.index')}>
-          <img
-            src='/images/header.svg'
-            alt='header'
-            className='w-full h-auto block object-cover'
-          />
+          <picture>
+            <source media='(min-width:1024px)' srcSet='/images/header_lg.svg' />
+            <img
+              src='/images/header.svg'
+              alt='header'
+              className='w-full h-auto block object-cover'
+            />
+          </picture>
         </Link>
       </div>
       <div className='w-full max-w-lg p-6 mx-auto'>

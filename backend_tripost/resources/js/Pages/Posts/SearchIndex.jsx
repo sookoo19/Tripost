@@ -107,15 +107,18 @@ export default function SearchIndex({
 
   return (
     <div className='flex min-h-screen flex-col items-center bg-white'>
-      <Head title='投稿検索結果' />
+      <Head title='検索結果' />
       <div className='w-full'>
         {/*ヘッダー*/}
         <Link href={route('posts.index')}>
-          <img
-            src='/images/header.svg'
-            alt='header'
-            className='w-full h-auto block object-cover'
-          />
+          <picture>
+            <source media='(min-width:1024px)' srcSet='/images/header_lg.svg' />
+            <img
+              src='/images/header.svg'
+              alt='header'
+              className='w-full h-auto block object-cover'
+            />
+          </picture>
         </Link>
       </div>
       <div className='w-full overflow-hidden bg-white pl-4 mt-4'>
@@ -124,21 +127,21 @@ export default function SearchIndex({
             // 明示的に検索ページへ遷移
             router.get(route('posts.search'));
           }}
-          className='shadow-md inline-flex items-center rounded-xl border border-gray-100 bg-white px-3 text-xs font-semibold uppercase tracking-widest text-gray-800 transition duration-150 ease-in-out hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
+          className='shadow-md inline-flex items-center rounded-xl border border-gray-100 bg-white px-3 text-xs lg:text-[14px] font-semibold uppercase tracking-widest text-gray-800 transition duration-150 ease-in-out hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
           type='button'
         >
           戻る
         </button>
       </div>
 
-      <h2 className='text-2xl font-semibold leading-tight text-gray-800 text-center'>
+      <h2 className='text-2xl lg:text-3xl font-semibold leading-tight text-gray-800 text-center'>
         タビ検索結果
       </h2>
       <div className='w-full overflow-hidden bg-white'>
         <div className='max-w-xl mx-auto p-4 pb-24'>
           {/* --- 絞り込み条件表示 --- */}
           <div className='max-w-xl mx-auto p-4 w-full'>
-            <div className='text-sm text-gray-600 mb-1'>
+            <div className='text-sm lg:text-lg text-gray-600 mb-1'>
               <strong>絞り込み条件：</strong>
               <span className='ml-2'>
                 {filters.country_id
@@ -178,7 +181,7 @@ export default function SearchIndex({
             <select
               value={sort}
               onChange={handleSortChange}
-              className='ml-auto px-3 py-1 rounded-full border bg-white text-xs text-gray-900'
+              className='ml-auto px-3 py-1 rounded-full border bg-white text-xs lg:text-md text-gray-900'
             >
               <option value='latest'>新着順</option>
               <option value='likes'>いいね順</option>
@@ -198,18 +201,18 @@ export default function SearchIndex({
                       '/images/defalt_profile.jpg'
                     }
                     alt='avatar'
-                    className='w-5 h-5 rounded-full object-cover'
+                    className='w-5 h-5 lg:w-8 lg:h-8 rounded-full object-cover'
                   />
                 </Link>
                 <div className='ml-1'>
                   <Link
                     href={route('users.profile', post.user.id)}
-                    className='font-semibold text-sm'
+                    className='font-semibold text-sm lg:text-lg'
                   >
                     @{post.user.displayid}
                   </Link>
                 </div>
-                <div className='text-sm font-bold ml-auto flex flex-row items-center'>
+                <div className='text-sm lg:text-lg font-bold ml-auto flex flex-row items-center'>
                   <svg
                     xmlns='http://www.w3.org/2000/svg'
                     width={28}

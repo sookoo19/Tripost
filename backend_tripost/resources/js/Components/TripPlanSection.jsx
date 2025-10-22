@@ -320,7 +320,7 @@ export default function TripPlanSection({
   };
 
   return (
-    <div className='mt-16 block font-bold text-base text-gray-700'>
+    <div className='mt-16 block font-bold text-base lg:text-lg text-gray-700'>
       旅程
       <div className='mt-2 border-t border-gray-300'>
         {Array.from({ length: parseInt(days || 0, 10) }, (_, i) => i + 1).map(
@@ -340,14 +340,14 @@ export default function TripPlanSection({
 
             return (
               <div key={day}>
-                <div className='font-bold text-sm text-gray-700 mt-2 mb-1'>
+                <div className='font-bold text-sm lg:text-lg text-gray-700 mt-2 mb-1'>
                   {day}日目
                 </div>
                 {/* 既存の旅程を表示（ソート済み） */}
                 {sortedPlans.map((plan, index) => (
                   <div
                     key={index}
-                    className='mb-2 p-2 bg-gray-100 text-xs rounded flex justify-between items-center'
+                    className='mb-2 p-2 bg-gray-100 text-xs lg:text-base rounded flex justify-between items-center'
                   >
                     <span>
                       {plan[0]} - {plan[1]}
@@ -366,7 +366,7 @@ export default function TripPlanSection({
                     <InputLabel
                       htmlFor={`trip_time_${day}`}
                       value='時刻'
-                      className='text-xs text-gray-500'
+                      className='text-xs lg:text-lg text-gray-500'
                     />
                     <input
                       id={`trip_time_${day}`}
@@ -380,14 +380,14 @@ export default function TripPlanSection({
                         tempPlans[tempPlans.length - 1][0] = e.target.value;
                         setTripPlanForDay(day, tempPlans);
                       }}
-                      className='mt-1 block w-full text-sm bg-gray-50 rounded border border-gray-300'
+                      className='mt-1 block w-full text-sm lg:text-lg bg-gray-50 rounded border border-gray-300'
                     />
                   </div>
                   <div>
                     <InputLabel
                       htmlFor={`trip_place_${day}`}
                       value='場所'
-                      className='text-xs text-gray-500'
+                      className='text-xs lg:text-lg text-gray-500'
                     />
                     <div ref={wrapperRef} className='relative'>
                       <input
@@ -395,7 +395,7 @@ export default function TripPlanSection({
                         name={`trip_place_${day}`}
                         ref={tripPlaceRef}
                         value={lastPlan[1] || ''}
-                        className='mt-1 block w-full text-sm bg-gray-50 rounded border border-gray-300'
+                        className='mt-1 block w-full text-sm lg:text-lg bg-gray-50 rounded border border-gray-300'
                         onChange={e => {
                           const tempPlans = [...plans];
                           if (tempPlans.length === 0)
