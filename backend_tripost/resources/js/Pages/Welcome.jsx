@@ -3,14 +3,14 @@ import { Head, Link } from '@inertiajs/react';
 export default function Welcome() {
   return (
     <>
-      <Head title='Welcome' />
+      <Head title='ようこそ' />
       <div className='min-h-screen relative bg-yellow-400'>
         {/* 背景画像 */}
         <div className='absolute inset-0 flex items-center justify-center z-0'>
           <img
             src='/images/welcome.svg'
             alt='welcome'
-            className='max-w-full max-h-full w-auto h-auto object-contain'
+            className='max-w-full max-h-full w-auto h-auto object-contain lg:mt-10'
             draggable={false}
           />
         </div>
