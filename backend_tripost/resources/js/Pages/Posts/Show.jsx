@@ -345,13 +345,12 @@ export default function Show({ post, user }) {
             >
               <img
                 src={
-                  post?.user?.profile_image_url ||
-                  (post?.user?.profile_image
-                    ? `/storage/${post?.user?.profile_image}`
-                    : '/images/defalt_profile.jpg')
+                  post?.user?.profile_image_url || '/images/defalt_profile.jpg'
                 }
-                alt='avatar'
+
+                alt='profile'
                 className='w-6 h-6 lg:w-10 lg:h-10 rounded-full object-cover'
+
               />
             </Link>
             <div className='flex flex-row'>

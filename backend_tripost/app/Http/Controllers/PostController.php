@@ -17,7 +17,7 @@ use App\Models\Style;
 use App\Models\Purpose;
 use App\Models\Budget;
 use App\Models\Follow;
-use App\Models\Like; // 追加
+use App\Models\Like; 
 
 class PostController extends Controller
 {
@@ -25,38 +25,72 @@ class PostController extends Controller
     public function index(Request $request)
     {
         $filter = $request->query('filter', '');
-
-        // 基本のクエリ：最新順、ユーザーを事前ロード
         $query = Post::with('user')->withCount('likes')->latest();
         $query->where('share_scope', '公開');
 
-        // フィルタ: フォロー中ユーザーの投稿のみ
         if ($filter === 'following') {
             if (auth()->check()) {
                 $followingIds = Follow::where('following', auth()->id())->pluck('followed')->toArray();
-                // フォロー中が空なら確実に空結果にするため [0] を指定 //フォロー中ユーザー ID が配列なのでwhereIn 
                 $query->whereIn('user_id', $followingIds ?: [0]);
             } else {
-                // 未ログインなら空結果
                 $query->whereRaw('0 = 1');
             }
         }
 
-        // ページネーション（例：8件／ページ） + クエリパラメータを維持
-        $posts = $query->paginate(8)->appends($request->query())->through(function (Post $post) {
+        // ヘルパー: パスから公開 URL を安全に解決（S3 優先）
+        $resolveUrl = function ($p) {
+            if (!is_string($p)) return null;
+            $p = trim($p);
+            if ($p === '') return null;
+            // フルURLならそのまま返す
+            if (preg_match('/^https?:\\/\\//', $p)) return $p;
+
+            try {
+                if (Storage::disk('s3')->exists($p)) {
+                    return Storage::disk('s3')->url($p);
+                }
+            } catch (\Throwable $e) {
+                \Log::warning('S3 exists check failed', ['path' => $p, 'error' => $e->getMessage()]);
+            }
+
+            try {
+                if (Storage::exists($p)) {
+                    return Storage::url($p);
+                }
+            } catch (\Throwable $e) {
+                \Log::warning('Storage exists check failed', ['path' => $p, 'error' => $e->getMessage()]);
+            }
+
+            return null;
+        };
+
+        $posts = $query->paginate(8)->appends($request->query())->through(function (Post $post) use ($resolveUrl) {
             $user = $post->user;
+            $userData = $user ? [
+                'id' => $user->id,
+                'displayid' => $user->displayid,
+                'profile_image_url' => (!empty($user->profile_image) && is_string($user->profile_image))
+                    ? $resolveUrl($user->profile_image)
+                    : null,
+            ] : null;
+
+            $photos = $post->photos ?? [];
+            $photos_urls = collect(is_array($photos) ? $photos : [])
+                ->map(function($p) use ($resolveUrl) {
+                    return $resolveUrl($p);
+                })
+                ->filter()
+                ->values()
+                ->all();
+
             return [
                 'id' => $post->id,
                 'title' => $post->title,
                 'subtitle' => $post->subtitle,
                 'created_at' => $post->created_at->toDateTimeString(),
-                'user' => [
-                    'id' => $user->id,
-                    'displayid' => $user->displayid,
-                    'profile_image_url' => $user->profile_image ? Storage::url($user->profile_image) : null,
-                ],
-                'photos' => $post->photos ?? [],
-                'photos_urls' => collect($post->photos ?? [])->map(fn($p) => Storage::url($p))->all(),
+                'user' => $userData,
+                'photos' => $photos,
+                'photos_urls' => $photos_urls,
                 'likes_count' => $post->likes_count,
             ];
         });
@@ -89,25 +123,32 @@ class PostController extends Controller
      */
     public function store(PostRequest $request): RedirectResponse
     {
-        // バリデーション結果を$validatedに代入
+        // バリデーション結果を取得
         $data = $request->validated();
+
+        // バイナリ UploadedFile が誤ってそのまま DB に入るのを防ぐため、
+        // 一旦 photos キーを除去してから作成する
+        if (array_key_exists('photos', $data)) {
+            unset($data['photos']);
+        }
+
         $post = auth()->user()->posts()->create($data);
 
-         if ($request->hasFile('photos')) {
-        $paths = [];
-        foreach ($request->file('photos') as $file) {
-            if (!$file) continue;
-            $paths[] = $file->store('posts_photos');
-            if (count($paths) >= 8) break;
+        // post_status が '旅行済' の場合のみ写真を保存する
+        if (($post->post_status ?? '') === '旅行済' && $request->hasFile('photos')) {
+            $paths = [];
+            foreach ($request->file('photos') as $file) {
+                if (!$file) continue;
+                $paths[] = $file->store('posts_photos');
+                if (count($paths) >= 8) break;
+            }
+            if (!empty($paths)) {
+                $post->photos = $paths;
+                $post->save();
+            }
         }
-        if (!empty($paths)) {
-            $post->photos = $paths;
-            $post->save();
-        }
-    }
 
-
-        return redirect()->route('profile.show', $post);   
+        return redirect()->route('profile.show', $post);
     }
 
     /**
@@ -115,19 +156,54 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        // 投稿情報と関連データのロード
         $post->load(['user', 'comments.user']);
         $post->loadCount('likes');
-        
-        // 投稿のユーザー情報
+
         $user = $post->user;
-        
-        // 現在のユーザーがログインしている場合、フォロー状態を確認
+
+        if ($user && !empty($user->profile_image) && is_string($user->profile_image)) {
+            try {
+                $user->profile_image_url = Storage::disk('s3')->exists($user->profile_image)
+                    ? Storage::disk('s3')->url($user->profile_image)
+                    : (Storage::exists($user->profile_image) ? Storage::url($user->profile_image) : null);
+            } catch (\Throwable $e) {
+                \Log::warning('profile_image url resolve failed', ['user_id' => $user->id, 'error' => $e->getMessage()]);
+                $user->profile_image_url = null;
+            }
+        } else {
+            $user->profile_image_url = null;
+        }
+
+        // photos_urls を安全に付与（S3 優先）
+        $resolveUrl = function ($p) {
+            if (!is_string($p)) return null;
+            $p = trim($p);
+            if ($p === '') return null;
+            if (preg_match('/^https?:\\/\\//', $p)) return $p;
+            try {
+                if (Storage::disk('s3')->exists($p)) {
+                    return Storage::disk('s3')->url($p);
+                }
+            } catch (\Throwable $e) {
+                \Log::warning('S3 exists check failed in show', ['path' => $p, 'error' => $e->getMessage()]);
+            }
+            try {
+                if (Storage::exists($p)) {
+                    return Storage::url($p);
+                }
+            } catch (\Throwable $e) {
+                \Log::warning('Storage exists check failed in show', ['path' => $p, 'error' => $e->getMessage()]);
+            }
+            return null;
+        };
+
+        $post->photos_urls = collect($post->photos ?? [])->map(function($p) use ($resolveUrl) {
+            return $resolveUrl($p);
+        })->filter()->values()->all();
+
         if (auth()->check()) {
             $currentUser = auth()->user();
-            // いいね状態
             $post->is_liked = $post->likes()->where('user_id', $currentUser->id)->exists();
-            // フォロー状態
             $user->is_followed = $currentUser->following()->where('users.id', $user->id)->exists();
         } else {
             $post->is_liked = false;
@@ -142,42 +218,150 @@ class PostController extends Controller
 
     public function edit(Post $post): Response
     {
+        // S3 優先で公開 URL を安全に解決するヘルパー
+        $resolveUrl = function ($p) {
+            if (!is_string($p)) return null;
+            $p = trim($p);
+            if ($p === '') return null;
+            if (preg_match('/^https?:\\/\\//', $p)) return $p;
+            try {
+                if (Storage::disk('s3')->exists($p)) {
+                    return Storage::disk('s3')->url($p);
+                }
+            } catch (\Throwable $e) {
+                \Log::warning('S3 exists check failed (edit)', ['path' => $p, 'error' => $e->getMessage()]);
+            }
+            try {
+                if (Storage::exists($p)) {
+                    return Storage::url($p);
+                }
+            } catch (\Throwable $e) {
+                \Log::warning('Storage exists check failed (edit)', ['path' => $p, 'error' => $e->getMessage()]);
+            }
+            return null;
+        };
+
+        $post = $post->load(['user', 'country', 'style', 'purpose', 'budget']);
+        $post->photos_urls = collect($post->photos ?? [])->map(function($p) use ($resolveUrl) {
+            return $resolveUrl($p);
+        })->filter()->values()->all();
+
         return Inertia::render('Posts/Edit', [
             'countries' => Country::all(['id', 'code', 'name']),
             'styles' => Style::all(['id', 'name']),
             'purposes' => Purpose::all(['id', 'name']),
             'budgets' => Budget::all(['id', 'min','max','label']),
-            'post' => $post->load(['user', 'country', 'style', 'purpose', 'budget']),
+            'post' => $post,
         ]);
     }
 
     public function update(PostRequest $request, Post $post): RedirectResponse
     {
-        $validated = $request->validated();
-        $post->update($validated);
-
-        // 写真は既存を削除して新しい写真のみを保存
-        $newPhotoPaths = [];
-        if ($request->hasFile('photos')) {
-            foreach ($request->file('photos') as $file) {
-                if (!$file || !$file->isValid()) continue;
-                $newPhotoPaths[] = $file->store('posts_photos');
-                if (count($newPhotoPaths) >= 8) break;
+        try {
+            $validated = $request->validated();
+            
+            // photos はバリデーション済みだが DB に直接入れないよう除外
+            if (array_key_exists('photos', $validated)) {
+                unset($validated['photos']);
             }
+            
+            // status を先に取得して判定に使用（update 後の値ではなく request の値）
+            $postStatus = $request->input('post_status', '準備中');
+            
+            // 基本データ更新
+            $post->update($validated);
+            
+            // post_status が '旅行済' の場合のみ写真を処理
+            if ($postStatus === '旅行済') {
+                // --- 既存画像の正規化 ---
+                $oldPhotos = $post->photos;
+                if (is_string($oldPhotos)) {
+                    $decoded = json_decode($oldPhotos, true);
+                    $oldPhotos = is_array($decoded) ? $decoded : [];
+                } elseif (!is_array($oldPhotos)) {
+                    $oldPhotos = [];
+                }
+
+                // フロントから送られてくる「保持する既存画像」
+                $kept = $request->input('existing_photos', []);
+                if (!is_array($kept)) {
+                    $kept = [];
+                }
+
+                // 削除すべき古いファイルを算出して削除
+                // ここで配列と文字列の比較でエラーが発生していたため、型を統一
+                $oldPhotoArray = array_values(array_filter($oldPhotos, 'is_string'));
+                $keptArray = array_values(array_filter($kept, 'is_string'));
+                $removed = array_values(array_diff($oldPhotoArray, $keptArray));
+                
+                foreach ($removed as $rawPath) {
+                    if (!is_string($rawPath)) continue;
+                    $path = trim($rawPath);
+                    if ($path === '') continue;
+
+                    // フルURLなら S3 キー抽出が必要（ここでは単純試行）
+                    if (preg_match('/^https?:\\/\\//', $path)) {
+                        continue;
+                    }
+
+                    try {
+                        if (Storage::disk('s3')->exists($path)) {
+                            Storage::disk('s3')->delete($path);
+                        }
+                    } catch (\Throwable $e) {
+                        \Log::warning('S3 delete failed', ['path' => $path, 'error' => $e->getMessage()]);
+                    }
+
+                    try {
+                        if (Storage::exists($path)) {
+                            Storage::delete($path);
+                        }
+                    } catch (\Throwable $e) {
+                        \Log::warning('Local storage delete failed', ['path' => $path, 'error' => $e->getMessage()]);
+                    }
+                }
+
+                // --- 新規アップロードファイルの保存 ---
+                $newPhotoPaths = [];
+                if ($request->hasFile('photos')) {
+                    foreach ($request->file('photos') as $file) {
+                        if (!$file) continue;
+                        try {
+                            $newPhotoPaths[] = $file->store('posts_photos');
+                            if (count($newPhotoPaths) >= 8) break;
+                        } catch (\Throwable $e) {
+                            \Log::warning('Failed to store uploaded file', ['error' => $e->getMessage()]);
+                        }
+                    }
+                }
+
+                // kept（既存で保持するパス）と新規アップロードを結合して最大8件にする
+                $merged = array_values(array_slice(array_merge($keptArray, $newPhotoPaths), 0, 8));
+                $post->photos = $merged;
+                $post->save();
+            } else {
+                // 準備中・旅行中の場合は写真を保存しない（空の配列にリセット）
+                $post->photos = [];
+                $post->save();
+            }
+
+            // 「編集した日時で並べたい」場合は created_at を更新する
+            $post->timestamps = false;
+            $post->created_at = now();
+            $post->save();
+            $post->timestamps = true;
+
+            return redirect()->route('posts.draft', $post)->with('success', '投稿を更新しました');
+        } catch (\Throwable $e) {
+            // エラーログ記録
+            \Log::error('Post update failed', [
+                'post_id' => $post->id, 
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return back()->withErrors(['error' => '投稿の更新に失敗しました。システム管理者にお問い合わせください。']);
         }
-
-        // 新しい写真のみを保存（既存写真は削除）
-        $post->photos = $newPhotoPaths;
-        $post->save();
-
-        // 「編集した日時で並べたい」場合は created_at を更新する
-        // created_at のみを上書きしたいので timestamps を一時的に無効化して保存
-        $post->timestamps = false;
-        $post->created_at = now();
-        $post->save();
-        $post->timestamps = true;
-
-        return redirect()->route('posts.draft', $post)->with('success', '投稿を更新しました');
     }
 
     public function searchPosts(): Response
@@ -292,36 +476,62 @@ class PostController extends Controller
         // データ変換ロジック
         $postsLatestProcessed = $postsLatest->through(function (Post $post) {
             $user = $post->user;
+            $userData = $user ? [
+                'id' => $user->id,
+                'displayid' => $user->displayid,
+                'profile_image_url' => (!empty($user->profile_image) && is_string($user->profile_image))
+                    ? Storage::url($user->profile_image)
+                    : null,
+            ] : null;
+            
+            $photos = $post->photos ?? [];
+            $photos_urls = collect(is_array($photos) ? $photos : [])
+                ->map(function($p) {
+                    return (!empty($p) && is_string($p)) ? Storage::url($p) : null;
+                })
+                ->filter()
+                ->values()
+                ->all();
+            
             return [
                 'id' => $post->id,
                 'title' => $post->title,
                 'subtitle' => $post->subtitle,
                 'created_at' => $post->created_at->toDateTimeString(),
-                'user' => [
-                    'id' => $user->id,
-                    'displayid' => $user->displayid,
-                    'profile_image_url' => $user->profile_image ? Storage::url($user->profile_image) : null,
-                ],
-                'photos' => $post->photos ?? [],
-                'photos_urls' => collect($post->photos ?? [])->map(fn($p) => Storage::url($p))->all(),
+                'user' => $userData,
+                'photos' => $photos,
+                'photos_urls' => $photos_urls,
                 'likes_count' => $post->likes_count,
             ];
         });
 
         $postsLikesProcessed = $postsLikes->through(function (Post $post) {
             $user = $post->user;
+            $userData = $user ? [
+                'id' => $user->id,
+                'displayid' => $user->displayid,
+                'profile_image_url' => (!empty($user->profile_image) && is_string($user->profile_image))
+                    ? Storage::url($user->profile_image)
+                    : null,
+            ] : null;
+            
+            $photos = $post->photos ?? [];
+            $photos_urls = collect(is_array($photos) ? $photos : [])
+                ->map(function($p) {
+                    return (!empty($p) && is_string($p)) ? Storage::url($p) : null;
+                })
+                ->filter()
+                ->values()
+                ->all();
+            
             return [
                 'id' => $post->id,
                 'title' => $post->title,
                 'subtitle' => $post->subtitle,
                 'created_at' => $post->created_at->toDateTimeString(),
-                'user' => [
-                    'id' => $user->id,
-                    'displayid' => $user->displayid,
-                    'profile_image_url' => $user->profile_image ? Storage::url($user->profile_image) : null,
-                ],
-                'photos' => $post->photos ?? [],
-                'photos_urls' => collect($post->photos ?? [])->map(fn($p) => Storage::url($p))->all(),
+                'user' => $userData,
+                'photos' => $photos,
+                'photos_urls' => $photos_urls,
                 'likes_count' => $post->likes_count,
             ];
         });
@@ -345,23 +555,61 @@ class PostController extends Controller
     {
         $user = auth()->user()->loadCount('posts');
         $query = Post::where('user_id', $user->id)->with('user')->latest();
-        $query->where('share_scope', '非公開')->whereIn('post_status', ['準備中', '旅行中']); 
+        $query->where('share_scope', '非公開')->whereIn('post_status', ['準備中', '旅行中']);
 
+        // S3 優先で公開 URL を安全に解決するヘルパー
+        $resolveUrl = function ($p) {
+            if (!is_string($p)) return null;
+            $p = trim($p);
+            if ($p === '') return null;
+            if (preg_match('/^https?:\\/\\//', $p)) return $p;
 
-        // ページネーション（例：8件／ページ）
-        $posts = $query->paginate(8)->through(function (Post $post) {
+            try {
+                if (Storage::disk('s3')->exists($p)) {
+                    return Storage::disk('s3')->url($p);
+                }
+            } catch (\Throwable $e) {
+                \Log::warning('S3 exists check failed (draft)', ['path' => $p, 'error' => $e->getMessage()]);
+            }
+
+            try {
+                if (Storage::exists($p)) {
+                    return Storage::url($p);
+                }
+            } catch (\Throwable $e) {
+                \Log::warning('Storage exists check failed (draft)', ['path' => $p, 'error' => $e->getMessage()]);
+            }
+
+            return null;
+        };
+
+        // ページネーション + データ整形（photos_urls と user.profile_image_url を付与）
+        $posts = $query->paginate(8)->through(function (Post $post) use ($resolveUrl) {
             $user = $post->user;
+            $userData = $user ? [
+                'id' => $user->id,
+                'displayid' => $user->displayid,
+                'profile_image_url' => (!empty($user->profile_image) && is_string($user->profile_image))
+                    ? $resolveUrl($user->profile_image)
+                    : null,
+            ] : null;
+
+            $photos = $post->photos ?? [];
+            $photos_urls = collect(is_array($photos) ? $photos : [])
+                ->map(fn($p) => $resolveUrl($p))
+                ->filter()
+                ->values()
+                ->all();
+
             return [
                 'id' => $post->id,
                 'title' => $post->title,
                 'subtitle' => $post->subtitle,
                 'created_at' => $post->created_at->toDateTimeString(),
-                'user' => [
-                    'id' => $user->id,
-                    'displayid' => $user->displayid,
-                    'profile_image_url' => $user->profile_image ? Storage::url($user->profile_image) : null,
-                ],
+                'user' => $userData,
                 'post_status' => $post->post_status,
+                'photos' => $photos,
+                'photos_urls' => $photos_urls,
             ];
         });
 
@@ -381,18 +629,31 @@ class PostController extends Controller
         // ページネーション（例：8件／ページ）
         $posts = $query->paginate(8)->through(function (Post $post) {
             $user = $post->user;
+            $userData = $user ? [
+                'id' => $user->id,
+                'displayid' => $user->displayid,
+                'profile_image_url' => (!empty($user->profile_image) && is_string($user->profile_image))
+                    ? Storage::url($user->profile_image)
+                    : null,
+            ] : null;
+            
+            $photos = $post->photos ?? [];
+            $photos_urls = collect(is_array($photos) ? $photos : [])
+                ->map(function($p) {
+                    return (!empty($p) && is_string($p)) ? Storage::url($p) : null;
+                })
+                ->filter()
+                ->values()
+                ->all();
+            
             return [
                 'id' => $post->id,
                 'title' => $post->title,
                 'subtitle' => $post->subtitle,
                 'created_at' => $post->created_at->toDateTimeString(),
-                'user' => [
-                    'id' => $user->id,
-                    'displayid' => $user->displayid,
-                    'profile_image_url' => $user->profile_image ? Storage::url($user->profile_image) : null,
-                ],
-                'photos' => $post->photos ?? [],
-                'photos_urls' => collect($post->photos ?? [])->map(fn($p) => Storage::url($p))->all(),
+                'user' => $userData,
+                'photos' => $photos,
+                'photos_urls' => $photos_urls,
                 'likes_count' => $post->likes_count,
             ];
         });
@@ -415,18 +676,33 @@ class PostController extends Controller
         $posts = $likes->through(function ($like) {
             $post = $like->post;
             if (! $post) return null;
+            
+            $user = $post->user;
+            $userData = $user ? [
+                'id' => $user->id,
+                'displayid' => $user->displayid,
+                'profile_image_url' => (!empty($user->profile_image) && is_string($user->profile_image))
+                    ? Storage::url($user->profile_image)
+                    : null,
+            ] : null;
+            
+            $photos = $post->photos ?? [];
+            $photos_urls = collect(is_array($photos) ? $photos : [])
+                ->map(function($p) {
+                    return (!empty($p) && is_string($p)) ? Storage::url($p) : null;
+                })
+                ->filter()
+                ->values()
+                ->all();
+            
             return [
                 'id' => $post->id,
                 'title' => $post->title,
                 'subtitle' => $post->subtitle,
                 'created_at' => $post->created_at->toDateTimeString(),
                 'liked_at' => $like->created_at->toDateTimeString(),
-                'user' => [
-                    'id' => $post->user->id,
-                    'displayid' => $post->user->displayid,
-                    'profile_image_url' => $post->user->profile_image ? Storage::url($post->user->profile_image) : null,
-                ],
-                'photos_urls' => collect($post->photos ?? [])->map(fn($p) => Storage::url($p))->all(),
+                'user' => $userData,
+                'photos_urls' => $photos_urls,
                 'likes_count' => $post->likes()->count(),
             ];
         });
@@ -450,19 +726,87 @@ class PostController extends Controller
 
     public function destroy(Request $request, Post $post)
     {
-        // 画像ファイルがあれば削除
-        if (!empty($post->photos) && is_array($post->photos)) {
-            foreach ($post->photos as $path) {
-                // public ディスクに保存している前提
-                if (Storage::disk('public')->exists($path)) {
-                    Storage::disk('public')->delete($path);
+        try {
+            // photos カラムの正規化：文字列(JSON) / 配列 / null を扱う
+            $photos = $post->photos;
+            if (is_string($photos)) {
+                $decoded = json_decode($photos, true);
+                if (is_array($decoded)) {
+                    $photos = $decoded;
+                } else {
+                    $photos = [$photos];
+                }
+            } elseif (!is_array($photos)) {
+                $photos = [];
+            }
+
+            foreach ($photos as $rawPath) {
+                // 文字列でないものは無視
+                if (!is_string($rawPath)) continue;
+                $path = trim($rawPath);
+                if ($path === '') continue;
+
+                // フル URL の場合、S3 key を抽出する試み（失敗したらスキップ）
+                if (preg_match('/^https?:\\/\\//', $path)) {
+                    try {
+                        $parts = parse_url($path);
+                        $candidate = $parts['path'] ?? null;
+                        if ($candidate) {
+                            // /bucket/key など先頭スラッシュを除去
+                            $candidate = ltrim($candidate, '/');
+                            $pathToCheck = $candidate;
+                        } else {
+                            continue;
+                        }
+                    } catch (\Throwable $e) {
+                        \Log::warning('Failed to parse URL for deletion', ['path' => $path, 'error' => $e->getMessage()]);
+                        continue;
+                    }
+                } else {
+                    $pathToCheck = $path;
+                }
+
+                try {
+                    // Storage::exists に配列が渡らないよう確認
+                    if (!is_string($pathToCheck)) {
+                        \Log::warning('Non-string path encountered', ['path' => var_export($pathToCheck, true)]);
+                        continue;
+                    }
+
+                    // S3 優先で存在確認・削除、失敗はログだけ
+                    if (Storage::disk('s3')->exists($pathToCheck)) {
+                        Storage::disk('s3')->delete($pathToCheck);
+                        continue;
+                    }
+                } catch (\Throwable $e) {
+                    \Log::warning('S3 delete check failed', ['post_id' => $post->id, 'path' => $pathToCheck, 'error' => $e->getMessage()]);
+                }
+
+                try {
+                    if (is_string($pathToCheck) && Storage::exists($pathToCheck)) {
+                        Storage::delete($pathToCheck);
+                    }
+                } catch (\Throwable $e) {
+                    \Log::warning('Local storage delete failed', ['post_id' => $post->id, 'path' => $pathToCheck, 'error' => $e->getMessage()]);
                 }
             }
+
+            try {
+                $post->delete();
+            } catch (\Throwable $e) {
+                \Log::error('Post delete failed', ['post_id' => $post->id, 'error' => $e->getMessage()]);
+                return response()->json(['ok' => false, 'message' => '投稿の削除に失敗しました'], 500);
+            }
+
+            return response()->json(['ok' => true]);
+        } catch (\Throwable $e) {
+            \Log::error('Post destruction failed', [
+                'post_id' => $post->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json(['ok' => false, 'message' => '予期せぬエラーが発生しました'], 500);
         }
-
-        $post->delete();
-
-        // axios などの AJAX で呼ばれる想定 => JSON を返す
-        return response()->json(['ok' => true]);
     }
 }
