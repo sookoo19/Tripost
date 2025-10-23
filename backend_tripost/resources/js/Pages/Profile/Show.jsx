@@ -68,29 +68,30 @@ export default function Show({ user, countries, posts }) {
   }, []);
 
   const handleShareClick = useCallback(() => {
-    const url = window.location.origin + window.location.pathname;
+    // 常に /profile/{user} の共有用 URL を生成（Ziggy の route ヘルパーを使用）
+    // 第3引数 true を付けると絶対 URL が返る（例: https://mytripost.com/profile/3）
+    const url = route('users.profile', { user: user.id }, true);
 
     void (async () => {
       if (navigator.share) {
-        // Web share API
         try {
           await navigator.share({
+            title: `${user.name}さんのプロフィール`,
             url,
           });
         } catch (error) {
           console.error('共有に失敗しました:', error);
         }
       } else {
-        // Web Share APIが使えないブラウザの処理
         try {
           await navigator.clipboard.writeText(url);
-          alert('URLをコピーしました');
+          alert('共有用URLをコピーしました');
         } catch (error) {
           console.error('URLのコピーに失敗しました:', error);
         }
       }
     })();
-  }, []);
+  }, [user]);
 
   return (
     <div className='flex min-h-screen flex-col items-center bg-white'>
