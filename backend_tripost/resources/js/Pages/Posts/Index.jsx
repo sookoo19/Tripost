@@ -132,7 +132,7 @@ export default function Index({ posts, filter }) {
           )}
         </button>
       </div>
-      <div className='flex gap-6 justify-center lg:text-2xl'>
+      <div className='flex gap-6 justify-center lg:text-xl'>
         <Link
           href={route('posts.index')}
           className={

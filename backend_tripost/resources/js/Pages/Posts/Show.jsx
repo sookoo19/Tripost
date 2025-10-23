@@ -347,10 +347,8 @@ export default function Show({ post, user }) {
                 src={
                   post?.user?.profile_image_url || '/images/defalt_profile.jpg'
                 }
-
                 alt='profile'
                 className='w-6 h-6 lg:w-10 lg:h-10 rounded-full object-cover'
-
               />
             </Link>
             <div className='flex flex-row'>
@@ -368,7 +366,7 @@ export default function Show({ post, user }) {
               {currentUserId !== post.user.id && (
                 <>
                   {followStatus && (
-                    <div className='ml-1 mt-1 text-xs lg:text-md text-gray-500'>
+                    <div className='ml-1 mt-1 lg:mt-0.5 text-xs lg:text-base text-gray-500'>
                       フォロー中
                     </div>
                   )}

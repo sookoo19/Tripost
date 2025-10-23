@@ -10,50 +10,87 @@ export default function BottomNav() {
 
   return (
     <div className='fixed bottom-0 left-0 w-full bg-gray-50 z-10 grid grid-cols-4 items-center justify-items-center py-2 border-t'>
-      <Link href={route('posts.index')} aria-label='投稿一覧'>
-        <img
-          src='/images/home _button.svg'
-          alt='home'
-          className='h-10 w-10'
-          draggable={false}
-        />
-      </Link>
-      <Link href={route('posts.search')} aria-label='投稿検索'>
-        <img
-          src='/images/researh_button.svg'
-          alt='research'
-          className='h-10 w-10'
-          draggable={false}
-        />
-      </Link>
-
-      <button
-        aria-label='タビ新規作成'
-        title='タビ新規作成'
-        onClick={
-          user ? () => setShowModal(true) : () => setToLoginModalOpen(true)
-        }
-      >
-        <svg
-          xmlns='http://www.w3.org/2000/svg'
-          width={50}
-          height={50}
-          viewBox='0 0 21 21'
+      <div className='relative group'>
+        <Link
+          href={route('posts.index')}
+          aria-label='投稿一覧'
+          className='inline-block'
         >
-          <g
-            fill='none'
-            fillRule='evenodd'
-            stroke='#303947ff'
-            strokeLinecap='round'
-            strokeLinejoin='round'
-            strokeWidth={1.5}
+          <img
+            src='/images/home _button.svg'
+            alt='home'
+            className='h-10 w-10'
+            draggable={false}
+          />
+        </Link>
+        <span
+          className='pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100'
+          aria-hidden='true'
+        >
+          ホーム
+        </span>
+      </div>
+
+      {/* 検索ボタン: ツールチップを追加 */}
+      <div className='relative group'>
+        <Link
+          href={route('posts.search')}
+          aria-label='投稿検索'
+          className='inline-block'
+        >
+          <img
+            src='/images/researh_button.svg'
+            alt='research'
+            className='h-10 w-10'
+            draggable={false}
+          />
+        </Link>
+        <span
+          className='pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100'
+          aria-hidden='true'
+        >
+          検索
+        </span>
+      </div>
+
+      {/* 作成ボタン: ツールチップを追加 */}
+      <div className='relative group'>
+        <button
+          alt='create post'
+          title='タビ新規作成'
+          onClick={
+            user ? () => setShowModal(true) : () => setToLoginModalOpen(true)
+          }
+          className='inline-flex items-center justify-center'
+        >
+          <svg
+            xmlns='http://www.w3.org/2000/svg'
+            width={50}
+            height={50}
+            viewBox='0 0 21 21'
           >
-            <path d='M10 4.5H5.5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V11'></path>
-            <path d='M17.5 3.467a1.46 1.46 0 0 1-.017 2.05L10.5 12.5l-3 1l1-3l6.987-7.046a1.41 1.41 0 0 1 1.885-.104zm-2 2.033l.953 1'></path>
-          </g>
-        </svg>
-      </button>
-      {/*モーダル*/}
+            <g
+              fill='none'
+              fillRule='evenodd'
+              stroke='#303947ff'
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              strokeWidth={1.5}
+            >
+              <path d='M10 4.5H5.5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V11'></path>
+              <path d='M17.5 3.467a1.46 1.46 0 0 1-.017 2.05L10.5 12.5l-3 1l1-3l6.987-7.046a1.41 1.41 0 0 1 1.885-.104zm-2 2.033l.953 1'></path>
+            </g>
+          </svg>
+        </button>
+        <span
+          className='pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100'
+          aria-hidden='true'
+        >
+          投稿作成
+        </span>
+      </div>
+
+      {/* モーダル */}
       {showModal && (
         <button
           onClick={() => setShowModal(false)}
@@ -94,25 +131,44 @@ export default function BottomNav() {
           </div>
         </button>
       )}
-      {user ? (
-        <Link href={route('profile.show')} aria-label='プロフィール画面'>
-          <img
-            src='/images/profile _button.svg'
-            alt='profile'
-            className='h-10 w-10'
-            draggable={false}
-          />
-        </Link>
-      ) : (
-        <button type='button' onClick={() => setToLoginModalOpen(true)}>
-          <img
-            src='/images/profile _button.svg'
-            alt='profile'
-            className='h-10 w-10'
-            draggable={false}
-          />
-        </button>
-      )}
+
+      {/* プロフィール: ログイン／未ログインでツールチップを追加 */}
+      <div className='relative group'>
+        {user ? (
+          <Link
+            href={route('profile.show')}
+            aria-label='プロフィール画面'
+            className='inline-block'
+          >
+            <img
+              src='/images/profile _button.svg'
+              alt='profile'
+              className='h-10 w-10'
+              draggable={false}
+            />
+          </Link>
+        ) : (
+          <button
+            type='button'
+            onClick={() => setToLoginModalOpen(true)}
+            className='inline-block'
+          >
+            <img
+              src='/images/profile _button.svg'
+              alt='profile'
+              className='h-10 w-10'
+              draggable={false}
+            />
+          </button>
+        )}
+        <span
+          className='pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100'
+          aria-hidden='true'
+        >
+          プロフィール
+        </span>
+      </div>
+
       {/* 未ログイン時に投稿クリックで表示するモーダル */}
       <ToLoginModal
         show={toLoginModalOpen}
