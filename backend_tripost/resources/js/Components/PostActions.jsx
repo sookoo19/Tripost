@@ -64,7 +64,7 @@ export default function PostActions({ liked, likesCount, toggleLike }) {
             </svg>
           )}
         </button>
-        <div className='font-bold text-sm text-gray-600 text-center'>
+        <div className='font-bold text-sm lg:text-lg text-gray-600 text-center'>
           {likesCount}
         </div>
       </div>
