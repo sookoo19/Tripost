@@ -710,7 +710,6 @@ export default function Edit({
             name='description'
             className='rounded-md bg-gray-50 border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 mt-1 block w-full h-32 lg:text-lg'
             value={data.description}
-            autoComplete='description'
             onChange={e => setData('description', e.target.value)}
           />
 
