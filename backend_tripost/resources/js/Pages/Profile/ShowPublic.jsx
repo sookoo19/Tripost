@@ -176,12 +176,14 @@ export default function Show({ user, countries, posts }) {
             <div className='flex flex-col ml-3'>
               <div className='flex flex-row items-center'>
                 {/*ユーザーID*/}
-                <div className='text-lg font-bold xs:mt-3'>
+                <div className='text-lg font-bold xs:mt-3 max-w-[10rem] xs:max-w-[12rem] sm:max-w-[18rem] whitespace-normal break-words break-all'>
                   @{user.displayid}
                 </div>
               </div>
               {/*ユーザー名*/}
-              <div className='text-2xl font-bold'>{user.name}</div>
+              <div className='text-xl sm:text-2xl font-bold max-w-[10rem] xs:max-w-[12rem] sm:max-w-[18rem] whitespace-normal break-words break-all'>
+                {user.name}
+              </div>
               {user.follow_you && (
                 <div className='my-0.5 px-1 text-xs lg:text-sm bg-gray-100 rounded-md text-center'>
                   フォローされています
@@ -196,13 +198,17 @@ export default function Show({ user, countries, posts }) {
               <span className='text-xs xs:text-sm'>タビ</span>
               {auth ? (
                 <>
-                  <Link href={route('follower.index', { user: user.id })}>
+                  <Link
+                    href={route('follower.index', { user: user.displayid })}
+                  >
                     <span className='ml-3 text-base font-bold'>
                       {user.followers_count ?? 0}
                     </span>
                     <span className='text-xs xs:text-sm'>フォロワー</span>
                   </Link>
-                  <Link href={route('following.index', { user: user.id })}>
+                  <Link
+                    href={route('following.index', { user: user.displayid })}
+                  >
                     <span className='ml-3 text-base font-bold'>
                       {user.following_count ?? 0}
                     </span>
@@ -292,7 +298,7 @@ export default function Show({ user, countries, posts }) {
               className='bg-white rounded-xl shadow-md mb-6 overflow-hidden border'
             >
               <div className='flex items-center px-4 py-3'>
-                <Link href={route('users.profile', post.user.id)}>
+                <Link href={route('users.profile', post.user.displayid)}>
                   <img
                     src={
                       post.user.profile_image_url ||
@@ -304,7 +310,7 @@ export default function Show({ user, countries, posts }) {
                 </Link>
                 <div className='ml-1'>
                   <Link
-                    href={route('users.profile', post.user.id)}
+                    href={route('users.profile', post.user.displayid)}
                     className='font-semibold text-sm lg:text-lg'
                   >
                     @{post.user.displayid}
