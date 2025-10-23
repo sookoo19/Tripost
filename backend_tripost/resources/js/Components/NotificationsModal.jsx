@@ -121,7 +121,7 @@ export default function NotificationsModal({ isOpen, closeModal }) {
                               <Link
                                 href={route(
                                   'users.profile',
-                                  notification.actor.id
+                                  notification.actor.displayid
                                 )}
                                 className='flex-shrink-0' // 追加：画像が縮まないようにする
                               >
@@ -162,7 +162,7 @@ export default function NotificationsModal({ isOpen, closeModal }) {
                                 <Link
                                   href={route(
                                     'users.profile',
-                                    notification.actor.id
+                                    notification.actor.displayid
                                   )}
                                   onClick={closeModal}
                                   className='flex-1 min-w-0' // min-w-0を追加
