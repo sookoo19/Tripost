@@ -156,10 +156,11 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        $post->load(['user', 'comments.user']);
-        $post->loadCount('likes');
-
-        $user = $post->user;
+        // user/comments と合わせて country/style/purpose/budget を事前ロード
+        $post->load(['user', 'comments.user', 'country', 'style', 'purpose', 'budget']);
+         $post->loadCount('likes');
+ 
+         $user = $post->user;
 
         if ($user && !empty($user->profile_image) && is_string($user->profile_image)) {
             try {
@@ -210,11 +211,17 @@ class PostController extends Controller
             $user->is_followed = false;
         }
 
-        return Inertia::render('Posts/Show', [
-            'post' => $post,
-            'user' => $user,
-        ]);
-    }
+        // フロント側の互換性のために簡易フィールドを追加（Show.jsx で参照しやすくする）
+        $post->country_name = $post->country->name ?? null;
+        $post->style_name = $post->style->name ?? null;
+        $post->purpose_name = $post->purpose->name ?? null;
+        $post->budget_label = $post->budget->label ?? null;
+ 
+         return Inertia::render('Posts/Show', [
+             'post' => $post,
+             'user' => $user,
+         ]);
+     }
 
     public function edit(Post $post): Response
     {
