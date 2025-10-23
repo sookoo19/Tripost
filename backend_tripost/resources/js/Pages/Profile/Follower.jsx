@@ -14,7 +14,7 @@ export default function Follower({ user, follower_index }) {
           href={
             currentUserId === user.id
               ? route('profile.show')
-              : route('users.profile', user.id)
+              : route('users.profile', user.displayid)
           }
           aria-label='戻る'
           className='fixed top-6 left-4 z-50 w-10 h-10 md:w-12 md:h-12 text-3xl text-gray-600 hover:text-gray-800 flex items-center justify-center'
@@ -31,7 +31,7 @@ export default function Follower({ user, follower_index }) {
                 {user.followers_count ?? 0} フォロワー
               </div>
               <Link
-                href={route('following.index', { user: user.id })}
+                href={route('following.index', { user: user.displayid })}
                 className='inline-block ml-6 '
               >
                 <span className='text-gray-500'>
@@ -58,7 +58,7 @@ export default function Follower({ user, follower_index }) {
                     href={
                       currentUserId === u.id
                         ? route('profile.show')
-                        : route('users.profile', u.id)
+                        : route('users.profile', u.displayid)
                     }
                   >
                     <img
@@ -72,7 +72,7 @@ export default function Follower({ user, follower_index }) {
                       href={
                         currentUserId === u.id
                           ? route('profile.show')
-                          : route('users.profile', u.id)
+                          : route('users.profile', u.displayid)
                       }
                       className='font-semibold lg:text-lg'
                     >

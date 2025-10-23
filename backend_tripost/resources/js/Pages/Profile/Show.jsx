@@ -68,29 +68,30 @@ export default function Show({ user, countries, posts }) {
   }, []);
 
   const handleShareClick = useCallback(() => {
-    const url = window.location.origin + window.location.pathname;
+    // 常に /profile/{user} の共有用 URL を生成（Ziggy の route ヘルパーを使用）
+    // 第3引数 true を付けると絶対 URL が返る（例: https://mytripost.com/profile/3）
+    const url = route('users.profile', { user: user.displayid }, true);
 
     void (async () => {
       if (navigator.share) {
-        // Web share API
         try {
           await navigator.share({
+            title: `${user.name}さんのプロフィール`,
             url,
           });
         } catch (error) {
           console.error('共有に失敗しました:', error);
         }
       } else {
-        // Web Share APIが使えないブラウザの処理
         try {
           await navigator.clipboard.writeText(url);
-          alert('URLをコピーしました');
+          alert('共有用URLをコピーしました');
         } catch (error) {
           console.error('URLのコピーに失敗しました:', error);
         }
       }
     })();
-  }, []);
+  }, [user]);
 
   return (
     <div className='flex min-h-screen flex-col items-center bg-white'>
@@ -243,13 +244,13 @@ export default function Show({ user, countries, posts }) {
                 {user.posts_count ?? 0}
               </span>
               <span className='text-xs xs:text-sm'>タビ</span>
-              <Link href={route('follower.index', { user: user.id })}>
+              <Link href={route('follower.index', { user: user.displayid })}>
                 <span className='ml-3 text-base font-bold'>
                   {user.followers_count ?? 0}
                 </span>
                 <span className='text-xs xs:text-sm'>フォロワー</span>
               </Link>
-              <Link href={route('following.index', { user: user.id })}>
+              <Link href={route('following.index', { user: user.displayid })}>
                 <span className='ml-3 text-base font-bold'>
                   {user.following_count ?? 0}
                 </span>
@@ -304,7 +305,7 @@ export default function Show({ user, countries, posts }) {
               className='bg-white rounded-xl shadow-md mb-6 overflow-hidden border'
             >
               <div className='flex items-center px-4 py-3'>
-                <Link href={route('users.profile', post.user.id)}>
+                <Link href={route('profile.show')}>
                   <img
                     src={
                       post.user.profile_image_url ||
@@ -316,7 +317,7 @@ export default function Show({ user, countries, posts }) {
                 </Link>
                 <div className='ml-1'>
                   <Link
-                    href={route('users.profile', post.user.id)}
+                    href={route('profile.show')}
                     className='font-semibold text-sm lg:text-lg'
                   >
                     @{post.user.displayid}

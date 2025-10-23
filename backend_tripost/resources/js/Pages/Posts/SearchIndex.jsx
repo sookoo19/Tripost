@@ -18,6 +18,7 @@ export default function SearchIndex({
   const items = posts?.data ?? posts ?? [];
   const [sort, setSort] = useState(filters.sort || 'latest');
   const [toLoginModalOpen, setToLoginModalOpen] = useState(false);
+  const currentUserId = page.props?.auth?.user?.id;
 
   const handleSortByLikes = () => {
     setSort('likes');
@@ -194,7 +195,13 @@ export default function SearchIndex({
               className='bg-white rounded-xl shadow-md mb-8 overflow-hidden border'
             >
               <div className='flex items-center px-4 py-3'>
-                <Link href={route('users.profile', post.user.id)}>
+                <Link
+                  href={
+                    currentUserId === post.user.id
+                      ? route('profile.show')
+                      : route('users.profile', post.user.displayid)
+                  }
+                >
                   <img
                     src={
                       post.user.profile_image_url ||
@@ -206,7 +213,11 @@ export default function SearchIndex({
                 </Link>
                 <div className='ml-1'>
                   <Link
-                    href={route('users.profile', post.user.id)}
+                    href={
+                      currentUserId === post.user.id
+                        ? route('profile.show')
+                        : route('users.profile', post.user.displayid)
+                    }
                     className='font-semibold text-sm lg:text-lg'
                   >
                     @{post.user.displayid}
