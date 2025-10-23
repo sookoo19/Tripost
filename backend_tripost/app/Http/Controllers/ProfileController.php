@@ -240,24 +240,27 @@ class ProfileController extends Controller
                 'user' => [
                     'id' => $p->user->id,
                     'displayid' => $p->user->displayid,
-                    'profile_image_url' => (!empty($p->user->profile_image) && is_string($p->user->profile_image))
-                        ? Storage::url($p->user->profile_image)
+                    'profile_image_url' => (!empty($p->user->profile_image) && is_string($p->user->profile_image) && Storage::disk('s3')->exists($p->user->profile_image))
+                        ? Storage::disk('s3')->url($p->user->profile_image)
                         : null,
                 ],
                 'photos_urls' => collect($p->photos ?? [])->map(function($q){
-                        return (!empty($q) && is_string($q)) ? Storage::url($q) : null;
+                        return (!empty($q) && is_string($q) && Storage::disk('s3')->exists($q)) ? Storage::disk('s3')->url($q) : null;
                     })->filter()->values()->all(),
                 'likes_count' => $p->likes_count,
             ];
         });
         $posts->setCollection($transformed);
-
+ 
         return Inertia::render('Profile/ShowPublic', [
             'user' => [
                 'id' => $user->id,
                 'displayid' => $user->displayid,
                 'name' => $user->name,
                 'profile_image' => $user->profile_image,
+                'profile_image_url' => (!empty($user->profile_image) && is_string($user->profile_image) && Storage::disk('s3')->exists($user->profile_image))
+                    ? Storage::disk('s3')->url($user->profile_image)
+                    : null,
                 'bio' => $user->bio,
                 // ここで国コード配列を渡す
                 'visited_countries' => $user->visitedCountries->pluck('code')->toArray(),
