@@ -1,21 +1,22 @@
 # TRIPOST（トリポスト）
-<figure>
-  <img src="docs/station5/ホーム画面.png" alt="ホーム画面" style="max-width:100%;height:auto;" />
-  <figcaption style="text-align:center;font-size:0.9rem;color:#555;">ホーム画面</figcaption>
-</figure>
-<figure>
-  <img src="docs/station5/プロフィール画面.png" alt="プロフィール画面" style="max-width:100%;height:auto;" />
-  <figcaption style="text-align:center;font-size:0.9rem;color:#555;">プロフィール画面</figcaption>
-</figure>
-<figure>
-  <img src="docs/station5/投稿作成画面.png" alt="投稿作成画面" style="max-width:100%;height:auto;" />
-  <figcaption style="text-align:center;font-size:0.9rem;color:#555;">投稿作成画面</figcaption>
-</figure>
-<figure>
-  <img src="docs/station5/投稿詳細画面.png" alt="投稿詳細画面" style="max-width:100%;height:auto;" />
-  <figcaption style="text-align:center;font-size:0.9rem;color:#555;">投稿詳細画面</figcaption>
-</figure>
-
+<div>
+  <figure>
+    <img src="docs/station5/ホーム画面.png" alt="ホーム画面" style="height:500px;object-fit:cover;display:block;" />
+    <figcaption style="text-align:center;font-size:0.9rem;color:#555;">ホーム画面</figcaption>
+  </figure>
+  <figure>
+    <img src="docs/station5/プロフィール画面.png" alt="プロフィール画面" style="height:500px;object-fit:cover;display:block;" />
+    <figcaption style="text-align:center;font-size:0.9rem;color:#555;">プロフィール画面</figcaption>
+  </figure>
+  <figure>
+    <img src="docs/station5/投稿作成画面.png" alt="投稿作成画面" style="height:500px;object-fit:cover;display:block;" />
+    <figcaption style="text-align:center;font-size:0.9rem;color:#555;">投稿作成画面</figcaption>
+  </figure>
+  <figure>
+    <img src="docs/station5/投稿詳細画面.png" alt="投稿詳細画面" style="height:500px;object-fit:cover;display:block;" />
+    <figcaption style="text-align:center;font-size:0.9rem;color:#555;">投稿詳細画面</figcaption>
+  </figure>
+</div>
 ## 概要
 「旅の計画も、思い出も。みんなとシェアしよう。」<br>
 旅を記録し、他のユーザーの旅からインスピレーションを得られる旅行特化SNSです。ユーザーは、写真・旅行日程・おすすめ情報などを投稿、共有できます。また、ユーザーは自身の旅スタイル(ソロ・友達と・バックパッカーなど)や目的(自然・グルメ・リラックスなど)に沿って、他ユーザーの旅を検索することができます。
