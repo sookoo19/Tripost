@@ -23,10 +23,10 @@ export default function Following({ user, following_index }) {
         </Link>
         <div className='flex items-center justify-center mb-4'>
           <div className='ml-3 mt-4'>
-            <div className='font-bold text-xl text-gray-900 text-center'>
+            <div className='font-bold text-xl lg:text-2xl text-gray-900 text-center'>
               @{user.displayid}
             </div>
-            <div className='font-bold text-sm mt-3'>
+            <div className='font-bold text-sm lg:text-lg mt-3'>
               <Link
                 href={route('follower.index', { user: user.id })}
                 className='inline-block'
@@ -64,7 +64,7 @@ export default function Following({ user, following_index }) {
                     <img
                       src={u.profile_image_url || '/images/defalt_profile.jpg'}
                       alt={u.displayid}
-                      className='w-10 h-10 rounded-full object-cover'
+                      className='w-10 h-10 lg:w-12 lg:h-12 rounded-full object-cover'
                     />
                   </Link>
                   <div className='ml-3'>
@@ -74,11 +74,11 @@ export default function Following({ user, following_index }) {
                           ? route('profile.show')
                           : route('users.profile', u.id)
                       }
-                      className='font-semibold'
+                      className='font-semibold lg:text-lg'
                     >
                       @{u.displayid}
                     </Link>
-                    <div className='text-xs text-gray-600'>{u.name}</div>
+                    <div className='text-xs lg:text-sm text-gray-600'>{u.name}</div>
                   </div>
                 </li>
               ))}

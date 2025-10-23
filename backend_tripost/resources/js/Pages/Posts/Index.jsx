@@ -126,7 +126,7 @@ export default function Index({ posts, filter }) {
             />
           </svg>
           {unreadCount > 0 && (
-            <span className='absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center'>
+            <span className='absolute -top-1 -right-1 bg-red-500 text-white text-xs lg:text-base rounded-full h-5 w-5 lg:h-6 lg:w-6 flex items-center justify-center'>
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}

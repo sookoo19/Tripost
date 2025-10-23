@@ -94,7 +94,7 @@ export default function Show({ user, countries, posts }) {
 
   return (
     <div className='flex min-h-screen flex-col items-center bg-white'>
-      <Head title='Profile' />
+      <Head title='プロフィール' />
       <div className='w-full'>
         {/*ヘッダー*/}
         <Link href={route('posts.index')}>
@@ -258,7 +258,7 @@ export default function Show({ user, countries, posts }) {
             </div>
           </div>
           {/*自己紹介文*/}
-          <div className='mt-3 font-normal text-sm'>
+          <div className='mt-3 font-normal text-sm lg:text-base'>
             {user.bio &&
               user.bio.split('\n').map((line, i) => (
                 <span key={i}>
@@ -283,7 +283,7 @@ export default function Show({ user, countries, posts }) {
           </button>
         </Link>
         <button
-          className=' ml-4 shadow inline-flex items-center rounded-2xl border border-gray-100 border-transparent bg-white px-2 xs:px-4 py-2 text-xs xs:text-sm font-semibold uppercase tracking-widest text-black transition duration-150 ease-in-out hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
+          className='ml-4 shadow inline-flex items-center rounded-2xl border border-gray-100 border-transparent bg-white px-2 xs:px-4 py-2 text-xs xs:text-sm font-semibold uppercase tracking-widest text-black transition duration-150 ease-in-out hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
           disabled={false}
           onClick={handleShareClick}
         >
@@ -311,18 +311,18 @@ export default function Show({ user, countries, posts }) {
                       '/images/defalt_profile.jpg'
                     }
                     alt='avatar'
-                    className='w-5 h-5 rounded-full object-cover'
+                    className='w-5 h-5 lg:h-8 lg:w-8 rounded-full object-cover'
                   />
                 </Link>
                 <div className='ml-1'>
                   <Link
                     href={route('users.profile', post.user.id)}
-                    className='font-semibold text-sm'
+                    className='font-semibold text-sm lg:text-lg'
                   >
                     @{post.user.displayid}
                   </Link>
                 </div>
-                <div className='text-sm font-bold ml-auto flex flex-row items-center'>
+                <div className='text-sm lg:text-lg font-bold ml-auto flex flex-row items-center'>
                   <button
                     type='button'
                     className='text-gray-600 hover:text-blue-500 transition-colors duration-150'

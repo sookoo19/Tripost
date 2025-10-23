@@ -82,15 +82,15 @@ export default function Edit({ user, countries = [] }) {
   return (
     <AuthenticatedLayout
       header={
-        <h2 className='text-2xl font-semibold leading-tight text-gray-800 text-center'>
+        <h2 className='text-2xl lg:text-3xl font-semibold leading-tight text-gray-800 text-center'>
           プロフィール設定
         </h2>
       }
     >
-      <Head title='Profile Edit' />
+      <Head title='プロフィール編集' />
       <form onSubmit={handleSubmit} encType='multipart/form-data'>
         <div>
-          <InputLabel htmlFor='profile_image' value='プロフィール画像' />
+          <InputLabel htmlFor='profile_image' className='lg:text-lg' value='プロフィール画像' />
           <div className='flex flex-col items-center mt-2'>
             <div className='w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden mb-2'>
               <img
@@ -140,13 +140,13 @@ export default function Edit({ user, countries = [] }) {
         <div className='mt-8'></div>
 
         <div>
-          <InputLabel htmlFor='name' value='ユーザー名' />
+          <InputLabel htmlFor='name' value='ユーザー名' className='lg:text-lg'/>
 
           <TextInput
             id='name'
             name='name'
             value={data.name}
-            className='bg-gray-50 mt-1 block w-full'
+            className='bg-gray-50 mt-1 block w-full lg:text-lg'
             autoComplete='name'
             isFocused={true}
             onChange={e => setData('name', e.target.value)}
@@ -158,12 +158,12 @@ export default function Edit({ user, countries = [] }) {
         <div className='mt-8'></div>
 
         <div>
-          <InputLabel htmlFor='bio' value='自己紹介' />
+          <InputLabel htmlFor='bio' value='自己紹介' className='lg:text-lg' />
 
           <textarea
             id='bio'
             name='bio'
-            className='rounded-md bg-gray-50 border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 mt-1 block w-full h-32'
+            className='lg:text-lgrounded-md bg-gray-50 border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 mt-1 block w-full h-32'
             value={data.bio}
             onChange={e => setData('bio', e.target.value)}
           />
@@ -174,7 +174,7 @@ export default function Edit({ user, countries = [] }) {
         <div className='mt-8'></div>
 
         <div>
-          <InputLabel htmlFor='visited_countries' value='訪れた国' />
+          <InputLabel htmlFor='visited_countries' value='訪れた国' className='lg:text-lg' />
           <div
             className='bg-gray-50 mt-2 block w-full rounded border border-gray-300 p-2'
             style={{ maxHeight: '200px', overflowY: 'auto' }}
@@ -216,7 +216,7 @@ export default function Edit({ user, countries = [] }) {
 
         <PrimaryButton
           type='submit'
-          className='w-full h-12 mt-10 flex justify-center items-center text-white'
+          className='lg:text-lg w-full h-12 mt-10 flex justify-center items-center text-white'
           disabled={processing}
         >
           変更を保存
@@ -224,7 +224,7 @@ export default function Edit({ user, countries = [] }) {
       </form>
       <Link href='/profile'>
         <button
-          className='w-full h-12 mt-2 flex justify-center items-center inline-flex items-center rounded-md border border-transparent bg-gray-200 px-4 py-2 text-lg font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out hover:bg-gray-300 focus:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
+          className='lg:text-lg w-full h-12 mt-2 flex justify-center items-center inline-flex items-center rounded-md border border-transparent bg-gray-200 px-4 py-2 text-lg font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out hover:bg-gray-300 focus:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
           disabled={false}
         >
           キャンセル

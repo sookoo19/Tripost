@@ -183,7 +183,7 @@ export default function Show({ user, countries, posts }) {
               {/*ユーザー名*/}
               <div className='text-2xl font-bold'>{user.name}</div>
               {user.follow_you && (
-                <div className='my-0.5 px-1 text-xs bg-gray-100 rounded-md text-center'>
+                <div className='my-0.5 px-1 text-xs lg:text-sm bg-gray-100 rounded-md text-center'>
                   フォローされています
                 </div>
               )}
@@ -234,7 +234,7 @@ export default function Show({ user, countries, posts }) {
             </div>
           </div>
           {/*自己紹介文*/}
-          <div className='mt-3 font-normal text-sm'>
+          <div className='mt-3 font-normal text-sm lg:text-base'>
             {user.bio &&
               user.bio.split('\n').map((line, i) => (
                 <span key={i}>
@@ -249,12 +249,12 @@ export default function Show({ user, countries, posts }) {
           </div>
         </div>
       </div>
-      <div className='w-full mt-3 mb-4'>
+      <div className='mt-3 mb-4'>
         <div className='flex justify-center items-center gap-4'>
           {!followStatus && (
             <button
               type='button'
-              className='w-2/5 shadow inline-flex items-center justify-center rounded-2xl border border-gray-100 border-transparent bg-blue-400 px-2 xs:px-4 py-2 text-xs xs:text-sm font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out hover:bg-blue-500 focus:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-blue-500'
+              className='shadow inline-flex items-center justify-center rounded-2xl border border-gray-100 border-transparent bg-blue-400 px-6 xs:px-8 lg:px-8 py-2 text-xs xs:text-sm font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out hover:bg-blue-500 focus:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-blue-500'
               disabled={loadingFollow}
               onClick={auth ? handleAddFollow : () => setToLoginModalOpen(true)}
             >
@@ -264,7 +264,7 @@ export default function Show({ user, countries, posts }) {
           {followStatus && (
             <button
               type='button'
-              className='w-2/5 shadow inline-flex items-center justify-center rounded-2xl border border-gray-100 border-transparent bg-white px-2 xs:px-4 py-2 text-xs xs:text-sm font-semibold uppercase tracking-widest text-black transition duration-150 ease-in-out hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-200'
+              className='shadow inline-flex items-center justify-center rounded-2xl border border-gray-100 border-transparent bg-white px-6 xs:px-8 lg:px-9 py-2 text-xs xs:text-sm font-semibold uppercase tracking-widest text-black transition duration-150 ease-in-out hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-200'
               disabled={loadingFollow}
               onClick={
                 auth ? handleRemoveFollow : () => setToLoginModalOpen(true)
@@ -275,7 +275,7 @@ export default function Show({ user, countries, posts }) {
           )}
 
           <button
-            className='w-2/5 shadow inline-flex items-center justify-center rounded-2xl border border-gray-100 border-transparent bg-white px-2 xs:px-4 py-2 text-xs xs:text-sm font-semibold uppercase tracking-widest text-black transition duration-150 ease-in-out hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
+            className='ml-4 shadow inline-flex items-center rounded-2xl border border-gray-100 border-transparent bg-white px-2 xs:px-4 py-2 text-xs xs:text-sm font-semibold uppercase tracking-widest text-black transition duration-150 ease-in-out hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-500'
             disabled={false}
             onClick={handleShareClick}
           >
@@ -299,18 +299,18 @@ export default function Show({ user, countries, posts }) {
                       '/images/defalt_profile.jpg'
                     }
                     alt='avatar'
-                    className='w-5 h-5 rounded-full object-cover'
+                    className='w-5 h-5 lg:h-8 lg:w-8 rounded-full object-cover'
                   />
                 </Link>
                 <div className='ml-1'>
                   <Link
                     href={route('users.profile', post.user.id)}
-                    className='font-semibold text-sm'
+                    className='font-semibold text-sm lg:text-lg'
                   >
                     @{post.user.displayid}
                   </Link>
                 </div>
-                <div className='text-sm font-bold ml-auto flex flex-row items-center'>
+                <div className='text-sm lg:text-lg font-bold ml-auto flex flex-row items-center'>
                   <svg
                     xmlns='http://www.w3.org/2000/svg'
                     width={28}
