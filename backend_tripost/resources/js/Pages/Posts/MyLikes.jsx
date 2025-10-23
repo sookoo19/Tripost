@@ -58,7 +58,7 @@ export default function Unpublic({ posts }) {
 
   return (
     <div className='flex min-h-screen flex-col items-center bg-white'>
-      <Head title='投稿一覧' />
+      <Head title='いいねした投稿' />
       <div className='w-full'>
         {/*ヘッダー*/}
         <Link href={route('posts.index')}>
@@ -72,7 +72,7 @@ export default function Unpublic({ posts }) {
           </picture>
         </Link>
       </div>
-      <h2 className='mt-5 text-xl font-semibold leading-tight text-gray-800 text-center'>
+      <h2 className='mt-5 lg:mt-10 text-xl lg:text-3xl font-semibold leading-tight text-gray-800 text-center'>
         いいねしたタビ
       </h2>
       <div className='w-full overflow-hidden mt-2 bg-white'>
@@ -101,7 +101,7 @@ export default function Unpublic({ posts }) {
                         '/images/defalt_profile.jpg'
                       }
                       alt='avatar'
-                      className='w-5 h-5 rounded-full object-cover'
+                      className='w-5 h-5 lg:h-8 lg:w-8 rounded-full object-cover'
                     />
                   </Link>
                   <div className='ml-1'>
@@ -111,12 +111,12 @@ export default function Unpublic({ posts }) {
                           ? route('profile.show')
                           : route('users.profile', post.user.id)
                       }
-                      className='font-semibold text-sm'
+                      className='font-semibold text-sm lg:text-lg'
                     >
                       @{post.user.displayid}
                     </Link>
                   </div>
-                  <div className='text-sm font-bold ml-auto flex flex-row items-center'>
+                  <div className='text-sm lg:text-lg font-bold ml-auto flex flex-row items-center'>
                     <svg
                       xmlns='http://www.w3.org/2000/svg'
                       width={28}
