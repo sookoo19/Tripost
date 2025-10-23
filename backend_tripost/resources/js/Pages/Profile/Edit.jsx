@@ -90,7 +90,11 @@ export default function Edit({ user, countries = [] }) {
       <Head title='プロフィール編集' />
       <form onSubmit={handleSubmit} encType='multipart/form-data'>
         <div>
-          <InputLabel htmlFor='profile_image' className='lg:text-lg' value='プロフィール画像' />
+          <InputLabel
+            htmlFor='profile_image'
+            className='lg:text-lg'
+            value='プロフィール画像'
+          />
           <div className='flex flex-col items-center mt-2'>
             <div className='w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden mb-2'>
               <img
@@ -140,7 +144,11 @@ export default function Edit({ user, countries = [] }) {
         <div className='mt-8'></div>
 
         <div>
-          <InputLabel htmlFor='name' value='ユーザー名' className='lg:text-lg'/>
+          <InputLabel
+            htmlFor='name'
+            value='ユーザー名'
+            className='lg:text-lg'
+          />
 
           <TextInput
             id='name'
@@ -174,7 +182,11 @@ export default function Edit({ user, countries = [] }) {
         <div className='mt-8'></div>
 
         <div>
-          <InputLabel htmlFor='visited_countries' value='訪れた国' className='lg:text-lg' />
+          <InputLabel
+            htmlFor='visited_countries'
+            value='訪れた国'
+            className='lg:text-lg'
+          />
           <div
             className='bg-gray-50 mt-2 block w-full rounded border border-gray-300 p-2'
             style={{ maxHeight: '200px', overflowY: 'auto' }}

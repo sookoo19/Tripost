@@ -78,7 +78,9 @@ export default function Follower({ user, follower_index }) {
                     >
                       @{u.displayid}
                     </Link>
-                    <div className='text-xs lg:text-sm text-gray-600'>{u.name}</div>
+                    <div className='text-xs lg:text-sm text-gray-600'>
+                      {u.name}
+                    </div>
                   </div>
                 </li>
               ))}
