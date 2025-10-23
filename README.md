@@ -1,4 +1,4 @@
-# TRIPOST（トリポスト）
+# Tripost（トリポスト）
 <div>
   <figure>
     <img src="docs/station5/ホーム画面.png" alt="ホーム画面" style="height:500px;object-fit:cover;display:block;" />
