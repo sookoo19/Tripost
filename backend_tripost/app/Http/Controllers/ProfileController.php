@@ -162,7 +162,23 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
+        // ユーザーのプロフィール画像を削除
+        if (!empty($user->profile_image) && is_string($user->profile_image) && Storage::disk('s3')->exists($user->profile_image)) {
+            Storage::disk('s3')->delete($user->profile_image);
+        }
 
+        // ユーザーの投稿画像を削除（post->photos が配列でパスを持っている想定）
+        $userPosts = $user->posts()->get();
+        foreach ($userPosts as $p) {
+            $photos = $p->photos ?? [];
+            if (is_array($photos)) {
+                foreach ($photos as $photoPath) {
+                    if (!empty($photoPath) && is_string($photoPath) && Storage::disk('s3')->exists($photoPath)) {
+                        Storage::disk('s3')->delete($photoPath);
+                    }
+                }
+            }
+        }
 
         $user->posts()->delete();
         $user->likes()->delete(); // いいねを削除
