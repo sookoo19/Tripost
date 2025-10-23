@@ -92,7 +92,7 @@ export default function Unpublic({ posts }) {
                     href={
                       currentUserId === post.user.id
                         ? route('profile.show')
-                        : route('users.profile', post.user.id)
+                        : route('users.profile', post.user.displayid)
                     }
                   >
                     <img
@@ -109,7 +109,7 @@ export default function Unpublic({ posts }) {
                       href={
                         currentUserId === post.user.id
                           ? route('profile.show')
-                          : route('users.profile', post.user.id)
+                          : route('users.profile', post.user.displayid)
                       }
                       className='font-semibold text-sm lg:text-lg'
                     >

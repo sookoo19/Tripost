@@ -25,7 +25,7 @@ class User extends Authenticatable implements MustVerifyEmailContract
         'name',
         'email',
         'password',
-        'displayid', //編集可能なuserID
+        'displayid', 
         'profile_image', //プロフィール画像URL
         'bio', //自己紹介文
 
@@ -167,5 +167,10 @@ class User extends Authenticatable implements MustVerifyEmailContract
         
         // S3 の公開 URL を返す
         return \Storage::disk('s3')->url($this->profile_image);
+    }
+
+    public function getRouteKeyName()
+    {
+        return 'displayid';
     }
 }

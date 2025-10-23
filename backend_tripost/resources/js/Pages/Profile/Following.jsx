@@ -14,7 +14,7 @@ export default function Following({ user, following_index }) {
           href={
             currentUserId === user.id
               ? route('profile.show')
-              : route('users.profile', user.id)
+              : route('users.profile', user.displayid)
           }
           aria-label='戻る'
           className='fixed top-6 left-4 z-50 w-10 h-10 md:w-12 md:h-12 text-3xl text-gray-600 hover:text-gray-800 flex items-center justify-center'
@@ -28,7 +28,7 @@ export default function Following({ user, following_index }) {
             </div>
             <div className='font-bold text-sm lg:text-lg mt-3'>
               <Link
-                href={route('follower.index', { user: user.id })}
+                href={route('follower.index', { user: user.displayid })}
                 className='inline-block'
               >
                 <span className='text-gray-500'>
@@ -58,7 +58,7 @@ export default function Following({ user, following_index }) {
                     href={
                       currentUserId === u.id
                         ? route('profile.show')
-                        : route('users.profile', u.id)
+                        : route('users.profile', u.displayid)
                     }
                   >
                     <img
@@ -72,7 +72,7 @@ export default function Following({ user, following_index }) {
                       href={
                         currentUserId === u.id
                           ? route('profile.show')
-                          : route('users.profile', u.id)
+                          : route('users.profile', u.displayid)
                       }
                       className='font-semibold lg:text-lg'
                     >
