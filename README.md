@@ -1,4 +1,22 @@
-# TRIPOST（トリポスト）
+# Tripost（トリポスト）
+<div>
+  <figure>
+    <img src="docs/station5/ホーム画面.png" alt="ホーム画面" style="height:500px;object-fit:cover;display:block;" />
+    <figcaption style="text-align:center;font-size:0.9rem;color:#555;">ホーム画面</figcaption>
+  </figure>
+  <figure>
+    <img src="docs/station5/プロフィール画面.png" alt="プロフィール画面" style="height:500px;object-fit:cover;display:block;" />
+    <figcaption style="text-align:center;font-size:0.9rem;color:#555;">プロフィール画面</figcaption>
+  </figure>
+  <figure>
+    <img src="docs/station5/投稿作成画面.png" alt="投稿作成画面" style="height:500px;object-fit:cover;display:block;" />
+    <figcaption style="text-align:center;font-size:0.9rem;color:#555;">投稿作成画面</figcaption>
+  </figure>
+  <figure>
+    <img src="docs/station5/投稿詳細画面.png" alt="投稿詳細画面" style="height:500px;object-fit:cover;display:block;" />
+    <figcaption style="text-align:center;font-size:0.9rem;color:#555;">投稿詳細画面</figcaption>
+  </figure>
+</div>
 
 ## 概要
 「旅の計画も、思い出も。みんなとシェアしよう。」<br>
