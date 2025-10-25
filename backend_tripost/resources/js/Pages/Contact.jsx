@@ -1,9 +1,16 @@
-import { useForm, usePage } from '@inertiajs/react';
+import InputError from '@/Components/InputError';
+import InputLabel from '@/Components/InputLabel';
+import PrimaryButton from '@/Components/PrimaryButton';
+import TextInput from '@/Components/TextInput';
+import GuestLayout from '@/Layouts/GuestLayout';
+import BottomNav from '@/Components/BottomNav';
+import { Head, useForm, usePage } from '@inertiajs/react';
 
 export default function Contact() {
   const { props } = usePage();
   const flash = props?.flash ?? {};
-  const form = useForm({
+
+  const { data, setData, post, processing, errors, reset } = useForm({
     displayid: '',
     email: '',
     message: '',
@@ -11,65 +18,79 @@ export default function Contact() {
 
   const submit = e => {
     e.preventDefault();
-    form.post(route('contact.send'));
+
+    post(route('contact.send'), {
+      onSuccess: () => reset(), // 送信成功時に全フィールドをクリア
+    });
   };
 
   return (
-    <div className='max-w-lg mx-auto p-4'>
-      {flash.success && (
-        <div className='mb-4 text-green-600'>{flash.success}</div>
-      )}
-      <h1 className='text-2xl font-bold mb-4'>お問い合わせ</h1>
-      <form onSubmit={submit} className='space-y-3'>
+    <GuestLayout title='お問い合わせフォーム'>
+      <Head title='お問い合わせ' />
+
+      <form onSubmit={submit}>
         <div>
-          <label className='block text-sm'>Display ID</label>
-          <input
-            value={form.data.displayid}
-            onChange={e => form.setData('displayid', e.target.value)}
-            className='w-full border rounded px-2 py-1'
+          <InputLabel htmlFor='displayid' value='Display ID' />
+
+          <TextInput
+            id='displayid'
+            name='displayid'
+            value={data.displayid}
+            className='mt-1 block w-full'
             autoComplete='off'
+            isFocused={true}
+            onChange={e => setData('displayid', e.target.value)}
           />
-          {form.errors.displayid && (
-            <div className='text-sm text-red-600'>{form.errors.displayid}</div>
-          )}
+
+          <InputError message={errors.displayid} className='mt-2' />
         </div>
 
-        <div>
-          <label className='block text-sm'>Email</label>
-          <input
-            value={form.data.email}
-            onChange={e => form.setData('email', e.target.value)}
-            className='w-full border rounded px-2 py-1'
+        <div className='mt-4'>
+          <InputLabel htmlFor='email' value='メールアドレス' />
+
+          <TextInput
+            id='email'
             type='email'
+            name='email'
+            value={data.email}
+            className='mt-1 block w-full'
+            autoComplete='username'
+            onChange={e => setData('email', e.target.value)}
           />
-          {form.errors.email && (
-            <div className='text-sm text-red-600'>{form.errors.email}</div>
-          )}
+
+          <InputError message={errors.email} className='mt-2' />
         </div>
 
-        <div>
-          <label className='block text-sm'>メッセージ</label>
+        <div className='mt-4'>
+          <InputLabel htmlFor='message' value='メッセージ' />
+
           <textarea
-            value={form.data.message}
-            onChange={e => form.setData('message', e.target.value)}
-            className='w-full border rounded px-2 py-1'
+            id='message'
+            name='message'
+            value={data.message}
+            onChange={e => setData('message', e.target.value)}
+            className='mt-1 block w-full border px-3 py-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500'
             rows={6}
           />
-          {form.errors.message && (
-            <div className='text-sm text-red-600'>{form.errors.message}</div>
-          )}
+
+          <InputError message={errors.message} className='mt-2' />
         </div>
 
-        <div>
-          <button
-            type='submit'
-            disabled={form.processing}
-            className='px-4 py-2 bg-indigo-600 text-black rounded'
+        <div className='mt-4 flex flex-col justify-end'>
+          <PrimaryButton
+            className='w-full h-12 mt-8 flex justify-center items-center'
+            disabled={processing}
           >
             送信
-          </button>
+          </PrimaryButton>
         </div>
       </form>
-    </div>
+      {flash.success && (
+        <div className='my-4 text-sm font-medium text-green-600'>
+          {flash.success}
+        </div>
+      )}
+      <BottomNav />
+    </GuestLayout>
   );
 }

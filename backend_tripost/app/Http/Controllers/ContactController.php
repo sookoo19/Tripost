@@ -41,6 +41,6 @@ class ContactController extends Controller
                     ->subject('【Tripost】お問い合わせを受け付けました');
         });
 
-        return back()->with('success', 'お問い合わせを送信しました。ありがとうございます！');
+        return back()->with('success', 'お問い合わせを送信しました。');
     }
 }
