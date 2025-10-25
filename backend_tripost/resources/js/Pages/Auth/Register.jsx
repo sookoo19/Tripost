@@ -25,7 +25,10 @@ export default function Register() {
 
   return (
     <GuestLayout title='アカウント作成画面'>
-      <Head title='新規登録' />
+      <Head>
+        <title>新規登録</title>
+        <meta property='og:title' content='アカウント作成 | Tripost' />
+      </Head>
 
       <form onSubmit={handleSubmit}>
         <div>

@@ -3,7 +3,10 @@ import { Head, Link } from '@inertiajs/react';
 export default function Welcome() {
   return (
     <>
-      <Head title='ようこそ' />
+      <Head>
+        <title>ようこそ</title>
+        <meta property='og:title' content='ようこそ | Tripost' />
+      </Head>
       <div className='min-h-screen relative bg-yellow-400'>
         {/* 背景画像 */}
         <div className='absolute inset-0 flex items-center justify-center z-0'>
