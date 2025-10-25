@@ -83,6 +83,12 @@ export default function Login({ status, canResetPassword }) {
           >
             新規登録はこちらから
           </Link>
+          <Link
+            href={route('contact.form')}
+            className='mt-2 rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
+          >
+            お問い合わせ
+          </Link>
         </div>
       </form>
     </GuestLayout>
