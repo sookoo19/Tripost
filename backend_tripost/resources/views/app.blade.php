@@ -27,9 +27,14 @@
         <meta property="og:type" content="website">
         <meta property="og:title" content="{{ config('app.name', 'Tripost') }}">
         <meta property="og:description" content="旅の計画も、思い出も。みんなとシェアしよう。">
-        <meta property="og:image" content="{{ asset('images/ogp.jpg') }}">
+        <meta property="og:image" content="{{ url('/images/ogp.jpg') }}">
         <meta property="og:url" content="{{ url()->current() }}">
-        <meta name="twitter:card" content="summary">
+
+        <!-- Twitter Card -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="{{ config('app.name', 'Tripost') }}">
+        <meta name="twitter:description" content="旅の計画も、思い出も。みんなとシェアしよう。">
+        <meta name="twitter:image" content="{{ url('/images/ogp.jpg') }}">
 
         <!-- Scripts / Vite -->
         @routes
