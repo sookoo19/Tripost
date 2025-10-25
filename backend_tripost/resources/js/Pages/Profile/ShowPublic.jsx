@@ -136,7 +136,7 @@ export default function Show({ user, countries, posts }) {
 
   return (
     <div className='flex min-h-screen flex-col items-center bg-white'>
-      <Head title={`@{user.displayid}`} />
+      <Head title='プロフィール' />
       <div className='w-full'>
         {/*ヘッダー*/}
         <Link href={route('posts.index')}>
