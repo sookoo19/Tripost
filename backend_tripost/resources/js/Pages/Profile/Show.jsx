@@ -214,9 +214,14 @@ export default function Show({ user, countries, posts }) {
                     >
                       このアプリについて
                     </a>
+                    <Link href={route('contact.form')}>
+                      <div className='my-4 text-lg text-gray-700 font-semibold w-full text-left'>
+                        お問い合わせ
+                      </div>
+                    </Link>
                     <button
                       type='button'
-                      className='my-4 text-lg text-red-500 font-semibold w-full text-left'
+                      className='mb-4 text-lg text-red-500 font-semibold w-full text-left'
                       onClick={() => {
                         if (window.confirm('本当にログアウトしますか？')) {
                           router.post('/auth/logout');
