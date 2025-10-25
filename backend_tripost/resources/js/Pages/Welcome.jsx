@@ -34,7 +34,7 @@ export default function Welcome() {
         </div>
 
         {/* フッターボタン（画面下部に配置：常に縦積み） */}
-        <div className='mt-auto mb-56 lg:mb-40 flex flex-col items-center z-50 px-4 space-y-3'>
+        <div className='mt-auto mb-56 sm:48 lg:mb-40 flex flex-col items-center z-50 px-4 space-y-3'>
           <Link
             href='/auth/register'
             className='text-lg sm:text-2xl w-full max-w-xs sm:max-w-sm md:max-w-md px-6 py-3 bg-black text-white font-bold rounded-full shadow-xl text-base sm:text-lg hover:scale-105 transition-transform duration-200 ease-in-out text-center'
