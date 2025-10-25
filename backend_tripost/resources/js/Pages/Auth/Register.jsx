@@ -144,13 +144,20 @@ export default function Register() {
         >
           登録
         </PrimaryButton>
-
-        <Link
-          href={route('login')}
-          className='rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
-        >
-          すでにアカウントをお持ちですか?
-        </Link>
+        <div className='mt-2 flex flex-col justify-end'>
+          <Link
+            href={route('login')}
+            className='rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
+          >
+            すでにアカウントをお持ちですか?
+          </Link>
+          <Link
+            href={route('contact.form')}
+            className='mt-2 rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
+          >
+            お問い合わせ
+          </Link>
+        </div>
       </form>
     </GuestLayout>
   );
