@@ -22,13 +22,24 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-        <!-- Scripts -->
+        <!-- Global default OGP (ページごとに上書き可能) -->
+        <meta property="og:site_name" content="Tripost">
+        <meta property="og:type" content="website">
+        <meta property="og:title" content="{{ config('app.name', 'Tripost') }}">
+        <meta property="og:description" content="旅の計画も、思い出も。みんなとシェアしよう。">
+        <meta property="og:image" content="{{ asset('images/ogp.jpg') }}">
+        <meta property="og:url" content="{{ url()->current() }}">
+        <meta name="twitter:card" content="summary">
+
+        <!-- Scripts / Vite -->
         @routes
         @viteReactRefresh
-	@vite([
-  	  'resources/js/app.jsx',
-	  isset($page['component']) ? "resources/js/Pages/{$page['component']}.jsx" : null
-	])
+        @vite([
+          'resources/js/app.jsx',
+          isset($page['component']) ? "resources/js/Pages/{$page['component']}.jsx" : null
+        ])
+
+        {{-- Inertia head: ページごとの Head がここに挿入され、上書きできます --}}
         @inertiaHead
     </head>
     <body class="font-sans antialiased">
