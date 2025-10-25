@@ -30,8 +30,10 @@ export default function Contact() {
 
       <form onSubmit={submit}>
         <div>
-          <InputLabel htmlFor='displayid' value='Display ID' />
-
+          <InputLabel htmlFor='displayid' value='ユーザーID' />
+          <div className='block text-xs text-gray-700'>
+            (未登録ユーザーは guest と入力してください)
+          </div>
           <TextInput
             id='displayid'
             name='displayid'
