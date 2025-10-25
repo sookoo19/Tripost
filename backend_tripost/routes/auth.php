@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\FormController;
+use App\Http\Controllers\ContactController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 
@@ -60,3 +61,7 @@ Route::middleware('auth')->group(function () {
     Route::post('auth/logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
 });
+
+    Route::get('/contact', [ContactController::class, 'showForm'])->name('contact.form');
+
+    Route::post('/contact', [ContactController::class, 'send'])->name('contact.send');
