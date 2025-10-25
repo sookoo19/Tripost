@@ -136,14 +136,7 @@ export default function Show({ user, countries, posts }) {
 
   return (
     <div className='flex min-h-screen flex-col items-center bg-white'>
-      <Head>
-        <title>@{user.displayid}</title>
-        <meta property='og:title' content={`@${user.displayid} | Tripost`} />
-        <meta
-          property='og:description'
-          content={`@${user.displayid} のプロフィール`}
-        />
-      </Head>
+      <Head title={`@{user.displayid}`} />
       <div className='w-full'>
         {/*ヘッダー*/}
         <Link href={route('posts.index')}>

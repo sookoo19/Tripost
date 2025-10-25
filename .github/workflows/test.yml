@@ -2,7 +2,7 @@ name: Laravel Test CI
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ develop, production ]
   pull_request:
     branches: [ production ]
   workflow_dispatch:

@@ -26,10 +26,7 @@ export default function Contact() {
 
   return (
     <GuestLayout title='お問い合わせフォーム'>
-      <Head>
-        <title>お問い合わせ</title>
-        <meta property='og:title' content='お問い合わせ | Tripost' />
-      </Head>
+      <Head title='お問い合わせ' />
 
       <form onSubmit={submit}>
         <div>

@@ -310,11 +310,7 @@ export default function Show({ post, user }) {
 
   return (
     <div className='flex min-h-screen flex-col items-center bg-whit'>
-      <Head>
-        <title>{post.title}</title>
-        <meta property='og:title' content={`${post.title} | Tripost`} />
-        <meta property='og:description' content='タビの詳細' />
-      </Head>
+      <Head title={post.title} />
 
       <div className='w-full overflow-hidden bg-white px-4 pt-6'>
         <button
