@@ -23,18 +23,18 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
         <!-- Global default OGP (ページごとに上書き可能) -->
-        <meta property="og:site_name" content="Tripost">
+        <meta property="og:site_name" content="Tripost(トリポスト)">
         <meta property="og:type" content="website">
         <meta property="og:title" content="{{ config('app.name', 'Tripost') }}">
         <meta property="og:description" content="旅の計画も、思い出も。みんなとシェアしよう。">
-        <meta property="og:image" content="{{ url('/images/ogp.jpg') }}">
+        <meta property="og:image" content="{{ asset('images/ogp.jpg') }}">
         <meta property="og:url" content="{{ url()->current() }}">
 
         <!-- Twitter Card -->
         <meta name="twitter:card" content="summary_large_image">
         <meta name="twitter:title" content="{{ config('app.name', 'Tripost') }}">
         <meta name="twitter:description" content="旅の計画も、思い出も。みんなとシェアしよう。">
-        <meta name="twitter:image" content="{{ url('/images/ogp.jpg') }}">
+        <meta name="twitter:image" content="{{ asset('images/ogp.jpg') }}">
 
         <!-- Scripts / Vite -->
         @routes
