@@ -8,6 +8,7 @@ services:
       - .env.production
     volumes:
       - .:/var/www/html
+      - ./docker/php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
     ports:
       - "9000:9000"
     depends_on:
@@ -18,12 +19,12 @@ services:
   nginx:
     image: nginx:1.25
     container_name: tripost-nginx
-    ports:                  # ← 追加
+    ports:
       - "80:80"
       - "443:443"
     volumes:
       - .:/var/www/html
-      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - laravel
