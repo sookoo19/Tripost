@@ -37,7 +37,7 @@
         <meta name="twitter:title" content="{{ config('app.name', 'Tripost') }}">
         <meta name="twitter:description" content="旅の計画も、思い出も。みんなとシェアしよう。">
         <meta name="twitter:image" content="{{ asset('images/ogp.jpg') }}">
-
+        
         <!-- PWA / iOS -->
         <link rel="manifest" href="{{ asset('manifest.json') }}">
         <meta name="theme-color" content="#F7D200">
@@ -49,6 +49,7 @@
 
         <!-- Optional: Safari pinned tab icon -->
         <!-- <link rel="mask-icon" href="{{ asset('icons/safari-pinned-tab.svg') }}" color="#F7D200"> -->
+
 
         <!-- Scripts / Vite -->
         @routes

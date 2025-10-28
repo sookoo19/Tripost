@@ -4,7 +4,7 @@ import { Head } from '@inertiajs/react';
 export default function TermsAndPrivacy() {
   return (
     <>
-      <Head title='利用規約・プライバシーポリシー - Tripost' />
+      <Head title='利用規約・プライバシーポリシー' />
 
       <div className='min-h-screen bg-white py-12 px-2 sm:px-4 lg:px-8'>
         <div className='max-w-4xl mx-auto bg-white p-8'>

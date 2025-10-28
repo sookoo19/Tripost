@@ -54,6 +54,8 @@ jobs:
             cd /home/ec2-user/tripost/backend_tripost || { echo "ディレクトリ移動失敗"; exit 1; }
             git fetch --prune || { echo "git fetch失敗"; exit 1; }
             git checkout main || { echo "git checkout失敗"; exit 1; }
+            git reset --hard HEAD
+            git clean -fd
             git pull origin main || { echo "git pull失敗"; exit 1; }
             docker compose -f docker-compose.production.yml up -d --build || { echo "docker-compose失敗"; exit 1; }
             
