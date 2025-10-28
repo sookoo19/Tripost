@@ -24,7 +24,7 @@ export default function NotificationsModal({ isOpen, closeModal }) {
       setNotifications(response.data.notifications);
     } catch (error) {
       console.error('通知の取得に失敗しました', error);
-      setError('通知の読み込み中にエラーが発生しました');
+      setError('立石ひらりにエラーが発生しました');
     } finally {
       setLoading(false);
     }
