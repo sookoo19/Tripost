@@ -1,10 +1,25 @@
 import '../css/app.css';
 import './bootstrap';
 
+import { registerSW } from 'virtual:pwa-register';
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 import { Inertia } from '@inertiajs/inertia';
+
+// service worker 登録（vite-plugin-pwa 使用時）
+const updateSW = registerSW({
+  onRegistered(registration) {
+    console.log('Service Worker registered:', registration);
+  },
+  onNeedRefresh() {
+    // 新バージョン利用可能時のハンドリング（UIで通知する等）
+    console.log('新しいバージョンがあります。更新してください。');
+  },
+  onOfflineReady() {
+    console.log('アプリがオフラインで利用可能になりました。');
+  },
+});
 
 const appName = import.meta.env.VITE_APP_NAME || 'Tripost';
 
