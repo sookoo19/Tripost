@@ -49,8 +49,8 @@ jobs:
           echo "${{ secrets.PRIVATE_KEY }}" > private_key
           chmod 600 private_key
 
-          # SSH接続 → デプロイ処理
-          ssh -o StrictHostKeyChecking=no -i private_key ${{ secrets.USER_NAME }}@${{ secrets.HOST_NAME }} << 'EOF'
+          # SSH接続 → デプロイ処理（KeepAliveオプション追加）
+          ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=10 -o StrictHostKeyChecking=no -i private_key ${{ secrets.USER_NAME }}@${{ secrets.HOST_NAME }} << 'EOF'
             cd /home/ec2-user/tripost/backend_tripost || { echo "ディレクトリ移動失敗"; exit 1; }
             git fetch --prune || { echo "git fetch失敗"; exit 1; }
             git checkout main || { echo "git checkout失敗"; exit 1; }
