@@ -53,7 +53,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/posts/draft', [PostController::class, 'draft'])->name('posts.draft');
     Route::get('/posts/unpublic', [PostController::class, 'unpublic'])->name('posts.unpublic');
     Route::get('/posts/mylikes', [PostController::class, 'mylikes'])->name('posts.mylikes');
-    Route::get('/posts/{post}', [PostController::class, 'show'])->name('posts.show'); 
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
     Route::get('/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit');
     Route::post('/posts/{post}', [PostController::class, 'update'])->name('posts.update');
@@ -77,6 +76,7 @@ Route::middleware('auth')->group(function () {
 // 他ユーザーのプロフィール（最後に配置）
 Route::get('/profile/{user}', [ProfileController::class, 'showPublic'])->name('users.profile'); 
 Route::get('/terms', fn() => inertia('TermsAndPrivacy'));
+Route::get('/posts/{post}', [PostController::class, 'show'])->name('posts.show'); 
 
 
 require __DIR__.'/auth.php';

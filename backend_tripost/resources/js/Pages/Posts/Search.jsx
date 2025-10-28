@@ -8,7 +8,7 @@ import Select from 'react-select';
 import { useMemo } from 'react';
 import BottomNav from '@/Components/BottomNav';
 
-export default function Search({ countries, styles, purposes, budgets }) {
+export default function Search({ countries, styles, purposes }) {
   const { data, setData, get, processing, errors } = useForm({
     keyword: '',
     period_from: '',

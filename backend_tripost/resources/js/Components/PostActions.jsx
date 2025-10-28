@@ -1,6 +1,11 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
+import { usePage } from '@inertiajs/react';
+import ToLoginModal from '@/Components/ToLoginModal';
 
 export default function PostActions({ liked, likesCount, toggleLike }) {
+  const page = usePage();
+  const auth = page.props?.auth?.user;
+  const [toLoginModalOpen, setToLoginModalOpen] = useState(false);
   const handleShareClick = useCallback(() => {
     const url = window.location.origin + window.location.pathname;
 
@@ -34,7 +39,13 @@ export default function PostActions({ liked, likesCount, toggleLike }) {
           onClick={e => {
             e.preventDefault();
             e.stopPropagation();
-            toggleLike(e);
+            if (auth) {
+              // ログイン済みならいいね処理
+              toggleLike(e);
+            } else {
+              // 未ログインならログインモーダルを開く
+              setToLoginModalOpen(true);
+            }
           }}
         >
           {!liked && (
@@ -87,6 +98,11 @@ export default function PostActions({ liked, likesCount, toggleLike }) {
           </svg>
         </button>
       </div>
+      {/* 未ログイン時に投稿クリックで表示するモーダル */}
+      <ToLoginModal
+        show={toLoginModalOpen}
+        closeModal={() => setToLoginModalOpen(false)}
+      />
     </div>
   );
 }
