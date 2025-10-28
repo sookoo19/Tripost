@@ -240,6 +240,7 @@ export default function Index({ posts, filter }) {
             </div>
           ))}
 
+
           {/* ページネーション */}
           {posts?.links && (
             <nav className='mt-4 flex justify-center space-x-2 text-sm'>
