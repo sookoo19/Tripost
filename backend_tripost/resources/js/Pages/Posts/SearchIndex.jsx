@@ -1,7 +1,6 @@
 import { Head, Link, usePage, router } from '@inertiajs/react';
 import BottomNav from '@/Components/BottomNav';
 import { useEffect, useState } from 'react';
-import ToLoginModal from '@/Components/ToLoginModal';
 
 export default function SearchIndex({
   posts,
@@ -17,7 +16,6 @@ export default function SearchIndex({
   const user = page.props?.auth?.user;
   const items = posts?.data ?? posts ?? [];
   const [sort, setSort] = useState(filters.sort || 'latest');
-  const [toLoginModalOpen, setToLoginModalOpen] = useState(false);
   const currentUserId = page.props?.auth?.user?.id;
 
   const handleSortByLikes = () => {
@@ -239,57 +237,28 @@ export default function SearchIndex({
                 </div>
               </div>
 
-              {user ? (
-                <Link href={route('posts.show', post.id)}>
-                  <div className='relative w-full aspect-square bg-gray-100'>
-                    <img
-                      src={firstPhotoUrl(post) || '/images/defalt_post.png'}
-                      alt={'photo'}
-                      className='w-full h-full object-cover'
-                      loading='lazy'
-                    />
-                  </div>
+              <Link href={route('posts.show', post.id)}>
+                <div className='relative w-full aspect-square bg-gray-100'>
+                  <img
+                    src={firstPhotoUrl(post) || '/images/defalt_post.png'}
+                    alt={'photo'}
+                    className='w-full h-full object-cover'
+                    loading='lazy'
+                  />
+                </div>
 
-                  <div className='px-4 py-3'>
-                    <h2 className='text-xl font-bold text-gray-700'>
-                      {post.title}
-                    </h2>
-                    <p className='text-sm text-gray-700 line-clamp-2'>
-                      {post.subtitle || post.excerpt || ''}
-                    </p>
-                    <div className='text-xs text-gray-500 mt-2'>
-                      {formatDate(post.created_at)}
-                    </div>
+                <div className='px-4 py-3'>
+                  <h2 className='text-xl font-bold text-gray-700'>
+                    {post.title}
+                  </h2>
+                  <p className='text-sm text-gray-700 line-clamp-2'>
+                    {post.subtitle || post.excerpt || ''}
+                  </p>
+                  <div className='text-xs text-gray-500 mt-2'>
+                    {formatDate(post.created_at)}
                   </div>
-                </Link>
-              ) : (
-                <button
-                  type='button'
-                  onClick={() => setToLoginModalOpen(true)}
-                  className='w-full text-left'
-                >
-                  <div className='relative w-full aspect-square bg-gray-100'>
-                    <img
-                      src={firstPhotoUrl(post) || '/images/defalt_post.png'}
-                      alt={'photo'}
-                      className='w-full h-full object-cover'
-                      loading='lazy'
-                    />
-                  </div>
-
-                  <div className='px-4 py-3'>
-                    <h2 className='text-xl font-bold text-gray-700'>
-                      {post.title}
-                    </h2>
-                    <p className='text-sm text-gray-700 line-clamp-2'>
-                      {post.subtitle || post.excerpt || ''}
-                    </p>
-                    <div className='text-xs text-gray-500 mt-2'>
-                      {formatDate(post.created_at)}
-                    </div>
-                  </div>
-                </button>
-              )}
+                </div>
+              </Link>
             </div>
           ))}
 
@@ -323,11 +292,6 @@ export default function SearchIndex({
         </div>
       </div>
       <BottomNav />
-      {/* 未ログイン時に投稿クリックで表示するモーダル */}
-      <ToLoginModal
-        show={toLoginModalOpen}
-        closeModal={() => setToLoginModalOpen(false)}
-      />
     </div>
   );
 }

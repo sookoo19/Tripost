@@ -4,10 +4,12 @@ import TripDayRoutes from '@/Components/TripDayRoutes';
 import PhotoCarousel from '@/Components/PhotoCarousel';
 import PostActions from '@/Components/PostActions';
 import { useMemo, useState, useEffect } from 'react';
+import ToLoginModal from '@/Components/ToLoginModal';
 import axios from 'axios';
 
 export default function Show({ post, user }) {
   const page = usePage();
+  const auth = page.props?.auth?.user;
   const currentUserId = page.props?.auth?.user?.id;
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   // 追加: ルート計算用の state
@@ -23,6 +25,7 @@ export default function Show({ post, user }) {
     post?.is_liked ?? (post?.isLikedBy?.includes(currentUserId) || false)
   );
   const [loadingLike, setLoadingLike] = useState(false);
+  const [toLoginModalOpen, setToLoginModalOpen] = useState(false);
 
   const handleAddFollow = async e => {
     e.preventDefault();
@@ -370,15 +373,24 @@ export default function Show({ post, user }) {
                       フォロー中
                     </div>
                   )}
-                  {!followStatus && (
-                    <button
-                      className='ml-1 mt-0.5 text-xs lg:text-md font-bold text-gray-600 border rounded px-1 border-gray-300'
-                      disabled={loadingFollow}
-                      onClick={handleAddFollow}
-                    >
-                      フォロー
-                    </button>
-                  )}
+                  {!followStatus &&
+                    (auth ? (
+                      <button
+                        className='ml-1 mt-0.5 text-xs lg:text-md font-bold text-gray-600 border rounded px-1 border-gray-300'
+                        disabled={loadingFollow}
+                        onClick={handleAddFollow}
+                      >
+                        フォロー
+                      </button>
+                    ) : (
+                      <button
+                        className='ml-1 mt-0.5 text-xs lg:text-md font-bold text-gray-600 border rounded px-1 border-gray-300'
+                        disabled={loadingFollow}
+                        onClick={() => setToLoginModalOpen(true)}
+                      >
+                        フォロー
+                      </button>
+                    ))}
                 </>
               )}
             </div>
@@ -452,6 +464,11 @@ export default function Show({ post, user }) {
         {/* フッターの余白 */}
         <div className='h-24' />
       </div>
+      {/* 未ログイン時に投稿クリックで表示するモーダル */}
+      <ToLoginModal
+        show={toLoginModalOpen}
+        closeModal={() => setToLoginModalOpen(false)}
+      />
     </div>
   );
 }
