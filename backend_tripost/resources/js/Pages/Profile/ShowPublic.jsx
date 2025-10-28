@@ -332,57 +332,28 @@ export default function Show({ user, countries, posts }) {
                 </div>
               </div>
 
-              {auth ? (
-                <Link href={route('posts.show', post.id)}>
-                  <div className='relative w-full aspect-square bg-gray-100'>
-                    <img
-                      src={firstPhotoUrl(post) || '/images/defalt_post.png'}
-                      alt={'photo'}
-                      className='w-full h-full object-cover'
-                      loading='lazy'
-                    />
-                  </div>
+              <Link href={route('posts.show', post.id)}>
+                <div className='relative w-full aspect-square bg-gray-100'>
+                  <img
+                    src={firstPhotoUrl(post) || '/images/defalt_post.png'}
+                    alt={'photo'}
+                    className='w-full h-full object-cover'
+                    loading='lazy'
+                  />
+                </div>
 
-                  <div className='px-4 py-3'>
-                    <h2 className='text-xl font-bold text-gray-700'>
-                      {post.title}
-                    </h2>
-                    <p className='text-sm text-gray-700 line-clamp-2'>
-                      {post.subtitle || post.excerpt || ''}
-                    </p>
-                    <div className='text-xs text-gray-500 mt-2'>
-                      {formatDate(post.created_at)}
-                    </div>
+                <div className='px-4 py-3'>
+                  <h2 className='text-xl font-bold text-gray-700'>
+                    {post.title}
+                  </h2>
+                  <p className='text-sm text-gray-700 line-clamp-2'>
+                    {post.subtitle || post.excerpt || ''}
+                  </p>
+                  <div className='text-xs text-gray-500 mt-2'>
+                    {formatDate(post.created_at)}
                   </div>
-                </Link>
-              ) : (
-                <button
-                  type='button'
-                  onClick={() => setToLoginModalOpen(true)}
-                  className='w-full text-left'
-                >
-                  <div className='relative w-full aspect-square bg-gray-100'>
-                    <img
-                      src={firstPhotoUrl(post) || '/images/defalt_post.png'}
-                      alt={'photo'}
-                      className='w-full h-full object-cover'
-                      loading='lazy'
-                    />
-                  </div>
-
-                  <div className='px-4 py-3'>
-                    <h2 className='text-xl font-bold text-gray-700'>
-                      {post.title}
-                    </h2>
-                    <p className='text-sm text-gray-700 line-clamp-2'>
-                      {post.subtitle || post.excerpt || ''}
-                    </p>
-                    <div className='text-xs text-gray-500 mt-2'>
-                      {formatDate(post.created_at)}
-                    </div>
-                  </div>
-                </button>
-              )}
+                </div>
+              </Link>
             </div>
           ))}
 
