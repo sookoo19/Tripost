@@ -12,7 +12,20 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'robots.txt', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'],
+      includeAssets: [
+        'favicon.svg',
+        'robots.txt',
+        'icons/icon-192.png',
+        'icons/icon-512.png',
+        'icons/apple-touch-icon.png',
+        // iOS 起動画面（自作ファイル名に合わせる）
+        'icons/apple-splash-2048x2732.png',
+        'icons/apple-splash-1668x2388.png',
+        'icons/apple-splash-1536x2048.png',
+        'icons/apple-splash-1170x2532.png',
+        'icons/apple-splash-1125x2436.png',
+        'icons/apple-splash-1242x2688.png'
+      ],
       manifest: {
         name: 'Tripost',
         short_name: 'Tripost',
