@@ -45,11 +45,15 @@
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="default">
         <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('icons/apple-touch-icon.png') }}">
-        <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
 
-        <!-- Optional: Safari pinned tab icon -->
-        <!-- <link rel="mask-icon" href="{{ asset('icons/safari-pinned-tab.svg') }}" color="#F7D200"> -->
-
+        <!-- iOS 起動画面（ホーム画面に追加したときに表示） -->
+        <link rel="apple-touch-startup-image" href="{{ asset('icons/apple-splash-2048x2732.png') }}" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+        <link rel="apple-touch-startup-image" href="{{ asset('icons/apple-splash-1668x2388.png') }}" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+        <link rel="apple-touch-startup-image" href="{{ asset('icons/apple-splash-1536x2048.png') }}" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+        <link rel="apple-touch-startup-image" href="{{ asset('icons/apple-splash-1170x2532.png') }}" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+        <link rel="apple-touch-startup-image" href="{{ asset('icons/apple-splash-1125x2436.png') }}" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+        <link rel="apple-touch-startup-image" href="{{ asset('icons/apple-splash-1242x2688.png') }}" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+        <!-- ...existing code... -->
 
         <!-- Scripts / Vite -->
         @routes
