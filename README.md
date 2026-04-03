@@ -1,13 +1,73 @@
 # Tripost（トリポスト）
+
+> 「旅の計画も、思い出も。みんなとシェアしよう。」
+
 ![Top画像](backend_tripost/public/images/ogp.jpg)
-<div>
+
+[![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?logo=laravel&logoColor=white)](https://laravel.com)
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev)
+[![PHP](https://img.shields.io/badge/PHP-8.3-777BB4?logo=php&logoColor=white)](https://www.php.net)
+[![AWS](https://img.shields.io/badge/AWS-EC2%20%7C%20RDS%20%7C%20S3-FF9900?logo=amazon-aws&logoColor=white)](https://aws.amazon.com)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://www.docker.com)
+[![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?logo=github-actions&logoColor=white)](https://github.com/features/actions)
+
+**URL:** [https://mytripost.com](https://mytripost.com)
+
+---
+
+## 目次
+
+- [プロダクト概要](#プロダクト概要)
+- [開発の背景](#開発の背景)
+- [スクリーンショット](#スクリーンショット)
+- [機能一覧](#機能一覧)
+- [技術スタック](#技術スタック)
+- [システム構成図](#システム構成図)
+- [ER図](#er図)
+- [設計ドキュメント](#設計ドキュメント)
+- [ローカル環境のセットアップ](#ローカル環境のセットアップ)
+- [工夫した点・こだわり](#工夫した点こだわり)
+
+---
+
+## プロダクト概要
+
+**Tripost** は、旅を記録し、他のユーザーの旅からインスピレーションを得られる **旅行特化型 SNS** です。
+
+InstagramやYouTubeなど既存のSNSでは、旅行情報が「写真・動画・テキスト・地図」と複数プラットフォームに分散しており、自分のスタイルに合った旅行情報を効率よく探すことが困難です。Tripostはこの課題を解決するため、**位置情報・ルート・写真・旅スタイル**を一つの投稿にまとめて共有できる仕組みを提供します。
+
+**主な利用シーン:**
+
+| タイミング | 使い方 |
+|---|---|
+| 旅行前 | 他ユーザーの投稿を旅スタイル・目的・国などで検索して旅程を計画 |
+| 旅行中 | リアルタイムに旅の記録を残す |
+| 旅行後 | 投稿としてまとめ、他ユーザーと体験を共有 |
+
+---
+
+## 開発の背景
+
+旅行情報を調べる際、SNS上のUGC（ユーザー生成コンテンツ）を参考にする機会が増えています。しかし実際には以下の課題があります。
+
+1. **情報の断片化** — Instagram・YouTube・ブログなど複数媒体を横断しなければ情報が揃わない
+2. **位置情報の不足** — 写真やテキストだけでは場所の特定やルート把握が困難
+3. **パーソナライズの欠如** — 自分の旅スタイル（ソロ・バックパッカー・グルメなど）に合った情報が見つかりにくい
+
+これらの課題を解決するために、**旅の情報を一つの投稿に集約し、地図と連動した検索・共有**ができるサービスを個人で開発しました。
+
+---
+
+## スクリーンショット
+
+<div style="display:flex;gap:16px;flex-wrap:wrap;">
   <figure>
     <img src="docs/station5/ホーム画面.png" alt="ホーム画面" style="height:500px;object-fit:cover;display:block;" />
     <figcaption style="text-align:center;font-size:0.9rem;color:#555;">ホーム画面</figcaption>
   </figure>
   <figure>
-    <img src="docs/station5/プロフィール画面.png" alt="プロフィール画面" style="height:500px;object-fit:cover;display:block;" />
-    <figcaption style="text-align:center;font-size:0.9rem;color:#555;">プロフィール画面</figcaption>
+    <img src="docs/station5/検索画面.png" alt="検索画面" style="height:500px;object-fit:cover;display:block;" />
+    <figcaption style="text-align:center;font-size:0.9rem;color:#555;">検索画面</figcaption>
   </figure>
   <figure>
     <img src="docs/station5/投稿作成画面.png" alt="投稿作成画面" style="height:500px;object-fit:cover;display:block;" />
@@ -17,104 +77,155 @@
     <img src="docs/station5/投稿詳細画面.png" alt="投稿詳細画面" style="height:500px;object-fit:cover;display:block;" />
     <figcaption style="text-align:center;font-size:0.9rem;color:#555;">投稿詳細画面</figcaption>
   </figure>
+  <figure>
+    <img src="docs/station5/プロフィール画面.png" alt="プロフィール画面" style="height:500px;object-fit:cover;display:block;" />
+    <figcaption style="text-align:center;font-size:0.9rem;color:#555;">プロフィール画面</figcaption>
+  </figure>
 </div>
 
-## 概要
-「旅の計画も、思い出も。みんなとシェアしよう。」<br>
-旅を記録し、他のユーザーの旅からインスピレーションを得られる旅行特化SNSです。ユーザーは、写真・旅行日程・おすすめ情報などを投稿、共有できます。また、ユーザーは自身の旅スタイル(ソロ・友達と・バックパッカーなど)や目的(自然・グルメ・リラックスなど)に沿って、他ユーザーの旅を検索することができます。
-
-## URL
-[https://mytripost.com](https://mytripost.com)
-
-## 主な利用シーン
-【旅行前】
-旅行先や旅程を決める際に、他のユーザーの投稿を参考にする
-自分の旅程を作成・整理する<br>
-【旅行中】
-リアルタイムに旅の記録を残す<br>
-【旅行後】
-旅の思い出を記録としてまとめる
-投稿を通して、他のユーザーと旅の体験を共有する
-
+---
 
 ## 機能一覧
-- **投稿作成機能**<br>
-旅程で登録された場所はマップ上に表示され、それぞれの地点の距離や位置関係を一目で確認可能。<br>
-下書き作成、公開範囲設定可能。
-- **投稿一覧機能**<br>
-全ユーザーの投稿とフォロー中ユーザーの投稿を最新順で表示。
-- **投稿検索機能**<br>
-フリーワード検索や条件検索(国、時期、旅行スタイルなど)。新着順やいいね順に並び替えも可能。
-- **プロフィール機能**<br>
-ユーザー名、ユーザー画像、自己紹介文、訪れた国を設定可能。
-- **アカウント作成、ログイン機能**
-- **メール認証、パスワードリセット機能**
-- **いいね機能**<br>
-いいねした投稿を一覧で確認可能。
-- **フォロー機能**
-- **通知機能**
 
-## 使用技術
+| 機能 | 説明 |
+|---|---|
+| **投稿作成** | 旅程の各地点をGoogle Mapsと連携して登録。マップ上にマーカー・ルート表示。下書き保存・公開範囲設定に対応 |
+| **投稿一覧** | 全ユーザーの投稿・フォロー中ユーザーの投稿を最新順で表示 |
+| **投稿検索** | フリーワード・国・旅スタイル・時期などの条件でフィルタリング。新着順/いいね順の並び替えに対応 |
+| **いいね** | 投稿へのいいね。いいねした投稿の一覧表示 |
+| **フォロー** | ユーザー間のフォロー・フォロワー管理 |
+| **通知** | いいね・フォロー時のリアルタイム通知 |
+| **プロフィール** | アイコン・自己紹介・訪問国の設定 |
+| **認証** | メール認証・パスワードリセット |
+
+---
+
+## 技術スタック
+
 ### フロントエンド
-- 言語<br>
-JavaScript <br>
-実行環境: Node.js v22.16.0 / npm 11.4.1
 
-- フレームワーク・ライブラリ<br>
-React.js 18.3.1  <br>
-Inertia.js（クライアント: @inertiajs/inertia 0.11.1、React アダプタ: @inertiajs/react 2.2.0、サーバ: inertiajs/inertia-laravel v2.0.5）  <br>
-react-select 5.10.2  <br>
-@react-google-maps/api 2.20.7  <br>
-react-cropper 2.3.3 / cropperjs 1.6.2  <br>
-dayjs 1.11.18  <br>
-axios 1.12.2
-
-- ビルド/開発ツール<br>
-Vite 7.1.7<br>
-laravel-vite-plugin 2.0.1
-
-- UI<br>
-Tailwind CSS 3.4.17
-
-- 開発支援<br>
-ESLint 9.36.0  <br>
-Prettier 3.6.2  
+| カテゴリ | 技術 |
+|---|---|
+| 言語 | JavaScript (Node.js v22) |
+| フレームワーク | React.js 18 |
+| サーバーサイドルーティング | Inertia.js（Laravel アダプタ） |
+| 地図 | @react-google-maps/api |
+| 画像クロップ | react-cropper / cropperjs |
+| スタイリング | Tailwind CSS 3 |
+| ビルド | Vite |
+| Linter / Formatter | ESLint / Prettier |
 
 ### バックエンド
-- 言語<br>
-PHP 8.3.22
 
-- フレームワーク・ライブラリ<br>
-Laravel Framework 12.23.1<br>
-inertiajs/inertia-laravel v2.0.5<br>
-laravel/breeze 2.3.8 <br>
-laravel/sanctum 4.2.0 <br>
-tightenco/ziggy 2.5.3
-
-- テスト / 開発ツール<br>
-phpunit 11.5.32, laravel/pint 1.24.0
+| カテゴリ | 技術 |
+|---|---|
+| 言語 | PHP 8.3 |
+| フレームワーク | Laravel 12 |
+| 認証 | Laravel Breeze / Sanctum |
+| テスト | PHPUnit |
+| Linter | Laravel Pint |
 
 ### 外部API
-Geocoding API<br>
-Maps JavaScript API<br>
-Places API <br>
-Directions API<br>
-[REST Countries](https://restcountries.com/)  
 
+| API | 用途 |
+|---|---|
+| Google Maps JavaScript API | 地図表示・マーカー配置 |
+| Google Places API | 場所検索・Google Mapsとの紐付け |
+| Google Directions API | 旅程ルートの表示 |
+| Google Geocoding API | 住所 ↔ 座標の変換 |
+| REST Countries | 国情報の取得 |
 
-### 開発環境
-Docker / Docker Compose（Laravel Sail）<br>
-MySQL<br>
-Mailpit<br>
+### インフラ・開発環境
 
-### 本番環境
-AWS (EC2、RDS for MySQL、Route 53、S3)<br>
-Nginx、Redis<br>
-Docker / Docker Compose(EC2上)<br>
-Mailgun
+| 区分 | 技術 |
+|---|---|
+| 開発環境 | Docker / Docker Compose（Laravel Sail）、MySQL、Mailpit |
+| 本番環境 | AWS (EC2・RDS for MySQL・S3・Route 53)、Nginx、Redis、Mailgun |
+| コンテナ (本番) | Docker / Docker Compose（EC2上） |
+| CI/CD | GitHub Actions |
 
-### CI/CD
-Github Actions
+---
 
-### インフラ構成図
-![インフラ構成図-Tripost](docs/インフラ構成_tripost.drawio.svg)
+## システム構成図
+
+![インフラ構成図](docs/インフラ構成_tripost.drawio.svg)
+
+---
+
+## ER図
+
+![ER図](docs/station3/ER/ER図_Tripost.jpeg)
+
+---
+
+## 設計ドキュメント
+
+| ドキュメント | リンク |
+|---|---|
+| 画面設計図 (Figma) | [Figma - 画面設計](https://www.figma.com/design/JkcWsCKqWOFi29hsUtHpKd/%E5%80%8B%E4%BA%BA%E9%96%8B%E7%99%BA%E3%80%8ETripost%E3%80%8F?node-id=0-1) |
+| 画面遷移図 (Figma) | [Figma - 画面遷移](https://www.figma.com/design/JkcWsCKqWOFi29hsUtHpKd/%E5%80%8B%E4%BA%BA%E9%96%8B%E7%99%BA%E3%80%8ETripost%E3%80%8F?node-id=24-435) |
+| ユーザーフロー図 (Figma) | [Figma - ユーザーフロー](https://www.figma.com/design/JkcWsCKqWOFi29hsUtHpKd/%E5%80%8B%E4%BA%BA%E9%96%8B%E7%99%BA%E3%80%8ETripost%E3%80%8F?node-id=25-513) |
+| API仕様書 | `docs/api.html`（Swagger UI） |
+
+---
+
+## ローカル環境のセットアップ
+
+### 前提条件
+
+- Docker / Docker Compose がインストール済みであること
+- Google Maps Platform の APIキーを取得済みであること
+
+### 手順
+
+```bash
+# 1. リポジトリをクローン
+git clone https://github.com/sookoo19/Tripost.git
+cd Tripost/backend_tripost
+
+# 2. 環境変数ファイルを作成
+cp .env.example .env
+
+# 3. .env を編集して必要な値を設定
+#    - DB_* : データベース接続情報
+#    - GOOGLE_MAPS_API_KEY : Google Maps APIキー
+#    - MAIL_* : メール送信設定
+
+# 4. Composer パッケージをインストール
+docker run --rm -v $(pwd):/app composer install
+
+# 5. Laravel Sail でコンテナを起動
+./vendor/bin/sail up -d
+
+# 6. アプリケーションキーを生成
+./vendor/bin/sail artisan key:generate
+
+# 7. マイグレーション & シーダーを実行
+./vendor/bin/sail artisan migrate --seed
+
+# 8. npm パッケージのインストール & ビルド
+./vendor/bin/sail npm install
+./vendor/bin/sail npm run dev
+```
+
+ブラウザで `http://localhost` にアクセスすると起動確認できます。
+
+---
+
+## 工夫した点・こだわり
+
+### Inertia.js によるSPA体験とサーバーサイドの両立
+
+React × Laravel の構成でSPAのUXを実現しつつ、APIを別途構築せずにLaravelのルーティング・認証・バリデーションをそのまま活用できる Inertia.js を採用しました。フロントエンドとバックエンドを分離せずに開発効率を保ちながら、シームレスなページ遷移を実現しています。
+
+### Google Maps Platform の複数API連携
+
+投稿作成時に Places API で場所を検索・取得し、取得した座標を Maps JavaScript API でマーカー表示、Directions API で各地点間のルートを描画する、3つのAPIを組み合わせた実装を行いました。APIコストを意識しながら、必要なタイミングでのみリクエストを発行するよう設計しました。
+
+### AWS + Docker によるコンテナ本番運用
+
+開発環境と本番環境の差異をなくすため、EC2上でもDocker Composeでコンテナを運用する構成にしました。S3で静的ファイルを管理し、RDSをデータベースに使用することで、スケーラビリティと保守性を確保しています。
+
+### GitHub Actions による CI/CD
+
+mainブランチへのPushをトリガーに、PHPUnit によるテスト・Laravel Pint によるコードスタイルチェック・EC2へのデプロイを自動化するCI/CDパイプラインを構築しました。
