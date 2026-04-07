@@ -62,11 +62,12 @@ jobs:
             --protocol tcp --port 22 \
             --cidr ${{ steps.ip.outputs.ipv4 }}/32' EXIT
 
-          # 転送先ディレクトリの権限を事前に修正
+          # 転送先ディレクトリをec2-user所有で再作成
           ssh -o StrictHostKeyChecking=no -i private_key ${{ secrets.USER_NAME }}@${{ secrets.HOST_NAME }} << 'PERMFIX'
-            mkdir -p /home/ec2-user/tripost/backend/public/build
-            chmod 755 /home/ec2-user/tripost/backend/public/build
-            chmod 755 /home/ec2-user/tripost/backend/public
+            sudo rm -rf /home/ec2-user/tripost/backend/public/build
+            sudo mkdir -p /home/ec2-user/tripost/backend/public/build
+            sudo chown -R ec2-user:ec2-user /home/ec2-user/tripost/backend/public/build
+            sudo chmod -R 755 /home/ec2-user/tripost/backend/public/build
           PERMFIX
 
           # ビルド済みアセットをEC2に転送
