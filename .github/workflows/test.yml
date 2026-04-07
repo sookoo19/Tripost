@@ -53,18 +53,18 @@ jobs:
         uses: actions/cache@v4
         id: cache-vendor
         with:
-          path: ./backend_tripost/vendor
-          key: ${{ runner.os }}-composer-${{ hashFiles('./backend_tripost/composer.lock') }}
+          path: ./backend/vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('./backend/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-
 
       - name: Install Composer dependencies
         if: steps.cache-vendor.outputs.cache-hit != 'true'
-        working-directory: ./backend_tripost
+        working-directory: ./backend
         run: composer install --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
       - name: Laravel Settings
-        working-directory: ./backend_tripost
+        working-directory: ./backend
         run: |
           cp .env.example .env
           php artisan key:generate
@@ -72,26 +72,26 @@ jobs:
           chmod -R 777 storage bootstrap/cache
 
       - name: Display versions
-        working-directory: ./backend_tripost
+        working-directory: ./backend
         run: |
           php --version
           composer --version
           php artisan --version
 
       - name: Run migrations
-        working-directory: ./backend_tripost
+        working-directory: ./backend
         run: php artisan migrate --force
 
       - name: Test migration rollback
-        working-directory: ./backend_tripost
+        working-directory: ./backend
         run: php artisan migrate:refresh --force
 
       - name: Seed database
-        working-directory: ./backend_tripost
+        working-directory: ./backend
         run: php artisan db:seed --force
 
       - name: Run PHPUnit tests
-        working-directory: ./backend_tripost
+        working-directory: ./backend
         run: php artisan test
 
       # フロントエンドのビルドテスト
@@ -103,15 +103,15 @@ jobs:
       - name: Cache Node modules
         uses: actions/cache@v4
         with:
-          path: ./backend_tripost/node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('./backend_tripost/package-lock.json') }}
+          path: ./backend/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('./backend/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
 
       - name: Install NPM dependencies
-        working-directory: ./backend_tripost
+        working-directory: ./backend
         run: npm ci
 
       - name: Build frontend
-        working-directory: ./backend_tripost
+        working-directory: ./backend
         run: npm run build

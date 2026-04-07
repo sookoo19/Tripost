@@ -2,7 +2,7 @@
 
 > 「旅の計画も、思い出も。みんなとシェアしよう。」
 
-![Top画像](backend_tripost/public/images/ogp.jpg)
+![Top画像](backend/public/images/ogp.jpg)
 
 [![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?logo=laravel&logoColor=white)](https://laravel.com)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev)
@@ -62,23 +62,23 @@ InstagramやYouTubeなど既存のSNSでは、旅行情報が「写真・動画�
 
 <div style="display:flex;gap:16px;flex-wrap:wrap;">
   <figure>
-    <img src="docs/station5/ホーム画面.png" alt="ホーム画面" style="height:500px;object-fit:cover;display:block;" />
+    <img src="docs/screenshots/home.png" alt="ホーム画面" style="height:500px;object-fit:cover;display:block;" />
     <figcaption style="text-align:center;font-size:0.9rem;color:#555;">ホーム画面</figcaption>
   </figure>
   <figure>
-    <img src="docs/station5/検索画面.png" alt="検索画面" style="height:500px;object-fit:cover;display:block;" />
+    <img src="docs/screenshots/search.png" alt="検索画面" style="height:500px;object-fit:cover;display:block;" />
     <figcaption style="text-align:center;font-size:0.9rem;color:#555;">検索画面</figcaption>
   </figure>
   <figure>
-    <img src="docs/station5/投稿作成画面.png" alt="投稿作成画面" style="height:500px;object-fit:cover;display:block;" />
+    <img src="docs/screenshots/create_post.png" alt="投稿作成画面" style="height:500px;object-fit:cover;display:block;" />
     <figcaption style="text-align:center;font-size:0.9rem;color:#555;">投稿作成画面</figcaption>
   </figure>
   <figure>
-    <img src="docs/station5/投稿詳細画面.png" alt="投稿詳細画面" style="height:500px;object-fit:cover;display:block;" />
+    <img src="docs/screenshots/post_detail.png" alt="投稿詳細画面" style="height:500px;object-fit:cover;display:block;" />
     <figcaption style="text-align:center;font-size:0.9rem;color:#555;">投稿詳細画面</figcaption>
   </figure>
   <figure>
-    <img src="docs/station5/プロフィール画面.png" alt="プロフィール画面" style="height:500px;object-fit:cover;display:block;" />
+    <img src="docs/screenshots/profile.png" alt="プロフィール画面" style="height:500px;object-fit:cover;display:block;" />
     <figcaption style="text-align:center;font-size:0.9rem;color:#555;">プロフィール画面</figcaption>
   </figure>
 </div>
@@ -148,13 +148,13 @@ InstagramやYouTubeなど既存のSNSでは、旅行情報が「写真・動画�
 
 ## システム構成図
 
-![インフラ構成図](docs/インフラ構成_tripost.drawio.svg)
+![インフラ構成図](docs/infrastructure.drawio.svg)
 
 ---
 
 ## ER図
 
-![ER図](docs/station3/ER/ER図_Tripost.jpeg)
+![ER図](docs/database/ER/er_diagram.jpeg)
 
 ---
 
@@ -165,7 +165,7 @@ InstagramやYouTubeなど既存のSNSでは、旅行情報が「写真・動画�
 | 画面設計図 (Figma) | [Figma - 画面設計](https://www.figma.com/design/JkcWsCKqWOFi29hsUtHpKd/%E5%80%8B%E4%BA%BA%E9%96%8B%E7%99%BA%E3%80%8ETripost%E3%80%8F?node-id=0-1) |
 | 画面遷移図 (Figma) | [Figma - 画面遷移](https://www.figma.com/design/JkcWsCKqWOFi29hsUtHpKd/%E5%80%8B%E4%BA%BA%E9%96%8B%E7%99%BA%E3%80%8ETripost%E3%80%8F?node-id=24-435) |
 | ユーザーフロー図 (Figma) | [Figma - ユーザーフロー](https://www.figma.com/design/JkcWsCKqWOFi29hsUtHpKd/%E5%80%8B%E4%BA%BA%E9%96%8B%E7%99%BA%E3%80%8ETripost%E3%80%8F?node-id=25-513) |
-| API仕様書 | `docs/api.html`（Swagger UI） |
+| API仕様書 | `docs/api.html`（Swagger UI）/ `docs/openapi.yml` |
 
 ---
 
@@ -181,7 +181,7 @@ InstagramやYouTubeなど既存のSNSでは、旅行情報が「写真・動画�
 ```bash
 # 1. リポジトリをクローン
 git clone https://github.com/sookoo19/Tripost.git
-cd Tripost/backend_tripost
+cd Tripost/backend
 
 # 2. 環境変数ファイルを作成
 cp .env.example .env
