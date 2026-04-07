@@ -8,12 +8,9 @@
         <testsuite name="Unit">
             <directory>tests/Unit</directory>
         </testsuite>
-        <!-- Feature テストを一時的にコメントアウト -->
-        <!--
         <testsuite name="Feature">
             <directory>tests/Feature</directory>
         </testsuite>
-        -->
     </testsuites>
     <source>
         <include>
@@ -25,7 +22,8 @@
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="CACHE_STORE" value="array"/>
-        <env name="DB_DATABASE" value="testing"/>
+        <env name="DB_CONNECTION" value="sqlite"/>
+        <env name="DB_DATABASE" value=":memory:"/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
