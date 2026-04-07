@@ -14,10 +14,10 @@ class ModelAccountsSeeder extends Seeder
             ['email' => 'demo@example.com'],
             [
                 'name' => 'Demo User',
-                'password' => '1q2w3e4R',
+                'password' => Hash::make('Demo1234!'),
                 'email_verified_at' => now(),
                 'remember_token' => Str::random(10),
-                'displayid' => 'demouser', 
+                'displayid' => 'demouser',
             ]
         );
     }
