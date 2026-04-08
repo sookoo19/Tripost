@@ -27,11 +27,11 @@ class PostsSeeder extends Seeder
             ]
         );
 
-        $japan    = Country::where('cca2', 'JP')->firstOrFail();
-        $france   = Country::where('cca2', 'FR')->firstOrFail();
-        $thailand = Country::where('cca2', 'TH')->firstOrFail();
-        $usa      = Country::where('cca2', 'US')->firstOrFail();
-        $italy    = Country::where('cca2', 'IT')->firstOrFail();
+        $japan    = Country::where('code', 'JP')->firstOrFail();
+        $france   = Country::where('code', 'FR')->firstOrFail();
+        $thailand = Country::where('code', 'TH')->firstOrFail();
+        $usa      = Country::where('code', 'US')->firstOrFail();
+        $italy    = Country::where('code', 'IT')->firstOrFail();
 
         $posts = [
             // ─── 1. 京都・奈良の歴史旅（3日） ───────────────────────────────────────
