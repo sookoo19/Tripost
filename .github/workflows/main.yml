@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Public IP Install
         id: ip
-        uses: haythem/public-ip@v1.3
+        run: echo "ipv4=$(curl -s https://checkip.amazonaws.com)" >> $GITHUB_OUTPUT
 
       - name: Checkout
         uses: actions/checkout@v4
