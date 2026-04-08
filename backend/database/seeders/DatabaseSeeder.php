@@ -21,10 +21,12 @@ class DatabaseSeeder extends Seeder
         ]);*/
 
         $this->call([
-        StylesTableSeeder::class,
-        PurposesTableSeeder::class,
-        BudgetTableSeeder::class,
-        CountrySeeder::class,
-    ]);
+            StylesTableSeeder::class,
+            PurposesTableSeeder::class,
+            BudgetTableSeeder::class,
+            CountrySeeder::class,
+            ModelAccountsSeeder::class,
+            PostsSeeder::class,
+        ]);
     }
 }
