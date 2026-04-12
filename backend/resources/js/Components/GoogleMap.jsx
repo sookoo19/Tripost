@@ -145,7 +145,7 @@ export default function GoogleMapComponent({
         } catch (e) {
           // ignore
         }
-      }, 100);
+      }, 200);
     }
   }, [directionsResult, isLoaded]);
 
